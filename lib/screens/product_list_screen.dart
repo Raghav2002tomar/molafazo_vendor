@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/theme_provider.dart';
@@ -45,6 +47,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
         elevation: 1,
         shadowColor: cs.shadow.withOpacity(0.04),
         actions: [
+          IconButton(onPressed: () async{
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.clear();
+
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/onboarding',
+                  (_) => false,
+            );
+
+          }, icon: Icon(Icons.logout)),
           PopupMenuButton<String>(
             onSelected: (lang) {
               context.read<TranslateProvider>().setLocale(lang);

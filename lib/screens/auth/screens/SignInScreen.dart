@@ -1,6 +1,7 @@
 // lib/auth/sign_in_screen.dart
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'SignUpScreens.dart';
 
@@ -41,11 +42,35 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _submitting = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    setState(() => _submitting = false);
-    // TODO: Call API then navigate
+
+    try {
+      // Simulate API call
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      // Here you would call your login API and check credentials
+      final success = true; // Replace with actual API response
+
+      if (success) {
+        // Navigate to dashboard and remove all previous routes
+        if (context.mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/dashboard', // Your dashboard route
+                (route) => false,
+          );
+        }
+      } else {
+        Fluttertoast.showToast(msg: 'Invalid email or password');
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Login failed: $e');
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
