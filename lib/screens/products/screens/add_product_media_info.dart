@@ -6,14 +6,36 @@ class AddProductMediaInfo extends StatelessWidget {
   final AddProductController controller;
   const AddProductMediaInfo({super.key, required this.controller});
 
+  // -------------------- UI HELPERS --------------------
+
   InputDecoration inputDec(String hint) {
     return InputDecoration(
       hintText: hint,
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 14,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFFCA5A5)),
+      ),
     );
   }
+
 
   Widget label(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
@@ -23,8 +45,11 @@ class AddProductMediaInfo extends StatelessWidget {
     ),
   );
 
+  // -------------------- IMAGE TILE --------------------
+
   Widget imageTile(BuildContext context, int index) {
     final img = controller.productImages[index];
+
     return Stack(
       children: [
         ClipRRect(
@@ -36,6 +61,8 @@ class AddProductMediaInfo extends StatelessWidget {
             height: double.infinity,
           ),
         ),
+
+        /// Remove Image
         Positioned(
           top: 4,
           right: 4,
@@ -48,6 +75,8 @@ class AddProductMediaInfo extends StatelessWidget {
             ),
           ),
         ),
+
+        /// Set Thumbnail
         Positioned(
           bottom: 4,
           left: 4,
@@ -55,8 +84,9 @@ class AddProductMediaInfo extends StatelessWidget {
             onTap: () => controller.setThumbnail(index),
             child: CircleAvatar(
               radius: 14,
-              backgroundColor:
-              controller.thumbnailIndex == index ? Colors.green : Colors.black54,
+              backgroundColor: controller.thumbnailIndex == index
+                  ? Colors.green
+                  : Colors.black54,
               child: const Icon(Icons.star, size: 16, color: Colors.white),
             ),
           ),
@@ -65,115 +95,143 @@ class AddProductMediaInfo extends StatelessWidget {
     );
   }
 
+  // -------------------- BUILD --------------------
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add Product – Media & Details')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return AnimatedBuilder(
+      animation: controller, // 🔥 Listens to notifyListeners()
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+              backgroundColor: Colors.white,
+              title: const Text('Add Product – Media & Details')),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
 
-            label('Thumbnail Image *'),
-            GestureDetector(
-              onTap: controller.pickThumbnailImage,
-              child: Container(
-                height: 140,
-                width: 140,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).colorScheme.primary),
-                ),
-                child: controller.thumbnailImage == null
-                    ? const Center(child: Icon(Icons.image, size: 40))
-                    : ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    File(controller.thumbnailImage!.path),
-                    fit: BoxFit.cover,
+                // ---------- THUMBNAIL ----------
+                label('Thumbnail Image *'),
+                GestureDetector(
+                  onTap: controller.pickThumbnailImage,
+                  child: Container(
+                    height: 140,
+                    width: 140,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    child: controller.thumbnailImage == null
+                        ? const Center(
+                      child: Icon(Icons.image, size: 40),
+                    )
+                        : ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(controller.thumbnailImage!.path),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
 
-            label('Product Images *'),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.add_photo_alternate),
-              label: const Text('Add Images'),
-              onPressed: controller.pickProductImages,
-            ),
-            const SizedBox(height: 10),
+                const SizedBox(height: 20),
 
-            if (controller.productImages.isNotEmpty)
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.productImages.length,
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
+                // ---------- PRODUCT IMAGES ----------
+                label('Product Images *'),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.add_photo_alternate),
+                  label: const Text('Add Images'),
+                  onPressed: controller.pickProductImages,
                 ),
-                itemBuilder: (c, i) => imageTile(context, i),
-              ),
 
-            const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
-            label('Product Tags'),
-            TextFormField(
-              controller: controller.tagsController,
-              decoration: inputDec('Comma separated tags'),
+                if (controller.productImages.isNotEmpty)
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.productImages.length,
+                    gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemBuilder: (context, index) =>
+                        imageTile(context, index),
+                  ),
+
+                const SizedBox(height: 20),
+
+                // ---------- EXTRA INFO ----------
+                label('Product Tags'),
+                TextFormField(
+                  controller: controller.tagsController,
+                  decoration: inputDec('Comma separated tags'),
+                ),
+
+                const SizedBox(height: 16),
+
+                label('Weight'),
+                TextFormField(
+                  controller: controller.weightController,
+                  decoration: inputDec('e.g. 500g / 1kg'),
+                ),
+
+                const SizedBox(height: 16),
+
+                label('Dimensions'),
+                TextFormField(
+                  controller: controller.dimensionsController,
+                  decoration: inputDec('L × W × H'),
+                ),
+
+                const SizedBox(height: 16),
+
+                label('Warranty Information'),
+                TextFormField(
+                  controller: controller.warrantyController,
+                  decoration: inputDec('Warranty details'),
+                ),
+
+                const SizedBox(height: 16),
+
+                label('SEO / Admin Notes'),
+                TextFormField(
+                  controller: controller.seoController,
+                  decoration: inputDec('Optional'),
+                ),
+
+                const SizedBox(height: 24),
+
+                // ---------- SUBMIT ----------
+                FilledButton(
+                  onPressed: () {
+                    if (controller.thumbnailImage == null ||
+                        controller.productImages.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Images required')),
+                      );
+                      return;
+                    }
+
+                    controller.submitProduct();
+                    Navigator.popUntil(context, (r) => r.isFirst);
+                  },
+                  child: const Text('Submit Product'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-
-            label('Weight'),
-            TextFormField(
-              controller: controller.weightController,
-              decoration: inputDec('e.g. 500g / 1kg'),
-            ),
-            const SizedBox(height: 16),
-
-            label('Dimensions'),
-            TextFormField(
-              controller: controller.dimensionsController,
-              decoration: inputDec('L × W × H'),
-            ),
-            const SizedBox(height: 16),
-
-            label('Warranty Information'),
-            TextFormField(
-              controller: controller.warrantyController,
-              decoration: inputDec('Warranty details'),
-            ),
-            const SizedBox(height: 16),
-
-            label('SEO / Admin Notes'),
-            TextFormField(
-              controller: controller.seoController,
-              decoration: inputDec('Optional'),
-            ),
-            const SizedBox(height: 24),
-
-            FilledButton(
-              onPressed: () {
-                if (controller.thumbnailImage == null ||
-                    controller.productImages.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Images required')),
-                  );
-                  return;
-                }
-                controller.submitProduct();
-                Navigator.popUntil(context, (r) => r.isFirst);
-              },
-              child: const Text('Submit Product'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

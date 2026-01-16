@@ -8,18 +8,38 @@ class AddStoreScreen extends StatelessWidget {
 
   InputDecoration _decoration(String label, {IconData? icon}) {
     return InputDecoration(
-      labelText: label,
-      prefixIcon: icon != null ? Icon(icon, size: 18) : null,
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      hintText: label,
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 14,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFFCA5A5)),
+      ),
     );
+
   }
 
   Widget _sectionTitle(String title, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 6),
       child: Text(title,
-          style: Theme.of(context).textTheme.titleMedium),
+          style: Theme.of(context).textTheme.titleLarge),
     );
   }
 
@@ -38,7 +58,10 @@ class AddStoreScreen extends StatelessWidget {
           final descCtrl = TextEditingController();
 
           return Scaffold(
-            appBar: AppBar(title: const Text('Create Store')),
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+                backgroundColor: Colors.white,
+                title: const Text('Create Store')),
             body: Form(
               key: c.formKey,
               child: SingleChildScrollView(
@@ -48,51 +71,46 @@ class AddStoreScreen extends StatelessWidget {
                   children: [
 
                     /// Status
-                    Card(
-                      child: ListTile(
-                        leading: Icon(Icons.info_outline,
-                            color: theme.colorScheme.secondary),
-                        title: const Text('Admin Approval Required'),
-                        subtitle: const Text(
-                            'Store will remain pending until approved.'),
-                      ),
-                    ),
 
                     _sectionTitle('Store Information', context),
+                    SizedBox(height: 8,),
+                    label('Store Name *'),
 
                     TextFormField(
                       controller: nameCtrl,
-                      decoration:
-                      _decoration('Store Name *', icon: Icons.store),
+                      decoration: inputDec('Store Name'),
                       validator: (v) => v!.isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 10),
+                    label('Mobile Number *'),
 
                     TextFormField(
                       controller: mobileCtrl,
-                      decoration: _decoration('Mobile Number *',
-                          icon: Icons.phone),
+                      decoration: inputDec('Mobile Number'),
+
                       keyboardType: TextInputType.phone,
                       validator: (v) => v!.isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 10),
+                    label('Email *'),
 
                     TextFormField(
                       controller: emailCtrl,
-                      decoration:
-                      _decoration('Email *', icon: Icons.email),
+                      decoration: inputDec('Email'),
                       validator: (v) => v!.isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 10),
+                    label('Address *'),
 
                     TextFormField(
                       controller: addressCtrl,
                       maxLines: 2,
-                      decoration: _decoration('Address *',
-                          icon: Icons.location_on),
+                      decoration: inputDec('Address'),
+
                       validator: (v) => v!.isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 10),
+                    label('Store Type *'),
 
                     DropdownButtonFormField<String>(
                       decoration: _decoration('Store Type *',
@@ -114,6 +132,7 @@ class AddStoreScreen extends StatelessWidget {
                     ),
 
                     if (c.storeImages.isNotEmpty)
+                      SizedBox(height: 8,),
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -202,4 +221,39 @@ class AddStoreScreen extends StatelessWidget {
       ),
     );
   }
+  InputDecoration inputDec(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 14,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFFCA5A5)),
+      ),
+    );
+  }
+
+  Widget label(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(
+      text,
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    ),
+  );
 }

@@ -90,19 +90,37 @@ class _SignInScreenState extends State<SignInScreen> {
                   children: [
                     const SizedBox(height: 24),
                     // Logo / Wordmark placeholder
-                    Text(
-                      'ojà',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 64,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface,
-                        letterSpacing: 0.5,
-                      ),
+                    Row(mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // final scheme = Theme.of(context).colorScheme;
+
+                Text(
+                'Molafzo',
+                style: TextStyle(
+                  color: scheme.onSurface, // 👈 auto adapts to theme
+                  fontSize: 70,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Cursive',
+                  letterSpacing: 2,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      color: scheme.primary.withOpacity(0.35), // 👈 theme accent glow
                     ),
-                    SizedBox(height: 16,),
+                    Shadow(
+                      offset: const Offset(0, 8),
+                      blurRadius: 22,
+                      color: Colors.black.withOpacity(0.4),
+                    ),
+                  ],
+                ),
+              ),
+                      ],
+                    ),
+                    SizedBox(height: 8,),
                     Text(
-                      'Experience business slaes on another level with ọjà, your market friendly app',
+                      'Experience business slaes on another level with Molafzo, your market friendly app',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
@@ -111,30 +129,35 @@ class _SignInScreenState extends State<SignInScreen> {
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 60),
                     Text(
-                      'Welcome back,',
+                      'Email',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
 
                     AppTextField(
                       controller: _emailCtrl,
-                      labelText: 'Email',
+                      // labelText: 'Email',
                       hintText: 'raidenLord@gmail.com',
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       validator: _validateEmail,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Password',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
 
                     PasswordTextField(
                       controller: _passwordCtrl,
-                      labelText: 'Password',
+                      hintText: 'Password',
                       validator: _validatePassword,
                       onSubmitted: (_) => _submit(),
                     ),
-                    const SizedBox(height: 8),
+                    // const SizedBox(height: ),
 
                     Align(
                       alignment: Alignment.centerLeft,

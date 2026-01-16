@@ -114,10 +114,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF22B822), // green from mock
-                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white, // green from mock
+                        foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
                       onPressed: _index == _pages.length - 1
@@ -126,7 +126,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         duration: const Duration(milliseconds: 320),
                         curve: Curves.easeOut,
                       ),
-                      child: Text(_index == _pages.length - 1 ? 'Get Started' : 'Get Started'),
+                      child: Text(_index == _pages.length - 1 ? 'Get Started' : 'Get Started',style: TextStyle(fontWeight: FontWeight.bold),),
                     ),
                   ),
                   const SizedBox(height: 90),

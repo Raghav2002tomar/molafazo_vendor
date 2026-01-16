@@ -9,11 +9,32 @@ class AddProductBasicInfo extends StatelessWidget {
   InputDecoration inputDec(String hint) {
     return InputDecoration(
       hintText: hint,
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 14,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFFCA5A5)),
+      ),
     );
   }
+
+
 
   Widget label(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
@@ -25,12 +46,16 @@ class AddProductBasicInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return ChangeNotifierProvider(
       create: (_) => AddProductController(),
       child: Consumer<AddProductController>(
         builder: (context, c, _) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Add Product – Basic Info')),
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+                backgroundColor: Colors.white,
+                title: const Text('Add Product – Basic Info')),
             body: Form(
               key: c.formKeyBasic,
               child: SingleChildScrollView(
@@ -42,6 +67,7 @@ class AddProductBasicInfo extends StatelessWidget {
                     /// Store
                     label('Select Approved Store *'),
                     DropdownButtonFormField(
+
                       decoration: inputDec('Choose store'),
                       value: c.selectedStore,
                       items: c.approvedStores

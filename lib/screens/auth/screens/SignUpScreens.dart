@@ -222,7 +222,7 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
                 controller: widget.phoneCtrl,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
-                  labelText: 'Phone Number',
+                  // labelText: 'Phone Number',
                   hintText: '+2348012345678',
                   filled: true,
                   fillColor: Color(0xFFF5F5F5),
@@ -384,26 +384,41 @@ class _NameEmailPasswordStep extends StatelessWidget {
           const SizedBox(height: 20),
           Form(
             key: nameFormKey,
-            child: Column(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'First Name',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
                 TextFormField(
                   controller: firstCtrl,
                   decoration: const InputDecoration(
-                    labelText: 'First Name',
+                    hintText: 'First Name',
                     filled: true,
                     fillColor: Color(0xFFF5F5F5),
                   ),
                 ),
                 const SizedBox(height: 12),
+                Text(
+                  'Last Name',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
                 TextFormField(
                   controller: lastCtrl,
                   decoration: const InputDecoration(
-                    labelText: 'Last Name',
+                    hintText: 'Last Name',
                     filled: true,
                     fillColor: Color(0xFFF5F5F5),
                   ),
                 ),
                 const SizedBox(height: 12),
+                Text(
+                  'Email',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
                 TextFormField(
                   controller: emailCtrl,
                   decoration: const InputDecoration(
@@ -419,14 +434,19 @@ class _NameEmailPasswordStep extends StatelessWidget {
           const SizedBox(height: 20),
           Form(
             key: passwordFormKey,
-            child: Column(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Password',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
                 StatefulBuilder(
                   builder: (context, setState) => TextFormField(
                     controller: pwdCtrl,
                     obscureText: !showPwd,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      hintText: 'Password',
                       filled: true,
                       fillColor: const Color(0xFFF5F5F5),
                       suffixIcon: IconButton(
@@ -440,6 +460,11 @@ class _NameEmailPasswordStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
+                Text(
+                  'Confirm Password',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
                 StatefulBuilder(
                   builder: (context, setState) => TextFormField(
                     controller: confirmCtrl,
@@ -485,15 +510,18 @@ class _AccountCreatedStep extends StatelessWidget {
         children: [
           Card(
             elevation: 0,
-            color: scheme.surfaceContainerHighest,
+            // color: scheme.surfaceContainerHighest,
+            color: Colors.grey.shade200,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
+
             ),
+
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Image.asset("assets/images/Group 8.png"),
+                  Image.asset("assets/images/Group 8.png",color: Colors.black,),
                   // CircleAvatar(
                   //   radius: 28,
                   //   backgroundColor: scheme.primary.withOpacity(0.15),
@@ -572,9 +600,9 @@ class _AccountCreatedStep extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
         radius: 16,
-        backgroundColor: scheme.primary.withOpacity(0.10),
+        backgroundColor: scheme.primary,
         // child: Icon(icon, size: 18, color: scheme.primary),
-        child: Image.asset(icon as String),
+        child: Image.asset(icon as String,color: Colors.white,),
       ),
       title: Text(title, style: Theme.of(context).textTheme.titleSmall),
       subtitle: Text(
@@ -618,6 +646,11 @@ class _GovtIdStep extends StatelessWidget {
           const SizedBox(height: 24),
 
           /// ID TYPE
+          Text(
+            'ID Type',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
           DropdownButtonFormField<String>(
             value: value,
             items: const [
@@ -628,12 +661,16 @@ class _GovtIdStep extends StatelessWidget {
             onChanged: onChanged,
             decoration: const InputDecoration(
               filled: true,
-              labelText: 'ID Type',
+              hintText: 'ID Type',
             ),
           ),
 
           const SizedBox(height: 16),
-
+          Text(
+            'ID Number',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
           /// ID NUMBER
           TextFormField(
             controller: numberCtrl,
@@ -644,7 +681,11 @@ class _GovtIdStep extends StatelessWidget {
           ),
 
           const SizedBox(height: 20),
-
+          Text(
+            'Upload ID Image',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
           /// IMAGE PREVIEW / UPLOAD
           if (file != null) ...[
             ClipRRect(
@@ -705,59 +746,94 @@ class _AddressProfileStep extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
+          // Profile Image Section
+          Text('Profile Image', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: scheme.outlineVariant,
+                    width: 1.5,
+                  ),
+                ),
+                child: ClipOval(
+                  child: profileImage != null
+                      ? Image.file(
+                    File(profileImage!.path),
+                    fit: BoxFit.cover,
+                  )
+                      : Container(
+                    color: scheme.surfaceContainerHighest,
+                    child: Icon(
+                      Icons.person_outline,
+                      size: 48,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+
+              /// EDIT / UPLOAD BUTTON
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onPickProfile,
+                  borderRadius: BorderRadius.circular(20),
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: scheme.primary,
+                    child: Icon(
+                      profileImage != null
+                          ? Icons.edit
+                          : Icons.camera_alt_outlined,
+                      size: 18,
+                      color: scheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          /// TEXT ACTION (like ID upload design)
+          TextButton.icon(
+            onPressed: onPickProfile,
+            icon: Icon(
+              profileImage != null ? Icons.edit : Icons.upload_file,
+              size: 18,
+            ),
+            label: Text(
+              profileImage != null ? 'Change Profile Photo' : 'Upload Profile Photo',
+            ),
+          ),
+          const SizedBox(height: 30),
+          Text(
+            'Full Address',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 16),
+
           // Address Field
           TextFormField(
             controller: city,
-            maxLines: 4,
+            maxLines: 5,
             decoration: const InputDecoration(
-              labelText: 'Full Address',
+              // labelText: 'Full Address',
               hintText: 'City, State, Country',
               filled: true,
               fillColor: Color(0xFFF5F5F5),
             ),
           ),
 
-          const SizedBox(height: 30),
 
-          // Profile Image Section
-          Text('Profile Image', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
-          Center(
-            child: Stack(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey.shade200,
-                  backgroundImage: profileImage != null
-                      ? FileImage(File(profileImage!.path))
-                      : null,
-                  child: profileImage == null
-                      ? const Icon(
-                          Icons.camera_alt_outlined,
-                          size: 40,
-                          color: Colors.black54,
-                        )
-                      : null,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: InkWell(
-                    onTap: onPickProfile,
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: scheme.primary,
-                      child: const Icon(
-                        Icons.edit,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
           const SizedBox(height: 24),
 
           // Terms & Conditions Checkbox

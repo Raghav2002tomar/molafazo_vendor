@@ -25,12 +25,13 @@ class _MainBottombarScreenState extends State<MainBottombarScreen> {
     final pages = [
       DashboardTab(),
       ProductListScreen(),
-      OrdersTab(),
-      ChatTab(),  // New tab at index 3
-      ProfileTab(),
+      OrderListScreen(),
+      ChatListScreen(),  // New tab at index 3
+      ProfileScreen(),
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: pages[_currentIndex],
       bottomNavigationBar: Row(
         children: [

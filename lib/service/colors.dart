@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Brand key colors (updated to match design)
-  static const Color seedPrimary = Color(0xFF22B822); // Brand Green
+  static const Color seedPrimary = Color(0xFF0F100F); // Brand Green
   static const Color seedSecondary = Color(0xFF00897B); // Teal 600 (can tweak)
   static const Color seedTertiary = Color(0xFFFF8A65); // Deep Orange 300 (promo)
 

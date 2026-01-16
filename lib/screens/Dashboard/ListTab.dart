@@ -81,7 +81,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           color: active
               ? Theme.of(context).colorScheme.primary
               : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: active
               ? [
             BoxShadow(
@@ -132,7 +132,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(4),
         color: Colors.white,
         boxShadow: [
           BoxShadow(
@@ -151,7 +151,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               children: [
                 ClipRRect(
                   borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+                  const BorderRadius.vertical(top: Radius.circular(4)),
                   child: SizedBox(
                     width: double.infinity,
                     child: productImage(p['image']),
@@ -258,17 +258,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        elevation: 0,
+        backgroundColor: Colors.white,
+        // elevation: 0,
         title: const Text('Products'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // SizedBox(height: 50,),
+          // Row(mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //   Text('Products',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
+          // ],),
           /// STORE FILTER
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 0, 12),
+            padding: const EdgeInsets.fromLTRB(16, 0, 0, 12),
             child: const Text(
               'Stores',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -276,7 +282,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
 
           SizedBox(
-            height: 50,
+            height: 35,
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,

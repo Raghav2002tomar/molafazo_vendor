@@ -105,10 +105,7 @@ class DashboardTab extends StatelessWidget {
               ],
             ),
           ),
-          // IconButton(
-          //   icon: Icon(Icons.notifications_outlined, color: Colors.white),
-          //   onPressed: () {},
-          // ),
+
         ],
       ),
     );
