@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../products/screens/add_product_basic_info.dart';
+import '../stores/screens/add_store_screen.dart';
+
 class DashboardTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -120,6 +123,10 @@ class DashboardTab extends StatelessWidget {
             label: 'Add Product',
             color: scheme.primary,
             onTap: () {
+
+
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>AddProductBasicInfo()));
+
               // Navigate to add product screen
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Add Product clicked')),
@@ -135,9 +142,10 @@ class DashboardTab extends StatelessWidget {
             color: scheme.secondary,
             onTap: () {
               // Navigate to store settings
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Manage Store clicked')),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>AddStoreScreen()));
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text('Manage Store clicked')),
+              // );
             },
           ),
         ),

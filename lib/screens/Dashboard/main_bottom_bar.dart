@@ -24,7 +24,7 @@ class _MainBottombarScreenState extends State<MainBottombarScreen> {
     // Pages for bottom navigation
     final pages = [
       DashboardTab(),
-      ListTab(),
+      ProductListScreen(),
       OrdersTab(),
       ChatTab(),  // New tab at index 3
       ProfileTab(),
