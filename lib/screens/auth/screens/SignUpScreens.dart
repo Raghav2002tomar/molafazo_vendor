@@ -14,6 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/local_user_storage.dart';
 import '../provider/phone_signup_controller.dart';
 
+
+
 class PhoneSignupWizard extends StatelessWidget {
   const PhoneSignupWizard({super.key});
 
@@ -29,19 +31,20 @@ class PhoneSignupWizard extends StatelessWidget {
 class _PhoneSignupView extends StatelessWidget {
   const _PhoneSignupView();
 
+  static const int totalSteps = 6;
+
   @override
   Widget build(BuildContext context) {
     final c = context.watch<PhoneSignupController>();
-    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         leading: c.step == 0
             ? null
             : IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                onPressed: c.back,
-              ),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: c.back,
+        ),
         title: const Text('Create your account'),
         centerTitle: true,
       ),
@@ -49,102 +52,231 @@ class _PhoneSignupView extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: LinearProgressIndicator(value: (c.step + 1) / 4),
+            child: LinearProgressIndicator(
+              value: (c.step + 1) / totalSteps,
+            ),
           ),
           Expanded(
             child: PageView(
               controller: c.page,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                // STEP 0: Phone + OTP
+                /// STEP 0 – Phone + OTP
                 _PhoneOtpStep(
+                  formKey: c.phoneFormKey,
                   phoneCtrl: c.phoneCtrl,
                   otpCtrl: c.otpCtrl,
-                  formKey: c.phoneFormKey,
                   sendOtp: c.sendOtp,
                   verifyOtp: c.verifyOtp,
                 ),
 
-                // STEP 1: Name, Email, Password
-                _NameEmailPasswordStep(
+                /// STEP 1 – Password
+                _PasswordStep(
+                  pwdCtrl: c.pwdCtrl,
+                  confirmCtrl: c.confirmCtrl,
+                  formKey: c.passwordFormKey,
+                ),
+
+                /// STEP 2 – Account Created
+                _AccountCreatedStep(
+                  onProceed: c.goToProfileSetup,
+                  onSkip: () => c.finishAndGoDashboard(context),
+                ),
+
+                /// STEP 3 – Name & Email
+                _NameEmailStep(
+                  formKey: c.nameFormKey,
                   firstCtrl: c.firstCtrl,
                   lastCtrl: c.lastCtrl,
                   emailCtrl: c.emailCtrl,
-                  pwdCtrl: c.pwdCtrl,
-                  confirmCtrl: c.confirmCtrl,
-                  nameFormKey: c.nameFormKey,
-                  passwordFormKey: c.passwordFormKey,
                   emailValidator: c.emailValidator,
-                  pwdValidator: c.passwordValidator,
                 ),
 
-                // STEP 2: Govt ID
+                /// STEP 4 – Govt ID
                 _GovtIdStep(
                   value: c.govtIdType,
-                  onChanged: (v) => c.govtIdType = v,
+                  onChanged: (v) {
+                    c.govtIdType = v;
+                    c.notifyListeners();
+                  },
                   numberCtrl: c.govtIdNumberCtrl,
                   file: c.idProofImage,
                   onUpload: c.pickGovtIdImage,
                 ),
 
-                // STEP 3: Address + Terms + Profile Image
+                /// STEP 5 – Address + Profile Image
                 _AddressProfileStep(
                   city: c.cityCtrl,
                   accepted: c.acceptedTerms,
-                  onAccept: (v) => c.acceptedTerms = v ?? false,
+                  onAccept: (v) {
+                    c.acceptedTerms = v ?? false;
+                    c.notifyListeners();
+                  },
                   profileImage: c.profileImage,
                   onPickProfile: () async {
                     final picker = ImagePicker();
-                    final picked = await picker.pickImage(
-                      source: ImageSource.gallery,
-                    );
+                    final picked =
+                    await picker.pickImage(source: ImageSource.gallery);
                     if (picked == null) return;
+
                     final compressed =
-                        await FlutterImageCompress.compressAndGetFile(
-                          picked.path,
-                          '${picked.path}_compressed.jpg',
-                          quality: 70,
-                        );
+                    await FlutterImageCompress.compressAndGetFile(
+                      picked.path,
+                      '${picked.path}_compressed.jpg',
+                      quality: 70,
+                    );
+
                     c.profileImage = compressed != null
                         ? XFile(compressed.path)
                         : null;
                     c.notifyListeners();
                   },
                 ),
-                _AccountCreatedStep(onFinish: () => c.saveAndFinish(context)),
               ],
             ),
           ),
-          // Only show the bottom "Continue" button for steps 0–3
-          if (c.step < 4)
+
+          /// BOTTOM CONTINUE BUTTON
+          if (c.step != 2)
             Padding(
               padding: const EdgeInsets.all(24),
               child: SizedBox(
-                height: 48,
                 width: double.infinity,
+                height: 48,
                 child: ElevatedButton(
                   onPressed: c.busy
                       ? null
-                      : () {
-                          switch (c.step) {
-                            case 0:
-                              c.sendOtp();
-                              break;
-                            case 1:
-                              c.verifyOtp();
-                              break;
-                            case 2:
-                            case 3:
-                              c.next();
-                              break; // move to next step
-                          }
-                        },
+                      : () async {
+                    switch (c.step) {
+                      case 0:
+                        await c.sendOtp();
+                        break;
+                      case 1:
+                        await c.createAccount();
+                        break;
+                      case 3:
+                        if (c.nameFormKey.currentState!.validate()) {
+                          c.next();
+                        }
+                        break;
+                      case 4:
+                        c.next();
+                        break;
+                      case 5:
+                        await c.saveAndFinish(context);
+                        break;
+                    }
+                  },
                   child: c.busy
                       ? const CircularProgressIndicator(strokeWidth: 2)
-                      : const Text('Continue'),
+                      : Text(c.step == 5 ? 'Finish' : 'Continue'),
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+class _PasswordStep extends StatelessWidget {
+  final TextEditingController pwdCtrl, confirmCtrl;
+  final GlobalKey<FormState> formKey;
+
+  const _PasswordStep({
+    required this.pwdCtrl,
+    required this.confirmCtrl,
+    required this.formKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Form(
+        key: formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Create Password',
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 20),
+
+            TextFormField(
+              controller: pwdCtrl,
+              obscureText: true,
+              decoration: const InputDecoration(
+                hintText: 'Password',
+                filled: true,
+              ),
+              validator: (v) =>
+              v != null && v.length >= 6 ? null : 'Min 6 characters',
+            ),
+
+            const SizedBox(height: 16),
+
+            TextFormField(
+              controller: confirmCtrl,
+              obscureText: true,
+              decoration: const InputDecoration(
+                hintText: 'Confirm Password',
+                filled: true,
+              ),
+              validator: (v) =>
+              v == pwdCtrl.text ? null : 'Passwords do not match',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+class _AccountCreatedStep extends StatelessWidget {
+  final VoidCallback onProceed;
+  final VoidCallback onSkip;
+
+  const _AccountCreatedStep({
+    required this.onProceed,
+    required this.onSkip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.verified_rounded, size: 80, color: Colors.green),
+          const SizedBox(height: 16),
+          Text('Account Created Successfully',
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(
+            'You can complete your profile now or skip for later',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onProceed,
+              child: const Text('Proceed to Create Profile'),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: onSkip,
+              child: const Text('Skip at this time'),
+            ),
+          ),
         ],
       ),
     );
@@ -343,6 +475,97 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
     );
   }
 }
+class _NameEmailStep extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController firstCtrl;
+  final TextEditingController lastCtrl;
+  final TextEditingController emailCtrl;
+  final String? Function(String?) emailValidator;
+
+  const _NameEmailStep({
+    required this.formKey,
+    required this.firstCtrl,
+    required this.lastCtrl,
+    required this.emailCtrl,
+    required this.emailValidator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Form(
+        key: formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Personal Information',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 20),
+
+            /// FIRST NAME
+            Text(
+              'First Name',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: firstCtrl,
+              decoration: const InputDecoration(
+                hintText: 'First Name',
+                filled: true,
+                fillColor: Color(0xFFF5F5F5),
+              ),
+              validator: (v) =>
+              v == null || v.trim().isEmpty ? 'First name required' : null,
+            ),
+
+            const SizedBox(height: 16),
+
+            /// LAST NAME
+            Text(
+              'Last Name',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: lastCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Last Name',
+                filled: true,
+                fillColor: Color(0xFFF5F5F5),
+              ),
+              validator: (v) =>
+              v == null || v.trim().isEmpty ? 'Last name required' : null,
+            ),
+
+            const SizedBox(height: 16),
+
+            /// EMAIL
+            Text(
+              'Email Address',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: emailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                hintText: 'Email Address',
+                filled: true,
+                fillColor: Color(0xFFF5F5F5),
+              ),
+              validator: emailValidator,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 class _NameEmailPasswordStep extends StatelessWidget {
   final GlobalKey<FormState> nameFormKey;
@@ -495,125 +718,6 @@ class _NameEmailPasswordStep extends StatelessWidget {
 }
 
 // STEP 4 – Account Created
-class _AccountCreatedStep extends StatelessWidget {
-  final VoidCallback onFinish;
-
-  const _AccountCreatedStep({required this.onFinish});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Card(
-            elevation: 0,
-            // color: scheme.surfaceContainerHighest,
-            color: Colors.grey.shade200,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-
-            ),
-
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Image.asset("assets/images/Group 8.png",color: Colors.black,),
-                  // CircleAvatar(
-                  //   radius: 28,
-                  //   backgroundColor: scheme.primary.withOpacity(0.15),
-                  //   child: Icon(Icons.verified_rounded, color: scheme.primary, size: 32),
-                  // ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Account Created!',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Set up the store and get the business ready for activation',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _setupItem(
-                    context,
-                    "assets/images/busness_info.png",
-                    'Add business information',
-                    'Add more information about the business',
-                  ),
-                  _setupItem(
-                    context,
-                    "assets/images/store.png",
-                    'Set-up your store',
-                    'Create and customise the online store',
-                  ),
-                  _setupItem(
-                    context,
-                    "assets/images/product_list.png",
-                    'Create your product list',
-                    'Add items to your product list with images',
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 44,
-                    child: ElevatedButton(
-                      onPressed: onFinish,
-                      child: const Text('Continue to Setup'),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 44,
-                    child: OutlinedButton(
-                      onPressed: onFinish,
-                      child: const Text('Skip for Later'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
-
-  Widget _setupItem(
-    BuildContext context,
-    String? icon,
-    String title,
-    String subtitle,
-  ) {
-    final scheme = Theme.of(context).colorScheme;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        radius: 16,
-        backgroundColor: scheme.primary,
-        // child: Icon(icon, size: 18, color: scheme.primary),
-        child: Image.asset(icon as String,color: Colors.white,),
-      ),
-      title: Text(title, style: Theme.of(context).textTheme.titleSmall),
-      subtitle: Text(
-        subtitle,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-      ),
-    );
-  }
-}
 
 class _GovtIdStep extends StatelessWidget {
   final String? value;

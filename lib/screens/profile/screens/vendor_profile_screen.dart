@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'edit_profile_screen.dart';
 class VendorProfileScreen extends StatefulWidget {
   const VendorProfileScreen({super.key});
 
@@ -61,7 +63,9 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> EditProfileScreen()));
+                },
                 icon: Icon(Icons.edit),
                 label: Text('Edit Profile'),
                 style: ElevatedButton.styleFrom(

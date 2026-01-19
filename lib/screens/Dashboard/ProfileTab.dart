@@ -607,8 +607,10 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../profile/screens/bank_info.dart';
+import '../profile/screens/edit_profile_screen.dart';
 import '../profile/screens/store_list_screen.dart';
 import '../profile/screens/vendor_profile_screen.dart';
 
@@ -645,7 +647,7 @@ class ProfileScreen extends StatelessWidget {
           children: [
             /// Profile Card
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 16,top: 8,bottom: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -678,15 +680,28 @@ class ProfileScreen extends StatelessWidget {
                         businessName,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
+                          fontSize: 14
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      // const SizedBox(height: 4),
                       Text(
                         businessLocation,
                         style: textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
+                            fontSize: 12
+
                         ),
                       ),
+                      InkWell(onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=> EditProfileScreen()));
+
+                      },
+                        child: Row(
+                          children: [
+                            Text("complete your profile",style: TextStyle(color: Colors.red,fontSize: 12),),SizedBox(width: 8,), Icon(Icons.edit,size: 12,color: Colors.red,)
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ],
@@ -774,7 +789,16 @@ class ProfileScreen extends StatelessWidget {
                   _MenuTile(
                     icon: Icons.logout,
                     title: 'Log Out',
-                    onTap: () {},
+                    onTap: ()async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/onboarding',
+                            (_) => false,
+                      );
+                    },
                     isDestructive: true,
                   ),
                 ],

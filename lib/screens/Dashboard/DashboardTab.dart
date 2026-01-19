@@ -32,20 +32,20 @@ class DashboardTab extends StatelessWidget {
             _buildMetricsGrid(scheme),
             const SizedBox(height: 24),
 
-            // Revenue Chart
-            _buildRevenueChart(context, scheme, textTheme),
-            const SizedBox(height: 24),
-
-            // Two Column Layout
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: _buildTopProducts(context, scheme, textTheme)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildRecentOrders(context, scheme, textTheme)),
-              ],
-            ),
-            const SizedBox(height: 24),
+            // // Revenue Chart
+            // _buildRevenueChart(context, scheme, textTheme),
+            // const SizedBox(height: 24),
+            //
+            // // Two Column Layout
+            // Row(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   children: [
+            //     Expanded(child: _buildTopProducts(context, scheme, textTheme)),
+            //     const SizedBox(width: 16),
+            //     Expanded(child: _buildRecentOrders(context, scheme, textTheme)),
+            //   ],
+            // ),
+            // const SizedBox(height: 24),
 
             // Low Stock Alert
             _buildLowStockAlert(context, scheme, textTheme),

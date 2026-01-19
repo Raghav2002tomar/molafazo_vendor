@@ -89,7 +89,7 @@ class MyApp extends StatelessWidget {
 
           /// ✅ LOGIN FLOW FIXED
           home: isLoggedIn
-              ? const ProductListScreen()
+              ? const MainBottombarScreen()
               : const OnboardingScreen(),
         );
       },
