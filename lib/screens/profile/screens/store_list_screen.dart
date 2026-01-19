@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:molafzo_vendor/screens/stores/screens/add_store_screen.dart';
+
+import '../../stores/screens/store_detail_screen.dart';
 class StoreListScreen extends StatefulWidget {
   const StoreListScreen({super.key});
 
@@ -180,6 +182,13 @@ class _StoreCard extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.arrow_forward_ios, size: 16),
                 onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => StoreDetailScreen(),
+                    ),
+                  );
+
                   // Navigate to store details
                 },
               ),

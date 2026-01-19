@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/screens/products/screens/product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -98,92 +99,103 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget productCard(Map<String, dynamic> p) {
     final bool outOfStock = p['stock'] == 0;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Image
-          Expanded(
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    p['image'],
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                if (outOfStock)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'Out of Stock',
-                        style:
-                        TextStyle(color: Colors.white, fontSize: 12),
-                      ),
+    return InkWell(onTap: (){
+      print("FGHJKL");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: p),
+        ),
+      );
+
+    },
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// Image
+            Expanded(
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                    child: Image.network(
+                      p['image'],
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
-              ],
+                  if (outOfStock)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Out of Stock',
+                          style:
+                          TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
 
-          /// Info
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  p['name'],
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                const SizedBox(height: 6),
+            /// Info
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    p['name'],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 6),
 
-                if (p['discount'] != null) ...[
-                  Text(
-                    "₹${p['price']}",
-                    style: const TextStyle(
-                        decoration: TextDecoration.lineThrough,
-                        fontSize: 12),
-                  ),
-                  Text(
-                    "₹${p['discount']}",
-                    style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green),
-                  ),
-                ] else
-                  Text(
-                    "₹${p['price']}",
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
+                  if (p['discount'] != null) ...[
+                    Text(
+                      "₹${p['price']}",
+                      style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          fontSize: 12),
+                    ),
+                    Text(
+                      "₹${p['discount']}",
+                      style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green),
+                    ),
+                  ] else
+                    Text(
+                      "₹${p['price']}",
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
 
-                const SizedBox(height: 4),
-                Text(
-                  "Stock: ${p['stock']}",
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    "Stock: ${p['stock']}",
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

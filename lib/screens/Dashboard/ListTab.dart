@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../products/screens/product_detail_screen.dart';
+
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
 
@@ -130,111 +132,123 @@ class _ProductListScreenState extends State<ProductListScreen> {
     final bool outOfStock = p['stock'] == 0;
     final bool hasDiscount = p['discount'] != null;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// IMAGE
-          Expanded(
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(4)),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: productImage(p['image']),
-                  ),
-                ),
-
-                /// OUT OF STOCK
-                if (outOfStock)
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: _badge("Out of Stock", Colors.red),
-                  ),
-
-                /// DISCOUNT
-                if (hasDiscount)
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: _badge(
-                        "₹${p['price'] - p['discount']} OFF", Colors.green),
-                  ),
-              ],
+    return InkWell(
+        onTap: (){
+          print("FGHJKL");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProductDetailScreen(product: p),
             ),
-          ),
+          );
 
-          /// INFO
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  p['name'],
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-                // const SizedBox(height: 4),
-
-                Row(
-                  children: [
-                    if (hasDiscount) ...[
-                      Text(
-                        "₹${p['price']}",
-                        style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        "₹${p['discount']}",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ] else
-                      Text(
-                        "₹${p['price']}",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                  ],
-                ),
-
-                // const SizedBox(height: 4),
-                Text(
-                  "Stock: ${p['stock']}",
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+        },
+        child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// IMAGE
+            Expanded(
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(4)),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: productImage(p['image']),
+                    ),
+                  ),
+
+                  /// OUT OF STOCK
+                  if (outOfStock)
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: _badge("Out of Stock", Colors.red),
+                    ),
+
+                  /// DISCOUNT
+                  if (hasDiscount)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: _badge(
+                          "₹${p['price'] - p['discount']} OFF", Colors.green),
+                    ),
+                ],
+              ),
+            ),
+
+            /// INFO
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    p['name'],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  // const SizedBox(height: 4),
+
+                  Row(
+                    children: [
+                      if (hasDiscount) ...[
+                        Text(
+                          "₹${p['price']}",
+                          style: const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          "₹${p['discount']}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ] else
+                        Text(
+                          "₹${p['price']}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  // const SizedBox(height: 4),
+                  Text(
+                    "Stock: ${p['stock']}",
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

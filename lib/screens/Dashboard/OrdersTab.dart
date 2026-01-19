@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../orders/screens/order_detail_screen.dart';
+
 class OrderListScreen extends StatefulWidget {
   const OrderListScreen({super.key});
 
@@ -24,12 +26,12 @@ class _OrderListScreenState extends State<OrderListScreen> {
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF8),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Orders'),
         // centerTitle: false,
         elevation: 0,
-        backgroundColor: const Color(0xFFF8FAF8),
+        backgroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -114,49 +116,54 @@ class _OrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          /// LEFT INFO
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Order ID $orderId',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+    return InkWell(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>OrderDetailScreen()));
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            /// LEFT INFO
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Order ID $orderId',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  date,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
+                  const SizedBox(height: 4),
+                  Text(
+                    date,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-
-          /// RIGHT INFO
-          Text(
-            items,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
+      
+            /// RIGHT INFO
+            Text(
+              items,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.green,
-            size: 22,
-          ),
-        ],
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.green,
+              size: 22,
+            ),
+          ],
+        ),
       ),
     );
   }
