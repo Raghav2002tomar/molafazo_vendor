@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../services/api_service.dart';
 import '../../../services/local_user_storage.dart';
 
 class PhoneSignupController extends ChangeNotifier {
@@ -16,7 +19,7 @@ class PhoneSignupController extends ChangeNotifier {
   bool otpSent = false;
 
   // ------------------ CONTROLLERS ------------------
-  final phoneCtrl = TextEditingController(text: '+234');
+  final phoneCtrl = TextEditingController(text: '');
   final otpCtrl = TextEditingController();
 
   final pwdCtrl = TextEditingController();
@@ -44,9 +47,7 @@ class PhoneSignupController extends ChangeNotifier {
   // ------------------ VALIDATORS ------------------
   String? Function(String?) get emailValidator => (v) {
     if (v == null || v.trim().isEmpty) return 'Email required';
-    return RegExp(r'^\S+@\S+\.\S+$').hasMatch(v)
-        ? null
-        : 'Invalid email';
+    return RegExp(r'^\S+@\S+\.\S+$').hasMatch(v) ? null : 'Invalid email';
   };
 
   String? Function(String?) get passwordValidator => (v) {
@@ -56,8 +57,10 @@ class PhoneSignupController extends ChangeNotifier {
   };
 
   // ------------------ NAVIGATION ------------------
-  void next() {
-    step++;
+  void goToStep(int newStep) {
+    if (newStep < 0 || newStep >= SignupStep.total) return;
+
+    step = newStep;
     page.animateToPage(
       step,
       duration: const Duration(milliseconds: 300),
@@ -84,62 +87,96 @@ class PhoneSignupController extends ChangeNotifier {
     busy = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1));
-    Fluttertoast.showToast(msg: 'OTP sent');
+    final res = await ApiService.postFormData(
+      endpoint: "/otp/mobile/send",
+      fields: {
+        "phone_number": phoneCtrl.text.trim(),
+        "device_type": "android",
+        "device_token": "1234",
+        "fcm_token": "1234r4",
+      },
+    );
 
-    otpSent = true;
     busy = false;
+
+    if (res["success"] == true || res["data"]?["status"] == true) {
+      otpSent = true;
+      Fluttertoast.showToast(msg: res["data"]["message"] ?? "OTP sent");
+    } else {
+      Fluttertoast.showToast(
+        msg: res["message"] ?? "Failed to send OTP",
+      );
+    }
+
     notifyListeners();
   }
 
   Future<void> verifyOtp() async {
     if (otpCtrl.text.length != 6) {
-      Fluttertoast.showToast(msg: 'Invalid OTP');
+      Fluttertoast.showToast(msg: "Enter valid 6-digit OTP");
       return;
     }
 
     busy = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1));
-    Fluttertoast.showToast(msg: 'Phone verified');
+    try {
+      final url = Uri.parse("${ApiService.baseUrl}/verify-otp");
 
-    busy = false;
-    notifyListeners();
-    next(); // → Password screen
-  }
+      final response = await http.post(
+        url,
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: {
+          "phone_number": phoneCtrl.text.trim(),
+          "otp": otpCtrl.text.trim(),
+        },
+      );
 
-  // ------------------ CREATE ACCOUNT ------------------
-  Future<void> createAccount() async {
-    if (!passwordFormKey.currentState!.validate()) return;
+      final res = jsonDecode(response.body);
 
-    busy = true;
-    notifyListeners();
+      if (res["success"] == true || res["status"] == true) {
+        // Read token from response
+        final token = res["api_token"] ?? res["data"]?["api_token"];
+        print("token --------- $token");
 
-    // 🔐 API call simulation
-    await Future.delayed(const Duration(seconds: 1));
+        if (token != null) {
+          await _saveToken(token);
+        }
 
-    Fluttertoast.showToast(msg: 'Account created');
+        if (res["data"] != null) {
+          await _saveUser(res["data"]);
+        }
 
-    busy = false;
-    notifyListeners();
-    next(); // → Account Created Screen
+        Fluttertoast.showToast(msg: "Account created successfully");
+
+        // Navigate to account created step
+        Future.delayed(Duration(milliseconds: 100), () {
+          goToStep(SignupStep.accountCreated);
+        });
+      } else {
+        Fluttertoast.showToast(msg: res["message"] ?? "Invalid OTP");
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Something went wrong: $e");
+      print("❌ Error in verifyOtp: $e");
+    } finally {
+      busy = false; // ✅ Stop loader no matter what
+      notifyListeners();
+    }
   }
 
   // ------------------ SUCCESS SCREEN ACTIONS ------------------
-  void goToProfileSetup() {
-    step = 4;
-    page.animateToPage(
-      step,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-    notifyListeners();
-  }
-
   Future<void> finishAndGoDashboard(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', true);
+    final token = prefs.getString("api_token");
+
+    // Fetch complete profile before going to dashboard
+    if (token != null) {
+      await _fetchProfile(token);
+    }
 
     if (context.mounted) {
       Navigator.pushNamedAndRemoveUntil(
@@ -171,31 +208,149 @@ class PhoneSignupController extends ChangeNotifier {
     busy = true;
     notifyListeners();
 
-    await LocalUserStorage.saveUser(
-      phone: phoneCtrl.text.trim(),
-      firstName: firstCtrl.text.trim(),
-      lastName: lastCtrl.text.trim(),
-      email: emailCtrl.text.trim(),
-      govtIdType: govtIdType,
-      govtIdNumber: govtIdNumberCtrl.text.trim(),
-      city: cityCtrl.text.trim(),
-      profileImage: profileImage?.path,
-      idProof: idProofImage?.path,
-    );
-
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', true);
+    final token = prefs.getString("api_token");
+
+    final res = await ApiService.multipart(
+      endpoint: "/vendor/complete-profile",
+      token: token,
+      fields: {
+        "name": "${firstCtrl.text.trim()} ${lastCtrl.text.trim()}",
+        "email": emailCtrl.text.trim(),
+        "mobile": phoneCtrl.text.trim(),
+        "password": pwdCtrl.text.trim(),
+        "password_confirmation": confirmCtrl.text.trim(),
+        "gov_id_type": govtIdType ?? "",
+        "gov_id_number": govtIdNumberCtrl.text.trim(),
+        "city": cityCtrl.text.trim(),
+        "country": "india",
+        "terms_accepted": acceptedTerms ? "1" : "0",
+        "alt_mobile": "1234512345",
+        "device_id": "123",
+        "device_type": "ios",
+        "fcm_token": "1234321",
+      },
+      files: {
+        if (profileImage != null) "profile_photo": File(profileImage!.path),
+        if (idProofImage != null)
+          "gov_id_document[]": File(idProofImage!.path),
+      },
+    );
 
     busy = false;
     notifyListeners();
 
-    if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/dashboard',
-            (_) => false,
+    if (res["success"] == true) {
+      Fluttertoast.showToast(msg: "Profile completed 🎉");
+
+      // Fetch complete profile after successful profile completion
+      if (token != null) {
+        await _fetchProfile(token);
+      }
+
+      if (context.mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/dashboard',
+              (_) => false,
+        );
+      }
+    } else {
+      Fluttertoast.showToast(
+        msg: res["message"] ?? "Profile update failed",
       );
     }
+  }
+
+  // ------------------ FETCH PROFILE ------------------
+  Future<void> _fetchProfile(String token) async {
+    try {
+      final res = await ApiService.get(
+        endpoint: "/get-profile",
+        token: token,
+      );
+
+      if (res["success"] == true || res["data"]?["status"] == true) {
+        // Save complete profile data
+        await _saveUser(res["data"]);
+        print("✅ Profile data fetched and saved successfully");
+      } else {
+        print("⚠️ Profile fetch failed: ${res['message']}");
+      }
+    } catch (e) {
+      print("❌ Error fetching profile: $e");
+    }
+  }
+
+  // ------------------ LOCAL STORAGE ------------------
+  Future<void> _saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("api_token", token);
+  }
+
+  Future<void> _saveUser(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Save complete user data as JSON string
+    await prefs.setString("user", jsonEncode(userData));
+
+    // Save individual fields for easy access
+    if (userData["id"] != null) {
+      await prefs.setInt(
+          "user_id", int.tryParse(userData["id"].toString()) ?? 0);
+    }
+
+    if (userData["role"] != null) {
+      await prefs.setString("user_role", userData["role"].toString());
+    }
+
+    if (userData["mobile"] != null) {
+      await prefs.setString("user_mobile", userData["mobile"].toString());
+    }
+
+    if (userData["email"] != null) {
+      await prefs.setString("user_email", userData["email"].toString());
+    }
+
+    if (userData["name"] != null) {
+      await prefs.setString("user_name", userData["name"].toString());
+    }
+
+    if (userData["api_token"] != null) {
+      await prefs.setString("api_token", userData["api_token"].toString());
+    }
+
+    if (userData["status"] != null) {
+      await prefs.setString("user_status", userData["status"].toString());
+    }
+
+    if (userData["profile_photo"] != null) {
+      await prefs.setString(
+          "user_profile_photo", userData["profile_photo"].toString());
+    }
+
+    if (userData["city"] != null) {
+      await prefs.setString("user_city", userData["city"].toString());
+    }
+
+    if (userData["country"] != null) {
+      await prefs.setString("user_country", userData["country"].toString());
+    }
+
+    if (userData["gov_id_type"] != null) {
+      await prefs.setString(
+          "user_gov_id_type", userData["gov_id_type"].toString());
+    }
+
+    if (userData["gov_id_number"] != null) {
+      await prefs.setString(
+          "user_gov_id_number", userData["gov_id_number"].toString());
+    }
+
+    // Mark user as logged in
+    await prefs.setBool("is_logged_in", true);
+
+    print("✅ User data saved successfully");
   }
 
   // ------------------ DISPOSE ------------------
@@ -213,4 +368,15 @@ class PhoneSignupController extends ChangeNotifier {
     cityCtrl.dispose();
     super.dispose();
   }
+}
+
+class SignupStep {
+  static const int phoneOtp = 0;
+  static const int accountCreated = 1;
+  static const int nameEmail = 2;
+  static const int password = 3;
+  static const int govtId = 4;
+  static const int addressProfile = 5;
+
+  static const int total = 6;
 }

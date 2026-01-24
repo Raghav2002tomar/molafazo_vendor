@@ -17,7 +17,7 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _products = await ApiService.fetchProducts();
+      // _products = await ApiService.fetchProducts();
     } catch (e) {
       _error = e.toString();
     } finally {

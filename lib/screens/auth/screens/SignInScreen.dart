@@ -1,9 +1,14 @@
-// lib/auth/sign_in_screen.dart
+import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../services/api_service.dart';
 import 'SignUpScreens.dart';
+
+enum LoginMode { phone, email }
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -13,65 +18,237 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  LoginMode _mode = LoginMode.phone;
+
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  bool _submitting = false;
+
+  final phoneCtrl = TextEditingController();
+  final otpCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
+
+  bool otpSent = false;
+  bool loading = false;
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
+    phoneCtrl.dispose();
+    otpCtrl.dispose();
+    emailCtrl.dispose();
+    passwordCtrl.dispose();
     super.dispose();
   }
 
-  String? _validateEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Email is required';
-    // Simple and readable email regex; adjust if needed
-    final ok = RegExp(r'^\S+@\S+\.\S+$').hasMatch(v.trim());
-    if (!ok) return 'Enter a valid email';
+  // ================= VALIDATORS =================
+  String? _phoneValidator(String? v) {
+    if (v == null || v.trim().isEmpty) {
+      return 'Phone number is required';
+    }
+    if (v.trim().length != 10) {
+      return 'Enter exactly 10 digits';
+    }
     return null;
   }
 
-  String? _validatePassword(String? v) {
-    if (v == null || v.isEmpty) return 'Password is required';
+  String? _otpValidator(String? v) {
+    if (v == null || v.isEmpty) return 'OTP is required';
+    if (v.length < 4) return 'Invalid OTP';
+    return null;
+  }
+
+  String? _emailValidator(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Email required';
+    return RegExp(r'^\S+@\S+\.\S+$').hasMatch(v) ? null : 'Invalid email';
+  }
+
+  String? _passwordValidator(String? v) {
+    if (v == null || v.isEmpty) return 'Password required';
     if (v.length < 6) return 'Minimum 6 characters';
     return null;
   }
 
-  Future<void> _submit() async {
-    FocusScope.of(context).unfocus();
+  // ================= OTP SEND =================
+  Future<void> sendOtp() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _submitting = true);
+    setState(() => loading = true);
 
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 800));
+    final res = await ApiService.postFormData(
+      endpoint: "/vendor/login/otp/send",
+      fields: {
+        "phone_number": phoneCtrl.text.trim(),
+        "device_type": "android",
+        "fcm_token": "1234321",
+        "device_token": "1234",
+      },
+    );
 
-      // Here you would call your login API and check credentials
-      final success = true; // Replace with actual API response
+    setState(() => loading = false);
 
-      if (success) {
-        // Navigate to dashboard and remove all previous routes
-        if (context.mounted) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/dashboard', // Your dashboard route
-                (route) => false,
-          );
-        }
-      } else {
-        Fluttertoast.showToast(msg: 'Invalid email or password');
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: 'Login failed: $e');
-    } finally {
-      if (mounted) setState(() => _submitting = false);
+    if (res["success"] == true || res["data"]?["status"] == true) {
+      otpSent = true;
+      setState(() {});
+      _toast("OTP sent successfully");
+    } else {
+      _toast(res["message"] ?? "Failed to send OTP");
     }
   }
 
+  // ================= OTP VERIFY =================
+  Future<void> verifyOtp() async {
+    if (!_formKey.currentState!.validate()) return;
 
+    setState(() => loading = true);
+
+    final res = await ApiService.postFormData(
+      endpoint: "/vendor/login/otp/verify",
+      fields: {
+        "phone_number": phoneCtrl.text.trim(),
+        "otp": otpCtrl.text.trim(),
+        "device_type": "android",
+        "fcm_token": "1234321",
+        "device_token": "1234",
+      },
+    );
+
+    setState(() => loading = false);
+
+    // Check for success
+    if (res["success"] == true || res["data"]?["status"] == true) {
+      print("Login Response: $res");
+
+      final token = res["data"]?["api_token"];
+
+      if (token == null || token.toString().isEmpty) {
+        _toast("Authentication failed - No token received");
+        return;
+      }
+
+      // Save token first
+      await _saveToken(token);
+
+      // Save complete user data
+      await _saveUser(res["data"]);
+
+      // Show success message
+      _toast(res["data"]["message"] ?? "Login successful");
+
+      // Navigate to dashboard
+      _goDashboard();
+    } else {
+      _toast(res["data"]["message"] ?? "Invalid OTP");
+    }
+  }
+
+  // ================= EMAIL LOGIN =================
+  Future<void> emailLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => loading = true);
+
+    final res = await ApiService.postFormData(
+      endpoint: "/vendor/login",
+      fields: {
+        "login": emailCtrl.text.trim(),
+        "password": passwordCtrl.text,
+        "device_type": "android",
+        "fcm_token": "1234321",
+        "device_token": "1234",
+        "device_id": "1234",
+      },
+    );
+
+    setState(() => loading = false);
+
+    if (res["success"] == true || res["data"]?["status"] == true) {
+      final token = res["data"]?["api_token"];
+
+      if (token != null) {
+        await _saveToken(token);
+      }
+
+      await _saveUser(res["data"]);
+      _toast(res["message"] ?? "Login successful");
+      _goDashboard();
+    } else {
+      _toast(res["message"] ?? "Login failed");
+    }
+  }
+
+  // ================= LOCAL STORAGE =================
+  Future<void> _saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("api_token", token);
+  }
+
+  Future<void> _saveUser(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Save complete user data as JSON string
+    await prefs.setString("user", jsonEncode(userData));
+
+    // Save individual fields for easy access
+    if (userData["id"] != null) {
+      await prefs.setInt("user_id", int.tryParse(userData["id"].toString()) ?? 0);
+    }
+
+    if (userData["role"] != null) {
+      await prefs.setString("user_role", userData["role"].toString());
+    }
+
+    if (userData["mobile"] != null) {
+      await prefs.setString("user_mobile", userData["mobile"].toString());
+    }
+
+    if (userData["email"] != null) {
+      await prefs.setString("user_email", userData["email"].toString());
+    }
+
+    if (userData["name"] != null) {
+      await prefs.setString("user_name", userData["name"].toString());
+    }
+
+    if (userData["api_token"] != null) {
+      await prefs.setString("api_token", userData["api_token"].toString());
+    }
+
+    if (userData["status"] != null) {
+      await prefs.setString("user_status", userData["status"].toString());
+    }
+
+    if (userData["profile_photo"] != null) {
+      await prefs.setString("user_profile_photo", userData["profile_photo"].toString());
+    }
+
+    if (userData["city"] != null) {
+      await prefs.setString("user_city", userData["city"].toString());
+    }
+
+    if (userData["country"] != null) {
+      await prefs.setString("user_country", userData["country"].toString());
+    }
+
+    // Mark user as logged in
+    await prefs.setBool("is_logged_in", true);
+
+    print("✅ User data saved successfully");
+  }
+
+  void _goDashboard() {
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/dashboard',
+            (_) => false,
+      );
+    }
+  }
+
+  void _toast(String msg) {
+    Fluttertoast.showToast(msg: msg);
+  }
+
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -82,139 +259,150 @@ class _SignInScreenState extends State<SignInScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 24),
-                    // Logo / Wordmark placeholder
-                    Row(mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // final scheme = Theme.of(context).colorScheme;
+                    const SizedBox(height: 20),
 
-                Text(
-                'Molafzo',
-                style: TextStyle(
-                  color: scheme.onSurface, // 👈 auto adapts to theme
-                  fontSize: 70,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Cursive',
-                  letterSpacing: 2,
-                  shadows: [
-                    Shadow(
-                      offset: const Offset(0, 4),
-                      blurRadius: 12,
-                      color: scheme.primary.withOpacity(0.35), // 👈 theme accent glow
+                    /// LOGO
+                    Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Molafzo',
+                            style: TextStyle(
+                              color: scheme.primary,
+                              fontSize: 64,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cursive',
+                              letterSpacing: 2,
+                              shadows: [
+                                Shadow(
+                                  offset: const Offset(0, 3),
+                                  blurRadius: 10,
+                                  color: scheme.primary.withOpacity(0.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Experience business sales on another level',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[600],
+                              letterSpacing: 0.3,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    Shadow(
-                      offset: const Offset(0, 8),
-                      blurRadius: 22,
-                      color: Colors.black.withOpacity(0.4),
-                    ),
-                  ],
-                ),
-              ),
-                      ],
-                    ),
-                    SizedBox(height: 8,),
+
+                    const SizedBox(height: 48),
+
+                    /// WELCOME TEXT
                     Text(
-                      'Experience business slaes on another level with Molafzo, your market friendly app',
-                      textAlign: TextAlign.center,
+                      'Welcome Back!',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Sign in to continue',
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface,
-                        letterSpacing: 0.5,
+                        fontSize: 15,
+                        color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 60),
-                    Text(
-                      'Email',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
 
-                    AppTextField(
-                      controller: _emailCtrl,
-                      // labelText: 'Email',
-                      hintText: 'raidenLord@gmail.com',
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      validator: _validateEmail,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Password',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 32),
 
-                    PasswordTextField(
-                      controller: _passwordCtrl,
-                      hintText: 'Password',
-                      validator: _validatePassword,
-                      onSubmitted: (_) => _submit(),
-                    ),
-                    // const SizedBox(height: ),
-
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: scheme.primary,
-                          padding: EdgeInsets.zero,
-                        ),
-                        onPressed: () {
-                          // TODO: navigate to Forgot Password
-                        },
-                        child: const Text('Forgot Password?'),
+                    /// MODE TOGGLE
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _ModeButton(
+                              label: 'Phone',
+                              icon: Icons.phone_android,
+                              selected: _mode == LoginMode.phone,
+                              onTap: () {
+                                setState(() {
+                                  _mode = LoginMode.phone;
+                                  otpSent = false;
+                                });
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: _ModeButton(
+                              label: 'Email',
+                              icon: Icons.email_outlined,
+                              selected: _mode == LoginMode.email,
+                              onTap: () {
+                                setState(() {
+                                  _mode = LoginMode.email;
+                                  otpSent = false;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
 
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: _submitting ? null : _submit,
-                        child: _submitting
-                            ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                            : const Text('Log In'),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 32),
 
+                    /// FORM FIELDS
+                    if (_mode == LoginMode.phone) ..._phoneUI(),
+                    if (_mode == LoginMode.email) ..._emailUI(),
+
+                    const SizedBox(height: 32),
+
+                    /// SIGN UP LINK
                     Center(
                       child: Text.rich(
                         TextSpan(
-                          text: "Don’t have an account? ",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          text: "Don't have an account? ",
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey[700],
+                          ),
                           children: [
                             TextSpan(
                               text: 'Sign Up',
                               style: TextStyle(
                                 color: scheme.primary,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  // TODO: navigate to Sign Up
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>PhoneSignupWizard()));
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => PhoneSignupWizard(),
+                                    ),
+                                  );
                                 },
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -224,61 +412,304 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
     );
   }
+
+  // ================= PHONE UI =================
+  List<Widget> _phoneUI() {
+    final scheme = Theme.of(context).colorScheme;
+
+    return [
+      Text(
+        'Phone Number',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      const SizedBox(height: 8),
+      AppTextField(
+        controller: phoneCtrl,
+        hintText: 'Enter your phone number',
+        keyboardType: TextInputType.number,
+        validator: _phoneValidator,
+        enabled: !otpSent,
+        prefixIcon: const Icon(Icons.phone_android),
+        maxLength: 10,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(10),
+        ],
+      ),
+      if (otpSent) ...[
+        const SizedBox(height: 20),
+        Text(
+          'Verification Code',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        AppTextField(
+          controller: otpCtrl,
+          hintText: 'Enter OTP',
+          keyboardType: TextInputType.number,
+          validator: _otpValidator,
+          prefixIcon: const Icon(Icons.lock_outline),
+          maxLength: 6,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton.icon(
+              onPressed: loading ? null : sendOtp,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Resend OTP'),
+              style: TextButton.styleFrom(
+                foregroundColor: scheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ],
+      const SizedBox(height: 24),
+      SizedBox(
+        height: 50,
+        child: ElevatedButton(
+          onPressed: loading ? null : (otpSent ? verifyOtp : sendOtp),
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: loading
+              ? const SizedBox(
+            height: 24,
+            width: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          )
+              : Text(
+            otpSent ? 'Verify & Sign In' : 'Send OTP',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  // ================= EMAIL UI =================
+  List<Widget> _emailUI() {
+    return [
+      Text(
+        'Email Address',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      const SizedBox(height: 8),
+      AppTextField(
+        controller: emailCtrl,
+        hintText: 'Enter your email',
+        keyboardType: TextInputType.emailAddress,
+        validator: _emailValidator,
+        prefixIcon: const Icon(Icons.email_outlined),
+      ),
+      const SizedBox(height: 20),
+      Text(
+        'Password',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      const SizedBox(height: 8),
+      PasswordTextField(
+        controller: passwordCtrl,
+        validator: _passwordValidator,
+        hintText: 'Enter your password',
+      ),
+      const SizedBox(height: 12),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () {
+              _toast('Forgot password feature coming soon');
+            },
+            child: const Text('Forgot Password?'),
+          ),
+        ],
+      ),
+      const SizedBox(height: 24),
+      SizedBox(
+        height: 50,
+        child: ElevatedButton(
+          onPressed: loading ? null : emailLogin,
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: loading
+              ? const SizedBox(
+            height: 24,
+            width: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          )
+              : const Text(
+            'Sign In',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
 }
 
-/// Reusable themed text field that behaves like TextFormField but keeps
-/// spacing and style consistent with the app InputDecorationTheme.
-class AppTextField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? labelText;
-  final String? hintText;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final String? Function(String?)? validator;
-  final void Function(String)? onSubmitted;
+// ================= MODE TOGGLE BUTTON =================
+class _ModeButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
 
-  const AppTextField({
-    super.key,
-    this.controller,
-    this.labelText,
-    this.hintText,
-    this.keyboardType,
-    this.textInputAction,
-    this.validator,
-    this.onSubmitted,
+  const _ModeButton({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
-      validator: validator,
-      onFieldSubmitted: onSubmitted,
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        // Uses InputDecorationTheme from AppTheme; no hardcoded colors.
+    final scheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: selected
+              ? [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ]
+              : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: selected ? scheme.primary : Colors.grey[600],
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                color: selected ? scheme.primary : Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+// ================= APP TEXT FIELD =================
+Widget AppTextField({
+  required TextEditingController controller,
+  String? hintText,
+  TextInputType keyboardType = TextInputType.text,
+  String? Function(String?)? validator,
+  bool readOnly = false,
+  bool enabled = true,
+  VoidCallback? onTap,
+  Widget? prefixIcon,
+  int? maxLength,
+  List<TextInputFormatter>? inputFormatters,
+}) {
+  return TextFormField(
+    controller: controller,
+    keyboardType: keyboardType,
+    validator: validator,
+    readOnly: readOnly,
+    enabled: enabled,
+    onTap: onTap,
+    maxLength: maxLength,
+    inputFormatters: inputFormatters,
+    decoration: InputDecoration(
+      hintText: hintText,
+      prefixIcon: prefixIcon,
+      counterText: '',
+      filled: true,
+      fillColor: enabled ? Colors.grey.shade50 : Colors.grey.shade200,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Colors.black,
+          width: 2,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+    ),
+  );
+}
+
+// ================= PASSWORD TEXT FIELD =================
 class PasswordTextField extends StatefulWidget {
-  final TextEditingController? controller;
-  final String? labelText;
-  final String? hintText;
+  final TextEditingController controller;
   final String? Function(String?)? validator;
-  final void Function(String)? onSubmitted;
+  final String hintText;
 
   const PasswordTextField({
     super.key,
-    this.controller,
-    this.labelText,
-    this.hintText,
+    required this.controller,
     this.validator,
-    this.onSubmitted,
+    this.hintText = 'Password',
   });
 
   @override
@@ -290,23 +721,47 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return TextFormField(
       controller: widget.controller,
-      obscureText: _obscure,
-      textInputAction: TextInputAction.done,
       validator: widget.validator,
-      onFieldSubmitted: widget.onSubmitted,
+      obscureText: _obscure,
       decoration: InputDecoration(
-        labelText: widget.labelText,
         hintText: widget.hintText,
+        prefixIcon: const Icon(Icons.lock_outline),
         suffixIcon: IconButton(
-          tooltip: _obscure ? 'Show' : 'Hide',
           icon: Icon(
-            _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            color: scheme.onSurfaceVariant,
+            _obscure ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey[600],
           ),
-          onPressed: () => setState(() => _obscure = !_obscure),
+          onPressed: () {
+            setState(() => _obscure = !_obscure);
+          },
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
       ),
     );

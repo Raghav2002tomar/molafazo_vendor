@@ -208,10 +208,12 @@ class AddStoreScreen extends StatelessWidget {
                           email: emailCtrl.text,
                           address: addressCtrl.text,
                           description: descCtrl.text,
+                          city: descCtrl.text
                         );
                       },
                       child: const Text('Submit Store'),
                     ),
+                    SizedBox(height: 50,)
                   ],
                 ),
               ),

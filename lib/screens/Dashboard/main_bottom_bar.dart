@@ -33,64 +33,67 @@ class _MainBottombarScreenState extends State<MainBottombarScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: pages[_currentIndex],
-      bottomNavigationBar: Row(
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _NavItem(
-                  svgPath: 'assets/images/product.svg',
-                  label: 'List',
-                  isSelected: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
-                ),
-                _NavItem(
-                  svgPath: 'assets/images/order.svg',
-                  label: 'Orders',
-                  isSelected: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
-                ),
-              ],
-            ),
-          ),
-          // Dashboard floating icon
-          GestureDetector(
-            onTap: () => setState(() => _currentIndex = 0),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: SvgPicture.asset(
-                'assets/images/dashboard.svg',
-                width: 28,
-                height: 28,
-                color: Colors.white,
+      bottomNavigationBar: SafeArea(
+        top: false, // only protect bottom
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _NavItem(
+                    svgPath: 'assets/images/product.svg',
+                    label: 'List',
+                    isSelected: _currentIndex == 1,
+                    onTap: () => setState(() => _currentIndex = 1),
+                  ),
+                  _NavItem(
+                    svgPath: 'assets/images/order.svg',
+                    label: 'Orders',
+                    isSelected: _currentIndex == 2,
+                    onTap: () => setState(() => _currentIndex = 2),
+                  ),
+                ],
               ),
             ),
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _NavItem(
-                  svgPath: 'assets/images/chat.svg',
-                  label: 'Chat',
-                  isSelected: _currentIndex == 3,
-                  onTap: () => setState(() => _currentIndex = 3),
+            // Dashboard floating icon
+            GestureDetector(
+              onTap: () => setState(() => _currentIndex = 0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                _NavItem(
-                  svgPath: 'assets/images/profile.svg',
-                  label: 'Profile',
-                  isSelected: _currentIndex == 4,
-                  onTap: () => setState(() => _currentIndex = 4),
+                child: SvgPicture.asset(
+                  'assets/images/dashboard.svg',
+                  width: 28,
+                  height: 28,
+                  color: Colors.white,
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _NavItem(
+                    svgPath: 'assets/images/chat.svg',
+                    label: 'Chat',
+                    isSelected: _currentIndex == 3,
+                    onTap: () => setState(() => _currentIndex = 3),
+                  ),
+                  _NavItem(
+                    svgPath: 'assets/images/profile.svg',
+                    label: 'Profile',
+                    isSelected: _currentIndex == 4,
+                    onTap: () => setState(() => _currentIndex = 4),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

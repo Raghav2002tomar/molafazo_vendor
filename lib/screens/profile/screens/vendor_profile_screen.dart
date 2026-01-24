@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../services/api_service.dart';
 import 'edit_profile_screen.dart';
+
 class VendorProfileScreen extends StatefulWidget {
   const VendorProfileScreen({super.key});
 
@@ -9,16 +12,64 @@ class VendorProfileScreen extends StatefulWidget {
 }
 
 class _VendorProfileScreenState extends State<VendorProfileScreen> {
+  bool _isLoading = true;
+  Map<String, dynamic>? _profileData;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfile();
+  }
+
+  Future<void> _fetchProfile() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("api_token");
+
+      if (token != null) {
+        final res = await ApiService.get(endpoint: "/get-profile", token: token);
+
+        if (res["success"] == true) {
+          _profileData = res["data"];
+        } else {
+          // Optional: fallback to local storage
+          final localData = prefs.getString("user");
+          if (localData != null) _profileData = jsonDecode(localData);
+        }
+      }
+    } catch (e) {
+      print("Error fetching profile: $e");
+    }
+
+    setState(() => _isLoading = false);
+  }
+
+  String _getValue(String key) {
+    final val = _profileData?[key];
+    if (val == null || val.toString().isEmpty) return "-";
+    return val.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: const Text("Business Details"),
         backgroundColor: Colors.white,
-        title: Text("Business Details"),),
+        foregroundColor: scheme.onSurface,
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -28,10 +79,10 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             const SizedBox(height: 12),
             _InfoCard(
               children: [
-                _InfoRow(label: 'Full Name', value: 'Raghav Kumar'),
-                _InfoRow(label: 'Email', value: 'raghav@example.com'),
-                _InfoRow(label: 'Mobile', value: '+91 98765 43210'),
-                _InfoRow(label: 'Alternate Contact', value: '+91 98765 11111'),
+                _InfoRow(label: 'Full Name', value: _getValue("name")),
+                _InfoRow(label: 'Email', value: _getValue("email")),
+                _InfoRow(label: 'Mobile', value: _getValue("mobile")),
+                _InfoRow(label: 'Alternate Contact', value: _getValue("alt_mobile")),
               ],
             ),
             const SizedBox(height: 20),
@@ -40,9 +91,9 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             const SizedBox(height: 12),
             _InfoCard(
               children: [
-                _InfoRow(label: 'ID Type', value: 'Aadhar Card'),
-                _InfoRow(label: 'ID Number', value: 'XXXX XXXX 1234'),
-                _DocumentRow(label: 'ID Proof', fileName: 'aadhar_proof.pdf'),
+                _InfoRow(label: 'ID Type', value: _getValue("gov_id_type")),
+                _InfoRow(label: 'ID Number', value: _getValue("gov_id_number")),
+                _DocumentRow(label: 'ID Proof', fileName: _getValue("gov_id_document")),
               ],
             ),
             const SizedBox(height: 20),
@@ -51,23 +102,25 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             const SizedBox(height: 12),
             _InfoCard(
               children: [
-                _InfoRow(label: 'City', value: 'Chandigarh'),
-                _InfoRow(label: 'State', value: 'Chandigarh'),
-                _InfoRow(label: 'Country', value: 'India'),
-                _InfoRow(label: 'PIN Code', value: '160001'),
+                _InfoRow(label: 'City', value: _getValue("city")),
+                _InfoRow(label: 'State', value: _getValue("state")),
+                _InfoRow(label: 'Country', value: _getValue("country")),
+                _InfoRow(label: 'PIN Code', value: _getValue("pincode")),
               ],
             ),
             const SizedBox(height: 20),
 
-            // Edit Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=> EditProfileScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                  ).then((_) => _fetchProfile());
                 },
-                icon: Icon(Icons.edit),
-                label: Text('Edit Profile'),
+                icon: const Icon(Icons.edit),
+                label: const Text('Edit Profile'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -75,10 +128,12 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }
+
+// ------------------ UI Widgets ------------------
 class _SectionHeader extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -94,10 +149,7 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Icon(icon, size: 20, color: scheme.primary),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
+        Text(title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -110,8 +162,6 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -119,9 +169,7 @@ class _InfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }
@@ -142,25 +190,8 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.end,
-            ),
-          ),
+          Expanded(flex: 2, child: Text(label, style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant))),
+          Expanded(flex: 3, child: Text(value, textAlign: TextAlign.end, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600))),
         ],
       ),
     );
@@ -175,42 +206,26 @@ class _DocumentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-          ),
+          Expanded(flex: 2, child: Text(label, style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant))),
           Expanded(
             flex: 3,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Icon(Icons.description, size: 16, color: scheme.primary),
+                const Icon(Icons.description, size: 16),
                 const SizedBox(width: 4),
                 Flexible(
-                  child: Text(
-                    fileName,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: scheme.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.end,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: Text(fileName, overflow: TextOverflow.ellipsis, textAlign: TextAlign.end, style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500)),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.visibility_outlined, size: 18, color: scheme.primary),
+                const Icon(Icons.visibility_outlined, size: 18),
               ],
             ),
           ),
