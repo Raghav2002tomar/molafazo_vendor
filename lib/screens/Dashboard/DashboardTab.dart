@@ -1,9 +1,83 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../products/screens/add_product_basic_info.dart';
 import '../stores/screens/add_store_screen.dart';
 
-class DashboardTab extends StatelessWidget {
+class DashboardTab extends StatefulWidget {
+  @override
+  State<DashboardTab> createState() => _DashboardTabState();
+}
+class _DashboardTabState extends State<DashboardTab> {
+
+  String username = 'User';
+  String profilestatus = '';
+  String email = '';
+
+  bool get _isProfileIncomplete {
+    // Simple check based on profilestatus
+    return email.isEmpty || email == null;
+  }
+
+  String get _profileStatusMessage {
+    if (_isProfileIncomplete) {
+      return "Complete your profile";
+    } else if (profilestatus == '2') {
+      return "Profile under review";
+    } else if (profilestatus == '1') {
+      return "Profile approved ✓";
+    }
+    return "";
+  }
+
+  Color get _profileStatusColor {
+    if (_isProfileIncomplete) return Colors.red;
+    if (profilestatus == '2') return Colors.orange;
+    if (profilestatus == '1') return Colors.green;
+    return Colors.grey;
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    fetechuserdata();
+    super.initState();
+  }
+
+  Future<void> fetechuserdata() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString('user'); // Get the saved JSON string
+    if (userJson != null) {
+      final userData = jsonDecode(userJson); // Convert JSON string to Map
+      setState(() {
+        username = userData['name'] ?? 'User';
+        email = userData['email'] ?? '';
+        profilestatus = userData['status_id']?.toString() ?? '';
+      });
+      print("✅ User loaded: $username, status: $profilestatus");
+    } else {
+      // Fallback default values
+      setState(() {
+        username = 'User';
+        profilestatus = '';
+      });
+    }
+  }
+  void _showTopToast(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.black87,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
+      duration: const Duration(seconds: 2),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -57,7 +131,7 @@ class DashboardTab extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, ColorScheme scheme, TextTheme textTheme) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [scheme.primary, scheme.primary.withOpacity(0.85)],
@@ -89,9 +163,10 @@ class DashboardTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome back, Raghav!',
+                  'Welcome, ${username}!',
                   style: textTheme.titleLarge?.copyWith(
                     color: Colors.white,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -99,7 +174,17 @@ class DashboardTab extends StatelessWidget {
                 Text(
                   'Manage your store efficiently',
                   style: textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
                     color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _profileStatusMessage, // ← show profile status here
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                    color: _profileStatusColor.withOpacity(0.9),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -114,24 +199,31 @@ class DashboardTab extends StatelessWidget {
   Widget _buildQuickActions(BuildContext context, ColorScheme scheme) {
     return Row(
       children: [
-        Expanded(
-          child: _QuickActionButton(
-            icon: Icons.add_box,
-            label: 'Add Product',
-            color: scheme.primary,
-            onTap: () {
+    Expanded(
+    child: _QuickActionButton(
+    icon: Icons.add_box,
+      label: 'Add Product',
+      color: scheme.primary,
+      onTap: () {
+        // Check profile status before navigating
+        if (profilestatus == '1') {
+          // Profile approved ✅
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddProductBasicInfo()),
+          );
+        } else if (profilestatus == '2') {
+          // Profile under review 🟠
+          _showTopToast(context, "Your profile is under review. Please wait for approval.");
+        } else {
+          // Profile incomplete 🔴
+          _showTopToast(context, "Complete your profile to add products.");
+        }
+      },
+    ),
+    ),
 
-
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>AddProductBasicInfo()));
-
-              // Navigate to add product screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Add Product clicked')),
-              );
-            },
-          ),
-        ),
-        const SizedBox(width: 12),
+    const SizedBox(width: 12),
         Expanded(
           child: _QuickActionButton(
             icon: Icons.store_outlined,

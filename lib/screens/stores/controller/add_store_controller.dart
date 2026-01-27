@@ -12,8 +12,7 @@ class AddStoreController extends ChangeNotifier {
   final ImagePicker picker = ImagePicker();
 
   // Dropdown values
-  String? storeType;
-  final storeTypes = ['Retail', 'Wholesale', 'Online'];
+
 
   // Images
   final List<XFile> storeImages = [];
@@ -21,6 +20,43 @@ class AddStoreController extends ChangeNotifier {
   XFile? registrationCertImage;
 
   bool submitting = false;
+  String? storeType; // will store "1", "2", "3"
+
+  final storeTypes = const [
+    {'label': 'Retail', 'value': '1'},
+    {'label': 'Online', 'value': '2'},
+    {'label': 'Wholesale', 'value': '3'},
+  ];
+  bool selfPickup = false;
+  bool deliveryBySeller = true;
+  TimeOfDay? openingTime;
+  TimeOfDay? closingTime;
+
+  Future<void> pickTime(
+      BuildContext context,
+      bool isOpening,
+      ) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      if (isOpening) {
+        openingTime = picked;
+      } else {
+        closingTime = picked;
+      }
+      notifyListeners();
+    }
+  }
+
+  String _workingHoursString() {
+    if (openingTime == null || closingTime == null) return '';
+    return '${openingTime!.hour}:${openingTime!.minute.toString().padLeft(2, '0')}'
+        ' - '
+        '${closingTime!.hour}:${closingTime!.minute.toString().padLeft(2, '0')}';
+  }
+
 
   // ---------------- Image Compression ----------------
   Future<XFile?> compressImage(XFile file) async {
@@ -134,12 +170,13 @@ class AddStoreController extends ChangeNotifier {
         'country': 'india',
         'city': city,
         'address': address,
-        'type': storeType ?? '1',
-        'delivery_by_seller': '1',
-        'self_pickup': '0',
+        'type': storeType!, // 🔥 FIXED
         'description': description,
-        'working_hours': '9 AM - 6 PM',
+    'self_pickup': selfPickup ? '1' : '0',
+    'delivery_by_seller': deliveryBySeller ? '1' : '0',
+    'working_hours': _workingHoursString(),
       },
+
       files: files,
     );
 
@@ -148,6 +185,11 @@ class AddStoreController extends ChangeNotifier {
 
     if (res['success'] == true || res['status'] == true) {
       Fluttertoast.showToast(msg: "Store created successfully 🎉");
+      // Go back to previous screen and notify it to refresh
+      Future.delayed(const Duration(milliseconds: 300), () {
+        Navigator.of(formKey.currentContext!).pop(true);
+      });
+      // Navigator.pop(context);
     } else {
       Fluttertoast.showToast(msg: res['message'] ?? "Failed to create store");
     }

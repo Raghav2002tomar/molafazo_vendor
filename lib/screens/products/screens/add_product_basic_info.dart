@@ -221,6 +221,7 @@ class AddProductBasicInfo extends StatelessWidget {
                       },
                       child: const Text('Next'),
                     ),
+                    SizedBox(height: 50,)
                   ],
                 ),
               ),

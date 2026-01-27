@@ -38,28 +38,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final token = prefs.getString("api_token");
 
       if (token != null) {
-        // Fetch fresh profile data from API
+        // Fetch latest profile data from API
         final res = await ApiService.get(endpoint: "/get-profile", token: token);
-        if (res["success"] == true) {
-          _userData = res["data"];
-          _userName = _userData?["name"];
-          _statusId = _userData?["status_id"];
-          _profilePhotoUrl = _userData?["profile_photo"];
-          await _saveUserData(_userData!);
-        }
 
+        if (res["success"] == true && res["data"] != null) {
+          // Save and update SharedPreferences + UI
+          await _saveUserData(res["data"]);
+        } else {
+          // API failed, fallback to local storage
+          await _loadLocalData();
+        }
       } else {
-        // Fallback to local data if no token
+        // No token, fallback
         await _loadLocalData();
       }
     } catch (e) {
       print("Error loading profile: $e");
-      // Load from local storage on error
       await _loadLocalData();
     }
 
     setState(() => _isLoading = false);
   }
+
 
   Future<void> _loadLocalData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -77,29 +77,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _saveUserData(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
 
+    // Save complete user data
     await prefs.setString("user", jsonEncode(userData));
 
-    if (userData["id"] != null) {
-      await prefs.setInt("user_id", int.tryParse(userData["id"].toString()) ?? 0);
-    }
-    if (userData["name"] != null) {
-      await prefs.setString("user_name", userData["name"].toString());
-    }
-    if (userData["email"] != null) {
-      await prefs.setString("user_email", userData["email"].toString());
-    }
-    if (userData["mobile"] != null) {
-      await prefs.setString("user_mobile", userData["mobile"].toString());
-    }
-    if (userData["profile_photo"] != null) {
-      await prefs.setString("user_profile_photo", userData["profile_photo"].toString());
-    }
-    if (userData["status_id"] != null) {
-      await prefs.setString("user_status_id", userData["status_id"].toString());
-    }
-    if (userData["city"] != null) {
-      await prefs.setString("user_city", userData["city"].toString());
-    }
+    // Save individual fields
+    await prefs.setInt("user_id", int.tryParse(userData["id"].toString()) ?? 0);
+    await prefs.setString("user_name", userData["name"]?.toString() ?? '');
+    await prefs.setString("user_email", userData["email"]?.toString() ?? '');
+    await prefs.setString("user_mobile", userData["mobile"]?.toString() ?? '');
+    await prefs.setString("user_profile_photo", userData["profile_photo"]?.toString() ?? '');
+    await prefs.setString("user_status_id", userData["status_id"]?.toString() ?? '');
+    await prefs.setString("user_city", userData["city"]?.toString() ?? '');
+
+    // Mark user as logged in
+    await prefs.setBool("is_logged_in", true);
+
+    // 🔹 Update UI state immediately
+    setState(() {
+      _userData = userData;
+      _userName = userData["name"] ?? 'User';
+      _userMobile = userData["mobile"] ?? '';
+      _profilePhotoUrl = userData["profile_photo"];
+      _statusId = userData["status_id"] ?? 0;
+    });
+
+    print("✅ User data saved and state updated");
   }
 
   bool get _isProfileIncomplete {

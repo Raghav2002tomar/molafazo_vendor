@@ -33,6 +33,8 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
 
         if (res["success"] == true) {
           _profileData = res["data"];
+          await _saveUserData(res["data"]);
+
         } else {
           // Optional: fallback to local storage
           final localData = prefs.getString("user");
@@ -44,6 +46,29 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
     }
 
     setState(() => _isLoading = false);
+  }
+  Future<void> _saveUserData(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Save complete user data
+    await prefs.setString("user", jsonEncode(userData));
+
+    // Save individual fields
+    await prefs.setInt("user_id", int.tryParse(userData["id"].toString()) ?? 0);
+    await prefs.setString("user_name", userData["name"]?.toString() ?? '');
+    await prefs.setString("user_email", userData["email"]?.toString() ?? '');
+    await prefs.setString("user_mobile", userData["mobile"]?.toString() ?? '');
+    await prefs.setString("user_profile_photo", userData["profile_photo"]?.toString() ?? '');
+    await prefs.setString("user_status_id", userData["status_id"]?.toString() ?? '');
+    await prefs.setString("user_city", userData["city"]?.toString() ?? '');
+
+    // Mark user as logged in
+    await prefs.setBool("is_logged_in", true);
+
+    // 🔹 Update UI state immediately
+
+
+    print("✅ User data saved and state updated");
   }
 
   String _getValue(String key) {

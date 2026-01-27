@@ -227,6 +227,8 @@ class AddProductMediaInfo extends StatelessWidget {
                   },
                   child: const Text('Submit Product'),
                 ),
+                SizedBox(height: 50,)
+
               ],
             ),
           ),

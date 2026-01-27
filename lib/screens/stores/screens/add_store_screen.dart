@@ -1,11 +1,35 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import '../controller/add_store_controller.dart';
 
-class AddStoreScreen extends StatelessWidget {
+class AddStoreScreen extends StatefulWidget {
   const AddStoreScreen({super.key});
 
+  @override
+  State<AddStoreScreen> createState() => _AddStoreScreenState();
+}
+
+class _AddStoreScreenState extends State<AddStoreScreen> {
+  final nameCtrl = TextEditingController();
+
+  final mobileCtrl = TextEditingController();
+
+  final emailCtrl = TextEditingController();
+
+  final addressCtrl = TextEditingController();
+
+  final descCtrl = TextEditingController();
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    mobileCtrl.dispose();
+    emailCtrl.dispose();
+    addressCtrl.dispose();
+    descCtrl.dispose();
+    super.dispose();
+  }
   InputDecoration _decoration(String label, {IconData? icon}) {
     return InputDecoration(
       hintText: label,
@@ -51,11 +75,7 @@ class AddStoreScreen extends StatelessWidget {
         builder: (context, c, _) {
           final theme = Theme.of(context);
 
-          final nameCtrl = TextEditingController();
-          final mobileCtrl = TextEditingController();
-          final emailCtrl = TextEditingController();
-          final addressCtrl = TextEditingController();
-          final descCtrl = TextEditingController();
+
 
           return Scaffold(
             backgroundColor: Colors.white,
@@ -113,16 +133,66 @@ class AddStoreScreen extends StatelessWidget {
                     label('Store Type *'),
 
                     DropdownButtonFormField<String>(
-                      decoration: _decoration('Store Type *',
-                          icon: Icons.category),
                       value: c.storeType,
-                      items: c.storeTypes
-                          .map((e) => DropdownMenuItem(
-                          value: e, child: Text(e)))
-                          .toList(),
-                      onChanged: (v) => c.storeType = v,
+                      decoration: inputDec('Store Type'),
+                      items: c.storeTypes.map((e) {
+                        return DropdownMenuItem<String>(
+                          value: e['value'],
+                          child: Text(e['label']!),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        c.storeType = v;
+                        c.notifyListeners();
+                      },
                       validator: (v) => v == null ? 'Required' : null,
                     ),
+                    SwitchListTile(
+                      title: const Text('Self Pickup'),
+                      value: c.selfPickup,
+                      onChanged: (v) {
+                        c.selfPickup = v;
+                        c.notifyListeners();
+                      },
+                    ),
+
+                    SwitchListTile(
+                      title: const Text('Delivery By Seller'),
+                      value: c.deliveryBySeller,
+                      onChanged: (v) {
+                        c.deliveryBySeller = v;
+                        c.notifyListeners();
+                      },
+                    ),
+                    SizedBox(height: 8,),
+                    label('Store Timing *'),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => c.pickTime(context, true),
+                            child: Text(
+                              c.openingTime == null
+                                  ? 'Opening Time'
+                                  : c.openingTime!.format(context),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => c.pickTime(context, false),
+                            child: Text(
+                              c.closingTime == null
+                                  ? 'Closing Time'
+                                  : c.closingTime!.format(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
 
                     _sectionTitle('Store Images', context),
                     OutlinedButton.icon(
@@ -191,27 +261,28 @@ class AddStoreScreen extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     FilledButton(
-                      onPressed: () {
+                      onPressed: c.submitting
+                          ? null
+                          : () async {
                         if (!c.formKey.currentState!.validate()) return;
+
                         if (c.storeProofImage == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                Text('Store proof is required')),
-                          );
+                          Fluttertoast.showToast(msg: 'Store proof is required');
                           return;
                         }
 
-                        c?.submitStore(
-                          name: nameCtrl.text,
-                          mobile: mobileCtrl.text,
-                          email: emailCtrl.text,
-                          address: addressCtrl.text,
-                          description: descCtrl.text,
-                          city: descCtrl.text
+                        await c.submitStore(
+                          name: nameCtrl.text.trim(),
+                          mobile: mobileCtrl.text.trim(),
+                          email: emailCtrl.text.trim(),
+                          address: addressCtrl.text.trim(),
+                          description: descCtrl.text.trim(),
+                          city: addressCtrl.text.trim(),
                         );
                       },
-                      child: const Text('Submit Store'),
+                      child: c.submitting
+                          ? const CircularProgressIndicator()
+                          : const Text('Submit Store'),
                     ),
                     SizedBox(height: 50,)
                   ],
@@ -223,6 +294,7 @@ class AddStoreScreen extends StatelessWidget {
       ),
     );
   }
+
   InputDecoration inputDec(String hint) {
     return InputDecoration(
       hintText: hint,

@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/screens/products/screens/add_product_basic_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../widgets/profile_not_eligible_widget.dart';
 import '../products/screens/product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -10,6 +15,77 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
+
+
+
+
+  String username = 'User';
+  String profilestatus = '';
+  String email = '';
+
+  bool get _isProfileIncomplete {
+    // Simple check based on profilestatus
+    return email.isEmpty || email == null;
+  }
+
+  String get _profileStatusMessage {
+    if (_isProfileIncomplete) {
+      return "Complete your profile";
+    } else if (profilestatus == '2') {
+      return "Profile under review";
+    } else if (profilestatus == '1') {
+      return "Profile approved ✓";
+    }
+    return "";
+  }
+
+  Color get _profileStatusColor {
+    if (_isProfileIncomplete) return Colors.red;
+    if (profilestatus == '2') return Colors.orange;
+    if (profilestatus == '1') return Colors.green;
+    return Colors.grey;
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    fetechuserdata();
+    super.initState();
+  }
+
+  Future<void> fetechuserdata() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString('user'); // Get the saved JSON string
+    if (userJson != null) {
+      final userData = jsonDecode(userJson); // Convert JSON string to Map
+      setState(() {
+        username = userData['name'] ?? 'User';
+        username = userData['email'] ?? '';
+        profilestatus = userData['status_id']?.toString() ?? '';
+      });
+      print("✅ User loaded: $username, status: $profilestatus");
+    } else {
+      // Fallback default values
+      setState(() {
+        username = 'User';
+        profilestatus = '';
+      });
+    }
+  }
+  void _showTopToast(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.black87,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
+      duration: const Duration(seconds: 2),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+
+
   /// ---------------- STORE LIST ----------------
   final List<String> stores = [
     'All',
@@ -275,23 +351,75 @@ class _ProductListScreenState extends State<ProductListScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        // elevation: 0,
         title: const Text('Products'),
+        actions: [
+          InkWell(onTap: (){
+            // Check profile status before navigating
+            if (profilestatus == '1') {
+              // Profile approved ✅
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddProductBasicInfo()),
+              );
+            }else if (email.isEmpty || email == null) {
+              // Profile incomplete 🔴
+              _showTopToast(context, "Complete your profile to add products.");
+            }
+            else if (profilestatus == '2') {
+              // Profile under review 🟠
+              _showTopToast(context, "Your profile is under review. Please wait for approval.");
+            }
+          },
+            child: Container(decoration: BoxDecoration(
+              border: Border.all(),
+              borderRadius: BorderRadius.circular(8)
+            ), child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Icon(Icons.add),
+
+                ],
+              ),
+            ),),
+          ),
+          SizedBox(width: 16,)
+        ],
       ),
-      body: Column(
+      body: (profilestatus != '1')
+          ? ProfileNotEligibleWidget(
+        title: email.isEmpty || email == null
+            ? "Profile incomplete"
+            : profilestatus == '2'
+            ? "Profile under review"
+            : "Access restricted",
+        subtitle: email.isEmpty || email == null
+            ? "Complete your profile to access products."
+            : profilestatus == '2'
+            ? "Your profile is under review. Please wait for approval."
+            : "Your profile cannot access this section.",
+        onUpdateTap: (email.isEmpty || email == null)
+            ? () {
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (_) => EditProfileScreen(),
+          //   ),
+          // );
+        }
+            : null, // ❌ Hide button if under review
+      )
+
+          : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // SizedBox(height: 50,),
-          // Row(mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //   Text('Products',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
-          // ],),
           /// STORE FILTER
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 0, 12),
             child: const Text(
               'Stores',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
 
@@ -312,8 +440,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 ? const Center(
               child: Text(
                 "No products available",
-                style:
-                TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w500),
               ),
             )
                 : GridView.builder(

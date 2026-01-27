@@ -156,7 +156,7 @@ class _PhoneSignupView extends StatelessWidget {
                         case SignupStep.phoneOtp:
                           if (!c.otpSent) {
                             // Send OTP
-                            await c.sendOtp();
+                            await c.sendOtp(context);
                           } else {
                             // Verify OTP
                             await c.verifyOtp();
@@ -231,7 +231,7 @@ class _PhoneOtpStep extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController phoneCtrl;
   final TextEditingController otpCtrl;
-  final Future<void> Function() sendOtp;
+  final Future<void> Function(BuildContext context) sendOtp;
   final Future<void> Function() verifyOtp;
 
   const _PhoneOtpStep({
@@ -402,7 +402,7 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
                   TextButton(
                     onPressed: _resendCountdown == 0
                         ? () async {
-                      await widget.sendOtp();
+                      await widget.sendOtp(context);
                       startResendCountdown();
                     }
                         : null,
