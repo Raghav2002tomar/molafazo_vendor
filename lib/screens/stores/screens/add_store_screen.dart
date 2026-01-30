@@ -240,15 +240,49 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                         ),
                       ),
 
-                    _sectionTitle('Store Proof *', context),
+                    _sectionTitle('Store Logo *', context),
                     c.storeProofImage == null
                         ? OutlinedButton.icon(
                       icon: const Icon(Icons.upload_file),
-                      label: const Text('Upload Proof'),
+                      label: const Text('Upload Logo'),
                       onPressed: c.pickStoreProofImage,
                     )
                         : Image.file(File(c.storeProofImage!.path),
                         height: 160, fit: BoxFit.cover),
+                    _sectionTitle('Government ID / Registration Certificate *', context),
+
+                    c.registrationCertImage == null
+                        ? OutlinedButton.icon(
+                      icon: const Icon(Icons.badge),
+                      label: const Text('Upload Registration Certificate'),
+                      onPressed: c.pickRegistrationCertImage,
+                    )
+                        : Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            File(c.registrationCertImage!.path),
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 6,
+                          right: 6,
+                          child: InkWell(
+                            onTap: c.clearRegistrationCert,
+                            child: const CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.red,
+                              child: Icon(Icons.close,
+                                  size: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
                     _sectionTitle('Store Description', context),
                     TextFormField(

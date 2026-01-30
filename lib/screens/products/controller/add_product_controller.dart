@@ -3,14 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../services/api_service.dart';
+import '../../profile/screens/store_list_screen.dart';
+import '../model/attribute_model.dart';
+import '../model/category_model.dart';
 
 class AddProductController extends ChangeNotifier {
   final formKeyBasic = GlobalKey<FormState>();
   final formKeyMedia = GlobalKey<FormState>();
   final picker = ImagePicker();
+  List<StoreModel> stores = [];
+  StoreModel? selectedStore;
+  List<AttributeModel> attributes = [];
+  Map<String, String?> selectedAttributes = {};
+  bool loadingAttributes = false;
+
+  bool loadingStores = false;
+  Category? selectedCategory;
+  SubCategory? selectedSubCategory;
+  ChildCategory? selectedChildCategory;
+
+  /// Lists
+  List<Category> categories = [];
+  List<SubCategory> subCategories = [];
+  List<ChildCategory> childCategories = [];
+
+  bool loadingCategory = false;
+  bool loadingSubCategory = false;
+  bool loadingChildCategory = false;
 
   /// Page 1: Basic Info
-  String? selectedStore;
   String? category;
   String? subCategory;
   String? childCategory;
@@ -19,9 +43,9 @@ class AddProductController extends ChangeNotifier {
   String? size;
 
   final approvedStores = ['Store A', 'Store B'];
-  final categories = ['Electronics', 'Fashion'];
-  final subCategories = ['Mobiles', 'Clothing'];
-  final childCategories = ['Smartphones', 'T-Shirts'];
+  // final categories = ['Electronics', 'Fashion'];
+  // final subCategories = ['Mobiles', 'Clothing'];
+  // final childCategories = ['Smartphones', 'T-Shirts'];
   final brands = ['Brand X', 'Brand Y'];
   final colors = ['Red', 'Blue', 'Black'];
   final sizes = ['S', 'M', 'L', 'XL'];
@@ -66,6 +90,135 @@ class AddProductController extends ChangeNotifier {
     }
     notifyListeners();
   }
+  Future<void> fetchAttributes(int childCategoryId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    loadingAttributes = true;
+    attributes.clear();
+    selectedAttributes.clear();
+    notifyListeners();
+
+    try {
+      final res = await ApiService.get(
+        endpoint: '/vendor/attributes/$childCategoryId',
+        token: token,
+      );
+
+      attributes = (res['data'] as List)
+          .map((e) => AttributeModel.fromJson(e))
+          .toList();
+
+      // 👇 initialize selection map (IMPORTANT)
+      for (final attr in attributes) {
+        selectedAttributes[attr.name] = null;
+      }
+    } catch (e) {
+      debugPrint('Attribute error: $e');
+    }
+
+    loadingAttributes = false;
+    notifyListeners(); // 🔥 REQUIRED
+  }
+
+  Future<void> fetchStores() async {
+    loadingStores = true;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+
+    if (token == null) {
+      loadingStores = false;
+      notifyListeners();
+      return;
+    }
+
+    final res = await ApiService.get(
+      endpoint: '/vendor/store/list',
+      token: token,
+    );
+
+    if (res['success'] == true) {
+      stores = (res['data'] as List)
+          .map((e) => StoreModel.fromJson(e))
+          .toList();
+    } else {
+      stores = [];
+    }
+
+    loadingStores = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    loadingCategory = true;
+    notifyListeners();
+
+    final res = await ApiService.get(
+      endpoint: "/vendor/categories",
+      token: token,
+    );
+
+    if (res["success"]) {
+      categories = (res["data"] as List)
+          .map((e) => Category.fromJson(e))
+          .toList();
+    }
+
+    loadingCategory = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchSubCategories(int categoryId, ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    loadingSubCategory = true;
+    subCategories.clear();
+    childCategories.clear();
+    selectedSubCategory = null;
+    selectedChildCategory = null;
+    notifyListeners();
+
+    final res = await ApiService.get(
+      endpoint: "/vendor/subcategories/$categoryId",
+      token: token,
+    );
+
+    if (res["success"]) {
+      subCategories = (res["data"] as List)
+          .map((e) => SubCategory.fromJson(e))
+          .toList();
+    }
+
+    loadingSubCategory = false;
+    notifyListeners();
+  }
+
+  Future<void> fetchChildCategories(int subCategoryId, ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    loadingChildCategory = true;
+    childCategories.clear();
+    selectedChildCategory = null;
+    notifyListeners();
+
+    final res = await ApiService.get(
+      endpoint: "/vendor/child-categories/$subCategoryId",
+      token: token,
+    );
+
+    if (res["success"]) {
+      childCategories = (res["data"] as List)
+          .map((e) => ChildCategory.fromJson(e))
+          .toList();
+    }
+
+    loadingChildCategory = false;
+    notifyListeners();
+  }
+
 
   /// Compress image
   Future<XFile?> compress(XFile file) async {
@@ -95,31 +248,76 @@ class AddProductController extends ChangeNotifier {
   }
 
   /// Submit: Print all data
-  void submitProduct() {
-    debugPrint('---------- PRODUCT DATA ----------');
-    debugPrint('Store: $selectedStore');
-    debugPrint('Category: $category > $subCategory > $childCategory');
-    debugPrint('Brand: $brand');
-    debugPrint('Color: $color');
-    debugPrint('Size: $size');
-    debugPrint('Name: ${nameController.text}');
-    debugPrint('SKU: ${skuController.text}');
-    debugPrint('Price: ${priceController.text}');
-    debugPrint('Discount: ${discountController.text}');
-    debugPrint('Quantity: ${qtyController.text}');
-    debugPrint('Description: ${descController.text}');
-    debugPrint('Tags: ${tagsController.text}');
-    debugPrint('Weight: ${weightController.text}');
-    debugPrint('Dimensions: ${dimensionsController.text}');
-    debugPrint('Warranty: ${warrantyController.text}');
-    debugPrint('SEO Meta: ${seoController.text}');
-    debugPrint('Images Count: ${productImages.length}');
-    if (thumbnailIndex != null) debugPrint('Thumbnail Image: ${productImages[thumbnailIndex!].path}');
-    debugPrint('Status: Pending (Admin Approval)');
-    debugPrint('----------------------------------');
-    debugPrint(
-        'Thumbnail Image: ${thumbnailImage?.path ?? "Not selected"}'
-    );
+  Future<ApiResult> submitProduct() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('api_token');
+
+      if (token == null) {
+        return ApiResult(
+          success: false,
+          message: "Authentication token missing",
+        );
+      }
+
+      final Map<String, String> fields = {
+        "store_id": selectedStore!.id.toString(),
+        "category_id": selectedCategory!.id.toString(),
+        "sub_category_id": selectedSubCategory!.id.toString(),
+        "name": nameController.text.trim(),
+        "description": descController.text.trim(),
+        "price": priceController.text.trim(),
+        "discount_price": discountController.text.trim(),
+        "available_quantity": qtyController.text.trim(),
+        "delivery_available": "1",
+        "delivery_price": "10",
+        "delivery_time": "2-3 Days",
+      };
+
+      /// Tags
+      for (final tag in tagsController.text.split(',')) {
+        if (tag.trim().isNotEmpty) {
+          fields["tags[]"] = tag.trim();
+        }
+      }
+
+      /// Attributes
+      selectedAttributes.forEach((key, value) {
+        if (value != null && value.isNotEmpty) {
+          fields["attributes_json[$key][]"] = value;
+        }
+      });
+
+      /// Images
+      final Map<String, File> files = {};
+      for (int i = 0; i < productImages.length; i++) {
+        files["images[$i]"] = File(productImages[i].path);
+      }
+
+      final response = await ApiService.multipart(
+        endpoint: "/vendor/product/create",
+        fields: fields,
+        files: files,
+        token: token,
+      );
+
+      if (response["success"] == true) {
+        return ApiResult(
+          success: true,
+          message: response["message"] ?? "Product added successfully",
+        );
+      } else {
+        return ApiResult(
+          success: false,
+          message: response["message"] ?? "Something went wrong",
+        );
+      }
+    } catch (e) {
+      return ApiResult(
+        success: false,
+        message: "Error: ${e.toString()}",
+      );
+    }
   }
 
   void disposeAll() {
@@ -135,4 +333,10 @@ class AddProductController extends ChangeNotifier {
     warrantyController.dispose();
     seoController.dispose();
   }
+}
+class ApiResult {
+  final bool success;
+  final String message;
+
+  ApiResult({required this.success, required this.message});
 }

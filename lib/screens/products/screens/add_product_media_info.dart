@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../profile/screens/store_list_screen.dart';
 import '../controller/add_product_controller.dart';
 
 class AddProductMediaInfo extends StatelessWidget {
@@ -212,18 +213,43 @@ class AddProductMediaInfo extends StatelessWidget {
 
                 // ---------- SUBMIT ----------
                 FilledButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (controller.thumbnailImage == null ||
                         controller.productImages.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Images required')),
+                        const SnackBar(content: Text('Images required')),
                       );
                       return;
                     }
 
-                    controller.submitProduct();
-                    Navigator.popUntil(context, (r) => r.isFirst);
+                    final result = await controller.submitProduct();
+
+                    if (!context.mounted) return;
+
+                    if (result.success) {
+                      // ✅ SUCCESS
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(result.message),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+
+                      // 👉 Navigate to Store List / Product List
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/dashboard',
+                            (_) => false,
+                      );
+                    } else {
+                      // ❌ ERROR
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(result.message),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   },
                   child: const Text('Submit Product'),
                 ),

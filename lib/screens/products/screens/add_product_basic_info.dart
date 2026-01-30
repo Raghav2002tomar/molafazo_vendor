@@ -1,20 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../profile/screens/store_list_screen.dart';
 import '../controller/add_product_controller.dart';
+import '../model/category_model.dart';
 import 'add_product_media_info.dart';
 
-class AddProductBasicInfo extends StatelessWidget {
+class AddProductBasicInfo extends StatefulWidget {
   const AddProductBasicInfo({super.key});
+
+  @override
+  State<AddProductBasicInfo> createState() => _AddProductBasicInfoState();
+}
+
+class _AddProductBasicInfoState extends State<AddProductBasicInfo> {
+  late final AddProductController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AddProductController();
+    controller.fetchStores();
+    controller.fetchCategories();
+  }
+
+  @override
+  void dispose() {
+    controller.disposeAll();
+    controller.dispose();
+    super.dispose();
+  }
 
   InputDecoration inputDec(String hint) {
     return InputDecoration(
       hintText: hint,
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 14,
-      ),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -34,8 +57,6 @@ class AddProductBasicInfo extends StatelessWidget {
     );
   }
 
-
-
   Widget label(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
     child: Text(
@@ -46,16 +67,16 @@ class AddProductBasicInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return ChangeNotifierProvider(
-      create: (_) => AddProductController(),
+    return ChangeNotifierProvider.value(
+      value: controller,
       child: Consumer<AddProductController>(
         builder: (context, c, _) {
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
-                backgroundColor: Colors.white,
-                title: const Text('Add Product – Basic Info')),
+              backgroundColor: Colors.white,
+              title: const Text('Add Product – Basic Info'),
+            ),
             body: Form(
               key: c.formKeyBasic,
               child: SingleChildScrollView(
@@ -63,100 +84,142 @@ class AddProductBasicInfo extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     /// Store
                     label('Select Approved Store *'),
-                    DropdownButtonFormField(
-
+                    DropdownButtonFormField<StoreModel>(
                       decoration: inputDec('Choose store'),
-                      value: c.selectedStore,
-                      items: c.approvedStores
-                          .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
+                      value: c.stores.contains(c.selectedStore)
+                          ? c.selectedStore
+                          : null,
+                      items: c.stores
+                          .map(
+                            (store) => DropdownMenuItem(
+                          value: store,
+                          child: Text(store.name),
+                        ),
+                      )
                           .toList(),
                       onChanged: (v) => c.selectedStore = v,
                       validator: (v) => v == null ? 'Required' : null,
                     ),
+
                     const SizedBox(height: 16),
 
                     /// Category
                     label('Category *'),
-                    DropdownButtonFormField(
+                    DropdownButtonFormField<Category>(
                       decoration: inputDec('Select category'),
-                      value: c.category,
+                      value: c.categories.contains(c.selectedCategory)
+                          ? c.selectedCategory
+                          : null,
                       items: c.categories
-                          .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
+                          .map(
+                            (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e.name),
+                        ),
+                      )
                           .toList(),
-                      onChanged: (v) => c.category = v,
+                      onChanged: (v) {
+                        if (v == null) return;
+                        c.selectedCategory = v;
+                        c.fetchSubCategories(v.id);
+                      },
                       validator: (v) => v == null ? 'Required' : null,
                     ),
+
                     const SizedBox(height: 16),
 
+                    /// Subcategory
                     label('Subcategory *'),
-                    DropdownButtonFormField(
+                    DropdownButtonFormField<SubCategory>(
                       decoration: inputDec('Select subcategory'),
-                      value: c.subCategory,
+                      value: c.subCategories.contains(c.selectedSubCategory)
+                          ? c.selectedSubCategory
+                          : null,
                       items: c.subCategories
-                          .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
+                          .map(
+                            (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e.name),
+                        ),
+                      )
                           .toList(),
-                      onChanged: (v) => c.subCategory = v,
+                      onChanged: (v) {
+                        if (v == null) return;
+                        c.selectedSubCategory = v;
+                        c.fetchChildCategories(v.id);
+                      },
                       validator: (v) => v == null ? 'Required' : null,
                     ),
+
                     const SizedBox(height: 16),
 
+                    /// Child category
                     label('Sub-Child Category *'),
-                    DropdownButtonFormField(
+                    DropdownButtonFormField<ChildCategory>(
                       decoration: inputDec('Select child category'),
-                      value: c.childCategory,
+                      value:
+                      c.childCategories.contains(c.selectedChildCategory)
+                          ? c.selectedChildCategory
+                          : null,
                       items: c.childCategories
-                          .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
+                          .map(
+                            (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e.name),
+                        ),
+                      )
                           .toList(),
-                      onChanged: (v) => c.childCategory = v,
+                      onChanged: (v) {
+                        if (v == null) return;
+                        c.selectedChildCategory = v;
+                        c.fetchAttributes(v.id);
+                      },
                       validator: (v) => v == null ? 'Required' : null,
                     ),
+
                     const SizedBox(height: 16),
 
-                    /// Optional dropdowns
-                    label('Brand'),
-                    DropdownButtonFormField(
-                      decoration: inputDec('Select brand'),
-                      value: c.brand,
-                      items: c.brands
-                          .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
-                          .toList(),
-                      onChanged: (v) => c.brand = v,
-                    ),
-                    const SizedBox(height: 16),
+                    /// Attributes loader
+                    if (c.loadingAttributes)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
 
-                    label('Color'),
-                    DropdownButtonFormField(
-                      decoration: inputDec('Select color'),
-                      value: c.color,
-                      items: c.colors
-                          .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
-                          .toList(),
-                      onChanged: (v) => c.color = v,
-                    ),
-                    const SizedBox(height: 16),
+                    /// Dynamic attributes
+                    ...c.attributes.map((attr) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          label(attr.name.toUpperCase()),
+                          DropdownButtonFormField<String>(
+                            decoration:
+                            inputDec('Select ${attr.name.toLowerCase()}'),
+                            value: attr.values.contains(
+                                c.selectedAttributes[attr.name])
+                                ? c.selectedAttributes[attr.name]
+                                : null,
+                            items: attr.values
+                                .map(
+                                  (v) => DropdownMenuItem(
+                                value: v,
+                                child: Text(v),
+                              ),
+                            )
+                                .toList(),
+                            onChanged: (v) =>
+                            c.selectedAttributes[attr.name] = v,
+                            validator: (v) =>
+                            v == null ? 'Required' : null,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    }),
 
-                    label('Size'),
-                    DropdownButtonFormField(
-                      decoration: inputDec('Select size'),
-                      value: c.size,
-                      items: c.sizes
-                          .map((e) =>
-                          DropdownMenuItem(value: e, child: Text(e)))
-                          .toList(),
-                      onChanged: (v) => c.size = v,
-                    ),
-                    const SizedBox(height: 16),
-
-                    /// Text fields
+                    /// Product info
                     label('Product Name *'),
                     TextFormField(
                       controller: c.nameController,
@@ -211,6 +274,7 @@ class AddProductBasicInfo extends StatelessWidget {
                     FilledButton(
                       onPressed: () {
                         if (!c.formKeyBasic.currentState!.validate()) return;
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -221,7 +285,8 @@ class AddProductBasicInfo extends StatelessWidget {
                       },
                       child: const Text('Next'),
                     ),
-                    SizedBox(height: 50,)
+
+                    const SizedBox(height: 50),
                   ],
                 ),
               ),

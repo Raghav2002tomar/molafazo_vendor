@@ -134,7 +134,12 @@ class AddStoreController extends ChangeNotifier {
     required String description,
   }) async {
     if (storeProofImage == null) {
-      Fluttertoast.showToast(msg: "Store proof image is required");
+      Fluttertoast.showToast(msg: "Store logo is required");
+      return;
+    }
+
+    if (registrationCertImage == null) {
+      Fluttertoast.showToast(msg: "Government ID is required");
       return;
     }
 
@@ -151,11 +156,16 @@ class AddStoreController extends ChangeNotifier {
       return;
     }
 
-    // Prepare files for upload
-    Map<String, File> files = {};
-    if (storeProofImage != null) files['logi'] = File(storeProofImage!.path);
-    if (registrationCertImage != null) files['registration_certificate'] = File(registrationCertImage!.path);
-    // Optional: Upload multiple store images
+    /// FILES
+    final Map<String, File> files = {};
+
+    /// ✅ LOGO
+    files['logo'] = File(storeProofImage!.path);
+
+    /// ✅ GOVERNMENT ID (multiple)
+    files['government_id[0]'] = File(registrationCertImage!.path);
+
+    /// Optional store images
     for (int i = 0; i < storeImages.length; i++) {
       files['store_images[$i]'] = File(storeImages[i].path);
     }
@@ -170,28 +180,26 @@ class AddStoreController extends ChangeNotifier {
         'country': 'india',
         'city': city,
         'address': address,
-        'type': storeType!, // 🔥 FIXED
+        'type': storeType!,                // "1" / "2" / "3"
+        'delivery_by_seller': deliveryBySeller ? '1' : '0',
+        'self_pickup': selfPickup ? '1' : '0',
         'description': description,
-    'self_pickup': selfPickup ? '1' : '0',
-    'delivery_by_seller': deliveryBySeller ? '1' : '0',
-    'working_hours': _workingHoursString(),
+        'working_hours': _workingHoursString(),
       },
-
       files: files,
     );
 
     submitting = false;
     notifyListeners();
 
-    if (res['success'] == true || res['status'] == true) {
+    if (res['status'] == true || res['success'] == true) {
       Fluttertoast.showToast(msg: "Store created successfully 🎉");
-      // Go back to previous screen and notify it to refresh
-      Future.delayed(const Duration(milliseconds: 300), () {
-        Navigator.of(formKey.currentContext!).pop(true);
-      });
-      // Navigator.pop(context);
+      Navigator.of(formKey.currentContext!).pop(true);
     } else {
-      Fluttertoast.showToast(msg: res['message'] ?? "Failed to create store");
+      Fluttertoast.showToast(
+        msg: res['message'] ?? "Failed to create store",
+      );
     }
   }
+
 }
