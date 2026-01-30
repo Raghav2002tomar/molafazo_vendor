@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
+import '../products/controller/add_product_controller.dart';
 import 'ChatTab.dart';
 import 'DashboardTab.dart';
 import 'ListTab.dart';
@@ -24,8 +26,12 @@ class _MainBottombarScreenState extends State<MainBottombarScreen> {
     // Pages for bottom navigation
     final pages = [
       DashboardTab(),
-      ProductListScreen(),
-      OrderListScreen(),
+      ChangeNotifierProvider(
+        create: (_) => AddProductController()
+          ..fetchStores()
+          ..fetchProducts(),
+        child: const ProductListScreen(),
+      ),      OrderListScreen(),
       ChatListScreen(),  // New tab at index 3
       ProfileScreen(),
     ];

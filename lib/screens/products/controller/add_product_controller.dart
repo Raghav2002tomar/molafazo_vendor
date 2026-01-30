@@ -9,6 +9,7 @@ import '../../../services/api_service.dart';
 import '../../profile/screens/store_list_screen.dart';
 import '../model/attribute_model.dart';
 import '../model/category_model.dart';
+import '../model/product_model.dart';
 
 class AddProductController extends ChangeNotifier {
   final formKeyBasic = GlobalKey<FormState>();
@@ -33,6 +34,12 @@ class AddProductController extends ChangeNotifier {
   bool loadingCategory = false;
   bool loadingSubCategory = false;
   bool loadingChildCategory = false;
+
+
+
+  List<ProductModel> products = [];
+  List<ProductModel> filteredProducts = [];
+  bool loadingProducts = false;
 
   /// Page 1: Basic Info
   String? category;
@@ -246,6 +253,47 @@ class AddProductController extends ChangeNotifier {
     thumbnailIndex = index;
     notifyListeners();
   }
+
+  Future<void> fetchProducts({int? storeId}) async {
+    loadingProducts = true;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+
+    if (token == null) {
+      loadingProducts = false;
+      notifyListeners();
+      return;
+    }
+
+    final res = await ApiService.get(
+      endpoint: '/vendor/product/list',
+      token: token,
+    );
+
+    if (res['status'] == true) {
+      products = (res['data'] as List)
+          .map((e) => ProductModel.fromJson(e))
+          .toList();
+      filteredProducts = products;
+      // 🔹 Store-based filter
+      // if (storeId != null) {
+      //   filteredProducts =
+      //       products.where((p) => p.storeId == storeId).toList();
+      // } else {
+      //   filteredProducts = products;
+      // }
+    }
+
+    loadingProducts = false;
+    notifyListeners();
+  }
+  void filterProductsByStore(StoreModel? store) {
+    selectedStore = store;
+    fetchProducts(storeId: store?.id);
+  }
+
 
   /// Submit: Print all data
   Future<ApiResult> submitProduct() async {
