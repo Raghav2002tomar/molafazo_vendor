@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalUserStorage {
   static const _keyUser = 'local_user';
+  static const _fcmTokenKey = 'fcm_token';
 
   /// ✅ SAVE FULL VENDOR PROFILE
   static Future<void> saveUser({
@@ -58,6 +59,17 @@ class LocalUserStorage {
     final raw = prefs.getString(_keyUser);
     if (raw == null) return null;
     return jsonDecode(raw);
+  }
+  /// Save FCM token
+  static Future<void> saveFcmToken(String fcmToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_fcmTokenKey, fcmToken);
+  }
+
+  /// Get FCM token
+  static Future<String?> getFcmToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_fcmTokenKey);
   }
 
   /// ✅ CLEAR USER (LOGOUT)

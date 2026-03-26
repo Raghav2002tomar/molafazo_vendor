@@ -1,20 +1,30 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:molafzo_vendor/providers/theme_provider.dart';
 import 'package:molafzo_vendor/providers/translate_provider.dart';
 import 'package:molafzo_vendor/screens/Dashboard/main_bottom_bar.dart';
 import 'package:molafzo_vendor/screens/onboarding/OnBoardingScreen.dart';
+import 'package:molafzo_vendor/screens/orders/controller/order_controller.dart';
 import 'package:molafzo_vendor/service/colors.dart' show AppTheme;
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'notification_handler.dart';
 import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
 import 'screens/product_list_screen.dart';
 import 'services/storage_service.dart';
+final GlobalKey<NavigatorState> navigatorKey =
+GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  // Register background message handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   /// ✅ INIT HIVE
   await Hive.initFlutter();
@@ -42,6 +52,7 @@ class Root extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        // ChangeNotifierProvider(create: (_) => OrderController()),
         ChangeNotifierProvider.value(value: translateProvider),
       ],
       child: const MyApp(),
@@ -56,6 +67,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final mode = context.watch<ThemeProvider>().mode;
     final langCode = context.watch<TranslateProvider>().locale; // String? like 'en'
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationHandler().init(context);
+    });
 
     return FutureBuilder<SharedPreferences>(
       future: SharedPreferences.getInstance(),
@@ -71,14 +85,28 @@ class MyApp extends StatelessWidget {
 
         final prefs = snapshot.data!;
         final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
-
+        final lightTheme = AppTheme.light();
+        final darkTheme = AppTheme.dark();
         return MaterialApp(
+          navigatorKey: navigatorKey,
           title: 'ShopEase Professional',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(),
-          darkTheme: AppTheme.dark(),
+          // theme: AppTheme.light(),
+          // darkTheme: AppTheme.dark(),
           themeMode: mode,
 
+
+        theme: lightTheme.copyWith(
+          textTheme: lightTheme.textTheme.apply(
+            fontFamily: 'Circe Rounded Regular',
+          ),
+        ),
+
+        darkTheme: darkTheme.copyWith(
+        textTheme: darkTheme.textTheme.apply(
+        fontFamily: 'Circe Rounded Regular',
+        ),
+        ),
           /// ✅ CORRECT Locale handling
           locale: langCode == null ? null : Locale(langCode),
 

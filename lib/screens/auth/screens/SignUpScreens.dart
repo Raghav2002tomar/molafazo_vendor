@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../providers/translate_provider.dart';
 import '../../../service/colors.dart';
 import '../../../services/local_user_storage.dart';
+import '../../../widgets/address_selection_screen.dart';
 import '../provider/phone_signup_controller.dart';
 
 class PhoneSignupWizard extends StatelessWidget {
@@ -100,12 +101,6 @@ class _PhoneSignupView extends StatelessWidget {
 
                   // STEP 4 – Govt ID
                   _GovtIdStep(
-                    value: c.govtIdType,
-                    onChanged: (v) {
-                      c.govtIdType = v;
-                      c.notifyListeners();
-                    },
-                    numberCtrl: c.govtIdNumberCtrl,
                     file: c.idProofImage,
                     onUpload: c.pickGovtIdImage,
                   ),
@@ -136,12 +131,23 @@ class _PhoneSignupView extends StatelessWidget {
                       compressed != null ? XFile(compressed.path) : null;
                       c.notifyListeners();
                     },
+                    selectedLat: c.selectedLat,
+                    selectedLng: c.selectedLng,
+                    selectedAddress: c.selectedAddress,
+                    onAddressSelected: (address, lat, lng) {
+                      c.selectedAddress = address;
+                      c.selectedLat = lat;
+                      c.selectedLng = lng;
+                      c.cityCtrl.text = address; // Update the controller
+                      c.notifyListeners();
+                    },
                   ),
                 ],
               ),
             ),
 
             // BOTTOM CONTINUE BUTTON (Hidden for Account Created step)
+
             if (c.step != SignupStep.accountCreated)
               Padding(
                 padding: const EdgeInsets.all(24),
@@ -177,12 +183,12 @@ class _PhoneSignupView extends StatelessWidget {
                           break;
 
                         case SignupStep.govtId:
-                          if (c.govtIdType != null &&
-                              c.govtIdNumberCtrl.text.isNotEmpty) {
+                          print("Govt ID step - file exists: ${c.idProofImage != null}");
+                          if (c.idProofImage != null) {
+                            print("Navigating to next step...");
                             c.goToStep(SignupStep.addressProfile);
                           } else {
-                            Fluttertoast.showToast(
-                                msg: 'Please complete Govt ID details');
+                            Fluttertoast.showToast(msg: 'Please upload your government ID');
                           }
                           break;
 
@@ -697,16 +703,10 @@ class _PasswordStepState extends State<_PasswordStep> {
 }
 
 class _GovtIdStep extends StatelessWidget {
-  final String? value;
-  final Function(String?) onChanged;
-  final TextEditingController numberCtrl;
   final VoidCallback onUpload;
   final XFile? file;
 
   const _GovtIdStep({
-    required this.value,
-    required this.onChanged,
-    required this.numberCtrl,
     required this.onUpload,
     required this.file,
   });
@@ -719,62 +719,29 @@ class _GovtIdStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Government ID Details',
+            'Identity Verification',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
+
           Text(
-            'Provide your government-issued ID for verification',
+            'Please upload a valid government ID (required)',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 24),
-
-          Text(
-            'ID Type',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: value,
-            items: const [
-              DropdownMenuItem(value: 'Aadhar', child: Text('Aadhar Card')),
-              DropdownMenuItem(value: 'PAN', child: Text('PAN Card')),
-              DropdownMenuItem(value: 'Passport', child: Text('Passport')),
-            ],
-            onChanged: onChanged,
-            decoration: const InputDecoration(
-              filled: true,
-              fillColor: Color(0xFFF5F5F5),
-              hintText: 'Select ID Type',
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          Text(
-            'ID Number',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: numberCtrl,
-            decoration: const InputDecoration(
-              filled: true,
-              fillColor: Color(0xFFF5F5F5),
-              hintText: 'Enter ID number',
-            ),
-          ),
 
           const SizedBox(height: 24),
 
           Text(
-            'Upload ID Image',
-            style: Theme.of(context).textTheme.titleMedium,
+            'Upload ID Image *',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Colors.red.shade700,
+            ),
           ),
+
           const SizedBox(height: 12),
 
           if (file != null) ...[
@@ -787,20 +754,82 @@ class _GovtIdStep extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
+
             const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onUpload,
-              icon: const Icon(Icons.edit),
-              label: const Text('Change ID Image'),
+
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onUpload,
+                    icon: const Icon(Icons.edit),
+                    label: const Text('Change ID Image'),
+                  ),
+                ),
+              ],
+            ),
+
+            // Show success message
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'ID uploaded successfully',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ] else ...[
             OutlinedButton.icon(
               onPressed: onUpload,
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
+                side: BorderSide(color: Colors.red.shade300),
               ),
               icon: const Icon(Icons.upload_file),
-              label: const Text('Upload ID Proof'),
+              label: const Text('Upload ID Proof (Required)'),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Show required indicator
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.red.shade700, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Government ID is required to verify your identity',
+                      style: TextStyle(
+                        color: Colors.red.shade700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -809,12 +838,18 @@ class _GovtIdStep extends StatelessWidget {
   }
 }
 
-class _AddressProfileStep extends StatelessWidget {
+class _AddressProfileStep extends StatefulWidget {
   final TextEditingController city;
   final bool accepted;
   final ValueChanged<bool?> onAccept;
   final XFile? profileImage;
   final VoidCallback onPickProfile;
+
+  // Add these new parameters
+  final double? selectedLat;
+  final double? selectedLng;
+  final String? selectedAddress;
+  final Function(String address, double lat, double lng) onAddressSelected;
 
   const _AddressProfileStep({
     required this.city,
@@ -822,11 +857,67 @@ class _AddressProfileStep extends StatelessWidget {
     required this.onAccept,
     required this.profileImage,
     required this.onPickProfile,
+    // Add these required parameters
+    required this.selectedLat,
+    required this.selectedLng,
+    required this.selectedAddress,
+    required this.onAddressSelected,
   });
+
+  @override
+  State<_AddressProfileStep> createState() => _AddressProfileStepState();
+}
+
+class _AddressProfileStepState extends State<_AddressProfileStep> {
+  // Address variables with lat/lng
+  String? _selectedAddress;
+  double? _selectedLat;
+  double? _selectedLng;
+
+  @override
+  void initState() {
+    super.initState();
+    // If there's existing text in city controller, use it as initial address
+    if (widget.city.text.isNotEmpty) {
+      _selectedAddress = widget.city.text;
+    }
+  }
+
+  /// ---------- ADDRESS SELECTION WITH MAP ----------
+  Future<void> _openMapAddressPicker() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddressSelectionScreen(
+          initialAddress: _selectedAddress ?? widget.city.text,
+          initialLat: _selectedLat,
+          initialLng: _selectedLng,
+          onAddressSelected: (address, lat, lng) {
+            Navigator.pop(context, {
+              'address': address,
+              'lat': lat,
+              'lng': lng,
+            });
+          },
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedAddress = result['address'];
+        _selectedLat = result['lat'];
+        _selectedLng = result['lng'];
+        // Update the controller with the selected address
+        widget.city.text = _selectedAddress!;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -868,9 +959,9 @@ class _AddressProfileStep extends StatelessWidget {
                     ),
                   ),
                   child: ClipOval(
-                    child: profileImage != null
+                    child: widget.profileImage != null
                         ? Image.file(
-                      File(profileImage!.path),
+                      File(widget.profileImage!.path),
                       fit: BoxFit.cover,
                     )
                         : Container(
@@ -886,13 +977,13 @@ class _AddressProfileStep extends StatelessWidget {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: onPickProfile,
+                    onTap: widget.onPickProfile,
                     borderRadius: BorderRadius.circular(20),
                     child: CircleAvatar(
                       radius: 20,
                       backgroundColor: scheme.primary,
                       child: Icon(
-                        profileImage != null
+                        widget.profileImage != null
                             ? Icons.edit
                             : Icons.camera_alt_outlined,
                         size: 20,
@@ -909,13 +1000,13 @@ class _AddressProfileStep extends StatelessWidget {
 
           Center(
             child: TextButton.icon(
-              onPressed: onPickProfile,
+              onPressed: widget.onPickProfile,
               icon: Icon(
-                profileImage != null ? Icons.edit : Icons.upload_file,
+                widget.profileImage != null ? Icons.edit : Icons.upload_file,
                 size: 18,
               ),
               label: Text(
-                profileImage != null
+                widget.profileImage != null
                     ? 'Change Profile Photo'
                     : 'Upload Profile Photo',
               ),
@@ -924,22 +1015,109 @@ class _AddressProfileStep extends StatelessWidget {
 
           const SizedBox(height: 24),
 
+          // Address Section with Map Picker
           Text(
-            'Full Address',
+            'Delivery Address',
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
-          TextFormField(
-            controller: city,
-            maxLines: 4,
-            decoration: const InputDecoration(
-              hintText: 'Enter your full address\n(City, State, Country)',
-              filled: true,
-              fillColor: Color(0xFFF5F5F5),
-              alignLabelWithHint: true,
+          // Address Selection Card with Map
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: scheme.outlineVariant),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: InkWell(
+              onTap: _openMapAddressPicker,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: scheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.map_outlined,
+                        color: scheme.primary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Select Address',
+                            style: textTheme.labelMedium?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _selectedAddress == null || _selectedAddress!.isEmpty
+                                ? 'Choose your address on map'
+                                : _selectedAddress!,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: _selectedAddress == null || _selectedAddress!.isEmpty
+                                  ? scheme.onSurfaceVariant
+                                  : scheme.onSurface,
+                              fontWeight: _selectedAddress == null || _selectedAddress!.isEmpty
+                                  ? FontWeight.normal
+                                  : FontWeight.w500,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (_selectedLat != null && _selectedLng != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  size: 12,
+                                  color: scheme.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Coordinates selected',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: scheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
+
+          // Hidden field for validation (optional)
+          if (_selectedAddress == null || _selectedAddress!.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 12),
+              child: Text(
+                'Address is required',
+                style: TextStyle(
+                  color: Colors.red.shade700,
+                  fontSize: 12,
+                ),
+              ),
+            ),
 
           const SizedBox(height: 24),
 
@@ -950,13 +1128,13 @@ class _AddressProfileStep extends StatelessWidget {
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: accepted ? scheme.primary : Colors.grey[300]!,
+                color: widget.accepted ? scheme.primary : Colors.grey[300]!,
               ),
             ),
             child: CheckboxListTile(
               contentPadding: EdgeInsets.zero,
-              value: accepted,
-              onChanged: onAccept,
+              value: widget.accepted,
+              onChanged: widget.onAccept,
               controlAffinity: ListTileControlAffinity.leading,
               title: const Text(
                 'I accept the Terms & Conditions',

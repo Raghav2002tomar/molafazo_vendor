@@ -101,12 +101,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     return InkWell(onTap: (){
       print("FGHJKL");
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProductDetailScreen(product: p),
-        ),
-      );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (_) => ProductDetailScreen(product: p),
+      //   ),
+      // );
 
     },
       child: Card(
@@ -167,13 +167,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
                   if (p['discount'] != null) ...[
                     Text(
-                      "₹${p['price']}",
+                      "c. ${p['price']}",
                       style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
                           fontSize: 12),
                     ),
                     Text(
-                      "₹${p['discount']}",
+                      "c. ${p['discount']}",
                       style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -181,7 +181,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     ),
                   ] else
                     Text(
-                      "₹${p['price']}",
+                      "c. ${p['price']}",
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.bold),
                     ),

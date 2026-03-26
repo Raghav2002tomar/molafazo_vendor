@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../services/local_user_storage.dart';
+import '../../services/storage_service.dart';
 import '../profile/screens/bank_info.dart';
 import '../profile/screens/edit_profile_screen.dart';
 import '../profile/screens/store_list_screen.dart';
@@ -314,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 4),
                   _MenuTile(
                     icon: Icons.account_balance,
-                    title: 'Account Management',
+                    title: 'Payment Mode',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -372,14 +376,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
 
                       if (confirmed == true) {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.clear();
 
-                        if (mounted) {
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            '/onboarding',
-                                (_) => false,
+                        final success = await logout();
+
+                        if (success) {
+
+                          // Optional: delete FCM token
+                          // await FirebaseMessaging.instance.deleteToken();
+
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.clear();
+
+                          if (mounted) {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/onboarding',
+                                  (_) => false,
+                            );
+                          }
+
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Logout failed")),
                           );
                         }
                       }
@@ -394,6 +412,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+
+  static Future<bool> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('api_token');
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/logout'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("Logout failed: ${response.body}");
+        return false;
+      }
+
+    } catch (e) {
+      print("Logout error: $e");
+      return false;
+    }
+  }
+
 }
 
 /// 🔹 Reusable Menu Tile

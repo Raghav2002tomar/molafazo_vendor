@@ -110,17 +110,17 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                 _InfoRow(label: 'Alternate Contact', value: _getValue("alt_mobile")),
               ],
             ),
-            const SizedBox(height: 20),
-
-            _SectionHeader(title: 'Government ID', icon: Icons.badge_outlined),
-            const SizedBox(height: 12),
-            _InfoCard(
-              children: [
-                _InfoRow(label: 'ID Type', value: _getValue("gov_id_type")),
-                _InfoRow(label: 'ID Number', value: _getValue("gov_id_number")),
-                _DocumentRow(label: 'ID Proof', fileName: _getValue("gov_id_document")),
-              ],
-            ),
+            // const SizedBox(height: 20),
+            //
+            // _SectionHeader(title: 'Government ID', icon: Icons.badge_outlined),
+            // const SizedBox(height: 12),
+            // _InfoCard(
+            //   children: [
+            //     _InfoRow(label: 'ID Type', value: _getValue("gov_id_type")),
+            //     _InfoRow(label: 'ID Number', value: _getValue("gov_id_number")),
+            //     _DocumentRow(label: 'ID Proof', fileName: _getValue("gov_id_document")),
+            //   ],
+            // ),
             const SizedBox(height: 20),
 
             _SectionHeader(title: 'Address', icon: Icons.location_on_outlined),
@@ -128,9 +128,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             _InfoCard(
               children: [
                 _InfoRow(label: 'City', value: _getValue("city")),
-                _InfoRow(label: 'State', value: _getValue("state")),
-                _InfoRow(label: 'Country', value: _getValue("country")),
-                _InfoRow(label: 'PIN Code', value: _getValue("pincode")),
+                // _InfoRow(label: 'Full address', value: _getValue("state")),
               ],
             ),
             const SizedBox(height: 20),

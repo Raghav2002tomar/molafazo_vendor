@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -17,7 +19,10 @@ class PhoneSignupController extends ChangeNotifier {
   int step = 0;
   bool busy = false;
   bool otpSent = false;
-
+// Add these variables to PhoneSignupController
+  double? selectedLat;
+  double? selectedLng;
+  String? selectedAddress;
   // ------------------ CONTROLLERS ------------------
   final phoneCtrl = TextEditingController(text: '');
   final otpCtrl = TextEditingController();
@@ -58,7 +63,12 @@ class PhoneSignupController extends ChangeNotifier {
 
   // ------------------ NAVIGATION ------------------
   void goToStep(int newStep) {
-    if (newStep < 0 || newStep >= SignupStep.total) return;
+    print("Attempting to go to step: $newStep, total steps: ${SignupStep.total}");
+
+    if (newStep < 0 || newStep >= SignupStep.total) {
+      print("Cannot go to step $newStep - out of range");
+      return;
+    }
 
     step = newStep;
     page.animateToPage(
@@ -138,11 +148,60 @@ class PhoneSignupController extends ChangeNotifier {
       overlayEntry.remove();
     });
   }
+  static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+
+  /// Get device ID
+  static Future<String> getDeviceId() async {
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await _deviceInfo.androidInfo;
+
+        // ANDROID ID (Best unique ID)
+        return androidInfo.id ?? androidInfo.model ?? "unknown_android";
+      }
+
+      if (Platform.isIOS) {
+        final iosInfo = await _deviceInfo.iosInfo;
+        return iosInfo.identifierForVendor ?? "unknown_ios";
+      }
+
+      return "unknown_device";
+    } catch (e) {
+      return "unknown_device";
+    }
+  }
+
+  /// Get device type
+  static Future<String> getDeviceType() async {
+    if (Platform.isAndroid) return "android";
+    if (Platform.isIOS) return "ios";
+    return "unknown";
+  }
+
+  /// Optional: Get full device name
+  static Future<String> getDeviceName() async {
+    if (Platform.isAndroid) {
+      final info = await _deviceInfo.androidInfo;
+      return "${info.brand} ${info.model}";
+    }
+
+    if (Platform.isIOS) {
+      final info = await _deviceInfo.iosInfo;
+      return info.name;
+    }
+
+    return "unknown";
+  }
 
   // ------------------ OTP ------------------
   Future<void> sendOtp(context) async {
     if (!phoneFormKey.currentState!.validate()) return;
+    final token = await FirebaseMessaging.instance.getToken();
+    await LocalUserStorage.saveFcmToken(token!);
 
+    // final fcmToken = await LocalUserStorage.getFcmToken();
+    final deviceId = await getDeviceId();
+    final deviceType = await getDeviceType();
     busy = true;
     notifyListeners();
 
@@ -150,9 +209,9 @@ class PhoneSignupController extends ChangeNotifier {
       endpoint: "/otp/mobile/send",
       fields: {
         "phone_number": phoneCtrl.text.trim(),
-        "device_type": "android",
-        "device_token": "1234",
-        "fcm_token": "1234r4",
+        "device_type": deviceType,
+        "device_token": deviceId,
+        "fcm_token": token.toString(),
       },
     );
 
@@ -279,6 +338,24 @@ class PhoneSignupController extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("api_token");
 
+    // Parse address components
+    String? addressLine1 = selectedAddress ?? cityCtrl.text;
+    String? city = "";
+    String? state = "";
+    String? country = "";
+    String? postalCode = "";
+
+    if (addressLine1 != null && addressLine1.isNotEmpty) {
+      List<String> parts = addressLine1.split(',');
+
+      if (parts.length >= 4) {
+        city = parts[parts.length - 4].trim();
+        state = parts[parts.length - 3].trim();
+        country = parts[parts.length - 2].trim();
+        postalCode = parts[parts.length - 1].trim();
+      }
+    }
+
     final res = await ApiService.multipart(
       endpoint: "/vendor/complete-profile",
       token: token,
@@ -288,12 +365,23 @@ class PhoneSignupController extends ChangeNotifier {
         "mobile": phoneCtrl.text.trim(),
         "password": pwdCtrl.text.trim(),
         "password_confirmation": confirmCtrl.text.trim(),
+
+        "address_line1": addressLine1,
+        "address_line2": "",
+        "city": state,
+        "state": city,
+        "country": country,
+        "postal_code": postalCode,
+
+        "latitude": selectedLat?.toString() ?? "",
+        "longitude": selectedLng?.toString() ?? "",
+
         "gov_id_type": govtIdType ?? "",
         "gov_id_number": govtIdNumberCtrl.text.trim(),
-        "city": cityCtrl.text.trim(),
-        "country": "india",
+
         "terms_accepted": acceptedTerms ? "1" : "0",
-        "alt_mobile": "1234512345",
+        "alt_mobile": phoneCtrl.text.trim(),
+
         "device_id": "123",
         "device_type": "ios",
         "fcm_token": "1234321",
@@ -311,7 +399,6 @@ class PhoneSignupController extends ChangeNotifier {
     if (res["success"] == true) {
       Fluttertoast.showToast(msg: "Profile completed 🎉");
 
-      // Fetch complete profile after successful profile completion
       if (token != null) {
         await _fetchProfile(token);
       }
@@ -446,5 +533,5 @@ class SignupStep {
   static const int govtId = 4;
   static const int addressProfile = 5;
 
-  static const int total = 6;
+  static const int total = 6;  // ✅ Fixed: should be 6
 }

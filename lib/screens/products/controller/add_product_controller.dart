@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/api_service.dart';
 import '../../profile/screens/store_list_screen.dart';
 import '../model/attribute_model.dart';
-import '../model/category_model.dart';
+import '../model/category_model.dart' hide Category, SubCategory, ChildCategory;
 import '../model/product_model.dart';
 
 class AddProductController extends ChangeNotifier {
@@ -254,6 +254,8 @@ class AddProductController extends ChangeNotifier {
     notifyListeners();
   }
 
+// Replace your fetchProducts method with this:
+
   Future<void> fetchProducts({int? storeId}) async {
     loadingProducts = true;
     notifyListeners();
@@ -267,31 +269,70 @@ class AddProductController extends ChangeNotifier {
       return;
     }
 
-    final res = await ApiService.get(
-      endpoint: '/vendor/product/list',
-      token: token,
-    );
+    try {
+      final res = await ApiService.get(
+        endpoint: '/vendor/product/list',
+        token: token,
+      );
 
-    if (res['status'] == true) {
-      products = (res['data'] as List)
-          .map((e) => ProductModel.fromJson(e))
-          .toList();
-      filteredProducts = products;
-      // 🔹 Store-based filter
-      // if (storeId != null) {
-      //   filteredProducts =
-      //       products.where((p) => p.storeId == storeId).toList();
-      // } else {
-      //   filteredProducts = products;
-      // }
+      debugPrint('📦 API Response: $res');
+
+      if (res['status'] == true || res['success'] == true) {
+        final data = res['data'] as List;
+        debugPrint('📦 Products count: ${data.length}');
+
+        products = data.map((e) {
+          try {
+            return ProductModel.fromJson(e);
+          } catch (e) {
+            debugPrint('❌ Error parsing product: $e');
+            debugPrint('❌ Product data: ${e}');
+            rethrow;
+          }
+        }).toList();
+
+        // Initialize filteredProducts with all products
+        filteredProducts = List.from(products);
+
+        // If a specific store is selected, filter by it
+        if (storeId != null) {
+          filteredProducts = products.where((product) {
+            return product.storeId == storeId;
+          }).toList();
+        }
+
+        debugPrint('✅ Filtered products: ${filteredProducts.length}');
+      } else {
+        debugPrint('❌ API status is false');
+        products = [];
+        filteredProducts = [];
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error fetching products: $e');
+      debugPrint('❌ Stack trace: $stackTrace');
+      products = [];
+      filteredProducts = [];
     }
 
     loadingProducts = false;
     notifyListeners();
   }
+
+  // Replace your filterProductsByStore method with this:
   void filterProductsByStore(StoreModel? store) {
     selectedStore = store;
-    fetchProducts(storeId: store?.id);
+
+    if (store == null) {
+      // Show all products when "All" is selected
+      filteredProducts = List.from(products);
+    } else {
+      // Filter products by store ID
+      filteredProducts = products.where((product) {
+        return product.storeId == store.id;
+      }).toList();
+    }
+
+    notifyListeners();
   }
 
 

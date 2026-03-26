@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/api_service.dart';
+import '../../../services/local_user_storage.dart';
 import 'SignUpScreens.dart';
 
 enum LoginMode { phone, email }
@@ -125,10 +129,60 @@ class _SignInScreenState extends State<SignInScreen> {
       overlayEntry.remove();
     });
   }
+  static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+
+  /// Get device ID
+  static Future<String> getDeviceId() async {
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await _deviceInfo.androidInfo;
+
+        // ANDROID ID (Best unique ID)
+        return androidInfo.id ?? androidInfo.model ?? "unknown_android";
+      }
+
+      if (Platform.isIOS) {
+        final iosInfo = await _deviceInfo.iosInfo;
+        return iosInfo.identifierForVendor ?? "unknown_ios";
+      }
+
+      return "unknown_device";
+    } catch (e) {
+      return "unknown_device";
+    }
+  }
+
+  /// Get device type
+  static Future<String> getDeviceType() async {
+    if (Platform.isAndroid) return "android";
+    if (Platform.isIOS) return "ios";
+    return "unknown";
+  }
+
+  /// Optional: Get full device name
+  static Future<String> getDeviceName() async {
+    if (Platform.isAndroid) {
+      final info = await _deviceInfo.androidInfo;
+      return "${info.brand} ${info.model}";
+    }
+
+    if (Platform.isIOS) {
+      final info = await _deviceInfo.iosInfo;
+      return info.name;
+    }
+
+    return "unknown";
+  }
 
   // ================= OTP SEND =================
   Future<void> sendOtp() async {
     if (!_formKey.currentState!.validate()) return;
+    // final fcmToken = await LocalUserStorage.getFcmToken();
+    final token = await FirebaseMessaging.instance.getToken();
+    await LocalUserStorage.saveFcmToken(token!);
+
+    final deviceId = await getDeviceId();
+    final deviceType = await getDeviceType();
 
     setState(() => loading = true);
 
@@ -136,9 +190,9 @@ class _SignInScreenState extends State<SignInScreen> {
       endpoint: "/vendor/login/otp/send",
       fields: {
         "phone_number": phoneCtrl.text.trim(),
-        "device_type": "android",
-        "fcm_token": "1234321",
-        "device_token": "1234",
+        "device_type": deviceType,
+        "fcm_token": token.toString(),
+        "device_token": deviceId,
       },
     );
 
@@ -165,6 +219,12 @@ class _SignInScreenState extends State<SignInScreen> {
   // ================= OTP VERIFY =================
   Future<void> verifyOtp() async {
     if (!_formKey.currentState!.validate()) return;
+    final token = await FirebaseMessaging.instance.getToken();
+    await LocalUserStorage.saveFcmToken(token!);
+
+    // final fcmToken = await LocalUserStorage.getFcmToken();
+    final deviceId = await getDeviceId();
+    final deviceType = await getDeviceType();
 
     setState(() => loading = true);
 
@@ -173,9 +233,9 @@ class _SignInScreenState extends State<SignInScreen> {
       fields: {
         "phone_number": phoneCtrl.text.trim(),
         "otp": otpCtrl.text.trim(),
-        "device_type": "android",
-        "fcm_token": "1234321",
-        "device_token": "1234",
+        "device_type": deviceType,
+        "fcm_token": token.toString(),
+        "device_token": deviceId,
       },
     );
 
@@ -210,7 +270,13 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // ================= EMAIL LOGIN =================
   Future<void> emailLogin() async {
+    final token = await FirebaseMessaging.instance.getToken();
+    await LocalUserStorage.saveFcmToken(token!);
+
     if (!_formKey.currentState!.validate()) return;
+    // final fcmToken = await LocalUserStorage.getFcmToken();
+    final deviceId = await getDeviceId();
+    final deviceType = await getDeviceType();
 
     setState(() => loading = true);
 
@@ -220,15 +286,17 @@ class _SignInScreenState extends State<SignInScreen> {
         "login": emailCtrl.text.trim(),
         "password": passwordCtrl.text,
         "device_type": "android",
-        "fcm_token": "1234321",
-        "device_token": "1234",
-        "device_id": "1234",
+        "fcm_token": token.toString(),
+        "device_token": deviceType,
+        "device_id": deviceId,
       },
     );
 
     setState(() => loading = false);
 
     if (res["success"] == true || res["data"]?["status"] == true) {
+
+
       final token = res["data"]?["api_token"];
 
       if (token != null) {

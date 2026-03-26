@@ -1,4 +1,4 @@
-package com.example.molafzo_vendor
+package com.molafzo_vendor
 
 import io.flutter.embedding.android.FlutterActivity
 

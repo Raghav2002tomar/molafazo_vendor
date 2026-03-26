@@ -289,7 +289,7 @@ class StoreModel {
   final String address;
   final String city;
   final String country;
-  final int type;
+  final List<int> types; // Changed from int to List<int>
   final int statusId;
   final String workingHours;
 
@@ -301,12 +301,35 @@ class StoreModel {
     required this.address,
     required this.city,
     required this.country,
-    required this.type,
+    required this.types, // Changed
     required this.statusId,
     required this.workingHours,
   });
 
   factory StoreModel.fromJson(Map<String, dynamic> json) {
+    // Parse the type field which comes as a JSON string array
+    List<int> parsedTypes = [];
+    if (json['type'] != null) {
+      try {
+        // If it's a string like "[\"1\", \"2\"]", parse it
+        if (json['type'] is String) {
+          final typeString = json['type'];
+          // Remove brackets and quotes, then split
+          final cleaned = typeString.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '');
+          if (cleaned.isNotEmpty) {
+            parsedTypes = cleaned.split(',').map((e) => int.parse(e.trim())).toList();
+          }
+        }
+        // If it's already a List
+        else if (json['type'] is List) {
+          parsedTypes = (json['type'] as List).map((e) => int.parse(e.toString())).toList();
+        }
+      } catch (e) {
+        print("Error parsing store types: $e");
+        parsedTypes = [];
+      }
+    }
+
     return StoreModel(
       id: json['id'],
       name: json['name'] ?? '',
@@ -315,7 +338,7 @@ class StoreModel {
       address: json['address'] ?? '',
       city: json['city'] ?? '',
       country: json['country'] ?? '',
-      type: json['type'] ?? 0,
+      types: parsedTypes, // Use parsed types
       statusId: json['status_id'] ?? 0,
       workingHours: json['working_hours'] ?? '',
     );
@@ -325,14 +348,22 @@ class StoreModel {
   bool get isActive => statusId == 1;
 
   String get typeText {
-    switch (type) {
-      case 1:
-        return 'Retail';
-      case 2:
-        return 'Wholesale';
-      default:
-        return 'Other';
+    if (types.isEmpty) return 'Other';
+
+    List<String> typeNames = [];
+    for (var type in types) {
+      switch (type) {
+        case 1:
+          typeNames.add('Retail');
+          break;
+        case 2:
+          typeNames.add('Wholesale');
+          break;
+        default:
+          typeNames.add('Other');
+      }
     }
+    return typeNames.join(', ');
   }
 
   String get fullAddress => '$address, $city, $country';

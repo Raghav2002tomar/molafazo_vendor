@@ -7,7 +7,7 @@ import 'ChatTab.dart';
 import 'DashboardTab.dart';
 import 'ListTab.dart';
 import 'OrdersTab.dart';
-import 'ProfileTab.dart';
+import 'ProfileTab.dart' hide DashboardTab;
 
 class MainBottombarScreen extends StatefulWidget {
   const MainBottombarScreen({super.key});

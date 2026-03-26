@@ -4,6 +4,16 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String baseUrl = "https://grantoma.lt/api";
+  static const String ImagebaseUrl = "https://grantoma.lt/";
+  static const String gov_id_document_URL = "/assets/gov_id_document/";
+  static const String profile_image_URL = "/assets/profile_image/";
+  static const String store_logo_URL = "/assets/store_logo/";
+  static const String store_background_URL = "/assets/store_background/";
+  static const String product_images_URL = "/assets/product_images/";
+  static const String store_documents_URL = "assets/store_documents/";
+  static const String category_images_URL = "assets/category_images/";
+  static const String banner_images_URL = "assets/banner_images/";
+  static const String chat_images_URL = "assets/customervendorchat_images";
 
   /// 🔹 Common headers
   static Map<String, String> _headers({String? token}) {

@@ -1,221 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_svg/svg.dart';
-// import 'package:molafzo_vendor/screens/stores/screens/add_store_screen.dart';
-//
-// class StoreDetailScreen extends StatelessWidget {
-//   const StoreDetailScreen({super.key});
-//
-//   // 🔹 STATIC STORE DATA
-//   Map<String, dynamic> get store => {
-//     'name': 'TechWorld Electronics',
-//     'mobile': '+91 98765 99999',
-//     'email': 'techworld@store.com',
-//     'address': 'Sector 17, Chandigarh',
-//     'type': 'Retail',
-//     'description':
-//     'TechWorld Electronics is a premium electronics retail store offering mobiles, laptops and accessories.',
-//     'images': [
-//       'https://images.unsplash.com/photo-1580910051074-7c7e5d9f6e6f',
-//       'https://images.unsplash.com/photo-1607082352121-fa243f3dde32',
-//       'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d',
-//     ],
-//     'proof':
-//     'https://images.unsplash.com/photo-1586953208448-b95a79798f07',
-//   };
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context);
-//
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-//       appBar: AppBar(
-//         title: const Text('Store Details'),
-//         backgroundColor: Colors.white,
-//         actions: [InkWell(onTap: (){
-//           Navigator.push(context, MaterialPageRoute(builder: (context)=>AddStoreScreen()));
-//         }, child: SvgPicture.asset("assets/images/edit.svg")),SizedBox(width: 12,)],
-//       ),
-//       body: SingleChildScrollView(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//
-//             // ================= STORE NAME =================
-//             Text(
-//               store['name'],
-//               style: theme.textTheme.titleLarge
-//                   ?.copyWith(fontWeight: FontWeight.bold),
-//             ),
-//             const SizedBox(height: 6),
-//
-//             Chip(
-//               label: Text(
-//                 store['type'],
-//                 style: const TextStyle(color: Colors.white),
-//               ),
-//               backgroundColor: theme.colorScheme.primary,
-//             ),
-//
-//             const SizedBox(height: 16),
-//
-//             // ================= BASIC INFO =================
-//             _card(children: [
-//               _row('Mobile', store['mobile']),
-//               _row('Email', store['email']),
-//               _row('Address', store['address']),
-//             ]),
-//
-//             const SizedBox(height: 16),
-//
-//             // ================= STORE IMAGES =================
-//             _sectionTitle('Store Images'),
-//             const SizedBox(height: 8),
-//             GridView.builder(
-//               shrinkWrap: true,
-//               physics: const NeverScrollableScrollPhysics(),
-//               itemCount: store['images'].length,
-//               gridDelegate:
-//               const SliverGridDelegateWithFixedCrossAxisCount(
-//                 crossAxisCount: 3,
-//                 crossAxisSpacing: 8,
-//                 mainAxisSpacing: 8,
-//               ),
-//               itemBuilder: (_, i) => _networkImage(
-//                 store['images'][i],
-//                 radius: 12,
-//               ),
-//             ),
-//
-//             const SizedBox(height: 16),
-//
-//             // ================= STORE PROOF =================
-//             _sectionTitle('Store Proof'),
-//             const SizedBox(height: 8),
-//             _networkImage(
-//               store['proof'],
-//               height: 180,
-//               radius: 12,
-//             ),
-//
-//             const SizedBox(height: 16),
-//
-//             // ================= DESCRIPTION =================
-//             _sectionTitle('Store Description'),
-//             _card(
-//               children: [
-//                 Text(
-//                   store['description'],
-//                   style: const TextStyle(fontSize: 14),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   // ================= UI HELPERS =================
-//
-//
-//    _sectionTitle(String title) {
-//     return Padding(
-//       padding: const EdgeInsets.only(bottom: 6),
-//       child: Text(
-//         title,
-//         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-//       ),
-//     );
-//   }
-//
-//   Widget _card(
-//       {required List<Widget> children}) {
-//     return Container(
-//       padding: const EdgeInsets.all(14),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         border: Border.all(color: Colors.grey.shade300),
-//         borderRadius: BorderRadius.circular(12),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
-//             blurRadius: 8,
-//             offset: const Offset(0, 2),
-//           ),
-//         ],
-//       ),
-//       child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: children),
-//     );
-//   }
-//
-//   Widget _row(String label, String value) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 6),
-//       child: Row(
-//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//         children: [
-//           Text(label,
-//               style:
-//               const TextStyle(fontSize: 13, color: Colors.black54)),
-//           Flexible(
-//             child: Text(
-//               value,
-//               textAlign: TextAlign.end,
-//               style: const TextStyle(fontSize: 14),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   /// ================= NETWORK IMAGE WITH LOADER + ERROR =================
-//   Widget _networkImage(
-//       String url, {
-//         double? height,
-//         double radius = 10,
-//       }) {
-//     return ClipRRect(
-//       borderRadius: BorderRadius.circular(radius),
-//       child: Image.network(
-//         url,
-//         height: height,
-//         width: double.infinity,
-//         fit: BoxFit.cover,
-//         loadingBuilder: (context, child, loadingProgress) {
-//           if (loadingProgress == null) return child;
-//           return Container(
-//             height: height ?? 110,
-//             color: Colors.grey.shade100,
-//             alignment: Alignment.center,
-//             child: const CircularProgressIndicator(strokeWidth: 2),
-//           );
-//         },
-//         errorBuilder: (_, __, ___) {
-//           return Container(
-//             height: height ?? 110,
-//             color: Colors.grey.shade200,
-//             alignment: Alignment.center,
-//             child: Center(
-//               child: Column(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 crossAxisAlignment: CrossAxisAlignment.center,
-//                 children: const [
-//                   Icon(Icons.broken_image, size: 40, color: Colors.grey),
-//
-//                 ],
-//               ),
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -234,6 +16,14 @@ class StoreDetailScreen extends StatefulWidget {
 class _StoreDetailScreenState extends State<StoreDetailScreen> {
   bool loading = true;
   Map<String, dynamic>? store;
+
+  // Store type mapping
+  final List<Map<String, dynamic>> storeTypes = [
+    {'label': 'Retail', 'value': '1'},
+    {'label': 'Online', 'value': '2'},
+    {'label': 'Wholesale', 'value': '3'},
+    {'label': 'Offline', 'value': '4'},
+  ];
 
   @override
   void initState() {
@@ -257,7 +47,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
 
     print(res); // debug
 
-    if (res['success'] == true ) {
+    if (res['success'] == true) {
       store = res['data'];
     } else {
       store = null;
@@ -279,9 +69,47 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     return [];
   }
 
+  // ================= PARSE STORE TYPES =================
+  List<String> getStoreTypeLabels() {
+    final typeData = store?['type'];
+    if (typeData == null) return [];
+
+    List<String> typeValues = [];
+
+    try {
+      // Case 1: It's a string like "[\"1\", \"2\"]"
+      if (typeData is String) {
+        // Remove brackets and quotes
+        final cleaned = typeData.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '');
+        if (cleaned.isNotEmpty) {
+          typeValues = cleaned.split(',').map((e) => e.trim()).toList();
+        }
+      }
+      // Case 2: It's already a List
+      else if (typeData is List) {
+        typeValues = typeData.map((e) => e.toString()).toList();
+      }
+    } catch (e) {
+      print("Error parsing store types: $e");
+    }
+
+    // Convert type values to labels
+    List<String> labels = [];
+    for (var value in typeValues) {
+      final match = storeTypes.firstWhere(
+            (type) => type['value'] == value,
+        orElse: () => {'label': 'Unknown'},
+      );
+      labels.add(match['label']);
+    }
+
+    return labels;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final storeTypes = getStoreTypeLabels();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -289,15 +117,15 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
         title: const Text('Store Details'),
         backgroundColor: Colors.white,
         actions: [
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AddStoreScreen()),
-              );
-            },
-            child: SvgPicture.asset("assets/images/edit.svg"),
-          ),
+          // InkWell(
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (_) => AddStoreScreen()),
+          //     );
+          //   },
+          //   child: SvgPicture.asset("assets/images/edit.svg"),
+          // ),
           const SizedBox(width: 12),
         ],
       ),
@@ -318,17 +146,25 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             ),
             const SizedBox(height: 6),
 
-            Chip(
-              label: Text(
-                store?['type'].toString() == '1'
-                    ? 'Retail'
-                    : 'Wholesale',
-                style: const TextStyle(color: Colors.white),
+            // ================= STORE TYPES (Multiple Chips) =================
+            if (storeTypes.isNotEmpty) ...[
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: storeTypes.map((type) {
+                  return Chip(
+                    label: Text(
+                      type,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                    backgroundColor: theme.colorScheme.primary,
+                  );
+                }).toList(),
               ),
-              backgroundColor: theme.colorScheme.primary,
-            ),
-            const SizedBox(height: 6),
+              const SizedBox(height: 6),
+            ],
 
+            // ================= STATUS =================
             Chip(
               label: Text(
                 store?['status_id'].toString() == '1'
@@ -382,34 +218,17 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                 children: [
                   _sectionTitle('Store Logo'),
                   const SizedBox(height: 8),
-                  _networkImage(store?['logo'], height: 180),
+                  _networkImage(store?['logo'], height: 180, type: "logo"),
                   const SizedBox(height: 16),
                 ],
               ),
 
-            // ================= STORE IMAGES =================
-            _sectionTitle('Store Images'),
-            const SizedBox(height: 8),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _list('images').isEmpty ? 3 : _list('images').length,
-              gridDelegate:
-              const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemBuilder: (_, i) =>
-                  _networkImage(_list('images').isEmpty ? null : _list('images')[i], radius: 12),
-            ),
-
             const SizedBox(height: 16),
 
-            // ================= STORE PROOF =================
-            _sectionTitle('Store Proof'),
+            // ================= STORE BACKGROUND =================
+            _sectionTitle('Store Background'),
             const SizedBox(height: 8),
-            _networkImage(store?['proof'], height: 180, radius: 12),
+            _networkImage(store?['store_background_image'], height: 180, radius: 12, type: "background_image"),
 
             const SizedBox(height: 16),
 
@@ -421,7 +240,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                 style: const TextStyle(fontSize: 14),
               ),
             ]),
-            SizedBox(height: 50,)
+            const SizedBox(height: 50),
           ],
         ),
       ),
@@ -482,12 +301,22 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
       String? url, {
         double? height,
         double radius = 10,
+        String? type,
       }) {
     if (url == null || url.isEmpty) {
       return _imagePlaceholder(height, radius);
     }
 
-    final imageUrl = url.startsWith('http') ? url : 'https://trisparksoftwaresolutions.com/$url';
+    String basePath;
+    if (type == "logo") {
+      basePath = ApiService.store_logo_URL;
+    } else if (type == "background_image") {
+      basePath = ApiService.store_background_URL; // Adjust if needed
+    } else {
+      basePath = ApiService.store_logo_URL;
+    }
+
+    final imageUrl = url.startsWith('http') ? url : '${ApiService.ImagebaseUrl}$basePath$url';
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
