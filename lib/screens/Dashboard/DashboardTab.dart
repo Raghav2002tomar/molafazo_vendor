@@ -133,7 +133,7 @@ class _DashboardTabState extends State<DashboardTab> {
       }
 
       // Make direct HTTP call instead of using ApiService
-      final url = Uri.parse('https://grantoma.lt/api/vendor/dashboard');
+      final url = Uri.parse('${ApiService.baseUrl}/vendor/dashboard');
       final response = await http.get(
         url,
         headers: {
@@ -243,9 +243,9 @@ class _DashboardTabState extends State<DashboardTab> {
 
 
   String formatRevenue(dynamic revenue) {
-    if (revenue == null) return 'c. 0';
+    if (revenue == null) return '0 c.';
     num rev = revenue is num ? revenue : num.tryParse(revenue.toString()) ?? 0;
-    return 'c. ${NumberFormat('#,##0').format(rev)}';
+    return '${NumberFormat('#,##0').format(rev)} c.';
   }
 
   String getPeriodRevenue() {
@@ -275,7 +275,7 @@ class _DashboardTabState extends State<DashboardTab> {
       return 'https://via.placeholder.com/150';
     }
 
-    return 'https://grantoma.lt/assets/product_images/$imageName';
+    return '${ApiService.ImagebaseUrl}assets/product_images/$imageName';
   }
 
   @override
@@ -684,7 +684,7 @@ class _DashboardTabState extends State<DashboardTab> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        'c. ${NumberFormat.compact().format(_dailyRevenue[index])}',
+                        '${NumberFormat.compact().format(_dailyRevenue[index])} c.',
                         style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 4),
@@ -748,7 +748,7 @@ class _DashboardTabState extends State<DashboardTab> {
                   ],
                 ),
                 Text(
-                  'c. ${NumberFormat('#,##0').format(double.tryParse(order['total_amount'].toString()) ?? 0)}',
+                  '${NumberFormat('#,##0').format(double.tryParse(order['total_amount'].toString()) ?? 0)} c.',
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Container(
@@ -803,7 +803,7 @@ class _DashboardTabState extends State<DashboardTab> {
                     Text('Order #${order['id']}', style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Text(
-                      'c. ${order['total_amount']} • ${order['payment_type']?.toUpperCase()}',
+                      '${order['total_amount']} • ${order['payment_type']?.toUpperCase()} c.',
                       style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                     ),
                   ],

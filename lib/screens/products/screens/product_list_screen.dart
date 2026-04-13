@@ -167,13 +167,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
                   if (p['discount'] != null) ...[
                     Text(
-                      "c. ${p['price']}",
+                      "${p['price']} c.",
                       style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
                           fontSize: 12),
                     ),
                     Text(
-                      "c. ${p['discount']}",
+                      "${p['discount']} c.",
                       style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -181,7 +181,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     ),
                   ] else
                     Text(
-                      "c. ${p['price']}",
+                      "${p['price']} c.",
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.bold),
                     ),

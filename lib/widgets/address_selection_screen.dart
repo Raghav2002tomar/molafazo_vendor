@@ -770,14 +770,14 @@ import 'package:flutter/services.dart';
 import '../screens/citys/CitySearchScreen.dart';
 
 class AddressSelectionScreen extends StatefulWidget {
-  final Function(String, double, double) onAddressSelected;
+  // final Function(String, double, double) onAddressSelected;
   final String? initialAddress;
   final double? initialLat;
   final double? initialLng;
 
   const AddressSelectionScreen({
     super.key,
-    required this.onAddressSelected,
+    // required this.onAddressSelected,
     this.initialAddress,
     this.initialLat,
     this.initialLng,
@@ -856,11 +856,12 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
     }
     fullAddress += ', ${_selectedCity!}';
 
-    widget.onAddressSelected(
-      fullAddress,
-      _selectedLat,
-      _selectedLng,
-    );
+    Navigator.pop(context, {
+      'address': fullAddress,
+      'lat': _selectedLat,
+      'lng': _selectedLng,
+      'city': _selectedCity, // ✅ ADD THIS
+    });
   }
 
   void _showErrorSnackBar(String message) {

@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "https://grantoma.lt/api";
-  static const String ImagebaseUrl = "https://grantoma.lt/";
+  // static const String baseUrl = "https://grantoma.lt/api";
+  // static const String ImagebaseUrl = "https://grantoma.lt/";
+  static const String baseUrl = "https://mudir.inbozor.app/api";
+  static const String ImagebaseUrl = "https://mudir.inbozor.app";
   static const String gov_id_document_URL = "/assets/gov_id_document/";
   static const String profile_image_URL = "/assets/profile_image/";
   static const String store_logo_URL = "/assets/store_logo/";
@@ -132,6 +135,60 @@ class ApiService {
       );
     } catch (e) {
       return _handleError(e);
+    }
+  }
+
+  static Future<Map<String, dynamic>?> store_multipart({
+    required String endpoint,
+    required String token,
+    required Map<String, String> fields,
+    required Map<String, File> files,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      // Add fields - handle nested arrays properly
+      fields.forEach((key, value) {
+        // If the key contains brackets (like type[0]), we need to add it as is
+        // The multipart request will handle it correctly
+        request.fields[key] = value;
+      });
+
+      // Add files
+      files.forEach((key, file) async {
+        final stream = http.ByteStream(file.openRead());
+        final length = await file.length();
+        final multipartFile = http.MultipartFile(
+          key,
+          stream,
+          length,
+          filename: file.path.split('/').last,
+        );
+        request.files.add(multipartFile);
+      });
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      final decoded = jsonDecode(responseBody);
+
+      debugPrint('API Response: $decoded');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return decoded;
+      } else {
+        debugPrint('API Error: ${response.statusCode} - $decoded');
+        return decoded;
+      }
+    } catch (e) {
+      debugPrint('API Request Error: $e');
+      return null;
     }
   }
 

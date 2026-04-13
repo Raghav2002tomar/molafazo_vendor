@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../promotion/add_review/screens/packages_screen.dart';
 import '../model/product_model.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -70,6 +73,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       appBar: AppBar(
         title: Text(widget.product.name),
         elevation: 0,
+        actions: [
+          InkWell(onTap: ()async {
+            final prefs = await SharedPreferences.getInstance();
+            final token = prefs.getString('api_token');
+
+            if (token == null || token.isEmpty) {
+              Fluttertoast.showToast(msg: "Authentication failed. Login again.");
+              return;
+            }
+         await   Navigator.push(context, MaterialPageRoute(builder: (context)=>PackagesScreen(productId: widget.product.id.toString(),token: token,)));
+          }, child: Icon(Icons.production_quantity_limits)),
+          SizedBox(width: 8,)
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

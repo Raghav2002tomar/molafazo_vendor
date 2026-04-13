@@ -292,7 +292,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     _badge("Out of Stock", Colors.red, left: 8),
                   if (hasDiscount)
                     _badge(
-                      "c. ${p.price - p.discountPrice!} OFF",
+                      "${p.price - p.discountPrice!} c. OFF",
                       Colors.green,
                       right: 8,
                     ),
@@ -317,7 +317,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     children: [
                       if (hasDiscount) ...[
                         Text(
-                          "c. ${p.price}",
+                          "${p.price} c.",
                           style: const TextStyle(
                             decoration: TextDecoration.lineThrough,
                             fontSize: 12,
@@ -326,7 +326,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          "c. ${p.discountPrice}",
+                          "${p.discountPrice} c.",
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -335,7 +335,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         ),
                       ] else
                         Text(
-                          "c. ${p.price}",
+                          "${p.price} c.",
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,

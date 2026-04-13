@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:molafzo_vendor/screens/Dashboard/ChatTab.dart';
 import 'package:molafzo_vendor/screens/Dashboard/OrdersTab.dart';
 import 'package:molafzo_vendor/screens/chat/screens/chat_detail_screen.dart';
 import 'package:molafzo_vendor/services/api_service.dart';
@@ -144,15 +145,12 @@ class NotificationHandler {
           ),
         ),
       );
-      // navigatorKey.currentState?.push(
-      //   MaterialPageRoute(
-      //     builder: (_) => OrderDetailScreen(
-      //         orderId: order.orderId
-      //     ),
-      //   ),
-      // );
-    }
-  }
+    }else if (type == "22" || type == "10" ){
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => ChatListScreen()),
+            (route) => route.isFirst,
+      );
+  }}
 
   // 🔔 SHOW LOCAL
   Future<void> _showLocalNotification(RemoteMessage message) async {

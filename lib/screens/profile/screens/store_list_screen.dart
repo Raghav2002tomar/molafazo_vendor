@@ -197,6 +197,26 @@ class _StoreCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // Edit Button - Pass full store data
+              IconButton(
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddStoreScreen(
+                        storeData: store, // Pass the full store object
+                      ),
+                    ),
+                  );
+                  // Refresh list after edit
+                  if (result == true) {
+                    final storeListScreen = context.findAncestorStateOfType<_StoreListScreenState>();
+                    storeListScreen?.fetchStores();
+                  }
+                },
+              ),
+              // View Details Button
               IconButton(
                 icon: const Icon(Icons.arrow_forward_ios, size: 16),
                 onPressed: () {
@@ -212,7 +232,7 @@ class _StoreCard extends StatelessWidget {
             ],
           ),
           const Divider(height: 20),
-          _InfoRow(label: 'Email', value: store.email),
+          _InfoRow(label: 'Email', value: store.email.isNotEmpty ? store.email : 'Not provided'),
           _InfoRow(label: 'Phone', value: store.mobile),
           _InfoRow(label: 'Address', value: store.fullAddress),
           _InfoRow(label: 'Hours', value: store.workingHours),
@@ -225,21 +245,20 @@ class _StoreCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: active ? Colors.green.shade50 : Colors.red,
+        color: active ? Colors.green.shade50 : Colors.orange.shade50,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         active ? 'Active' : 'Pending',
         style: TextStyle(
           fontSize: 11,
-          color: active ? Colors.green : Colors.white,
+          color: active ? Colors.green : Colors.orange,
           fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 }
-
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -284,72 +303,120 @@ class _InfoRow extends StatelessWidget {
 class StoreModel {
   final int id;
   final String name;
-  final String email;
   final String mobile;
+  final String email;
   final String address;
   final String city;
   final String country;
-  final List<int> types; // Changed from int to List<int>
+  final List<int> types;
   final int statusId;
   final String workingHours;
+  final int deliveryBySeller;
+  final int selfPickup;
+  final String? description;
+  final String? logo;
+  final String? storeBackgroundImage;
+  final String? backgroundColor;
+  final List<Map<String, dynamic>>? socialLinks;
+  final Map<String, dynamic>? deliveryPolicy;
+  final Map<String, dynamic>? returnPolicy;
+  final String? deliveryDays;
+  final String? landmark;
 
   StoreModel({
     required this.id,
     required this.name,
-    required this.email,
     required this.mobile,
+    required this.email,
     required this.address,
     required this.city,
     required this.country,
-    required this.types, // Changed
+    required this.types,
     required this.statusId,
     required this.workingHours,
+    required this.deliveryBySeller,
+    required this.selfPickup,
+    this.description,
+    this.logo,
+    this.storeBackgroundImage,
+    this.backgroundColor,
+    this.socialLinks,
+    this.deliveryPolicy,
+    this.returnPolicy,
+    this.deliveryDays,
+    this.landmark,
   });
 
   factory StoreModel.fromJson(Map<String, dynamic> json) {
-    // Parse the type field which comes as a JSON string array
+    // Parse types
     List<int> parsedTypes = [];
     if (json['type'] != null) {
       try {
-        // If it's a string like "[\"1\", \"2\"]", parse it
         if (json['type'] is String) {
           final typeString = json['type'];
-          // Remove brackets and quotes, then split
           final cleaned = typeString.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '');
           if (cleaned.isNotEmpty) {
             parsedTypes = cleaned.split(',').map((e) => int.parse(e.trim())).toList();
           }
-        }
-        // If it's already a List
-        else if (json['type'] is List) {
+        } else if (json['type'] is List) {
           parsedTypes = (json['type'] as List).map((e) => int.parse(e.toString())).toList();
+        } else if (json['type'] is int) {
+          parsedTypes = [json['type'] as int];
         }
       } catch (e) {
-        print("Error parsing store types: $e");
         parsedTypes = [];
+      }
+    }
+
+    // Parse address to separate address and landmark if needed
+    String fullAddress = json['address'] ?? '';
+    String address = fullAddress;
+    String landmark = '';
+
+    // If address has comma, split into address and landmark
+    if (fullAddress.contains(',') && !fullAddress.contains('http')) {
+      final parts = fullAddress.split(',');
+      address = parts[0].trim();
+      if (parts.length > 1) {
+        landmark = parts.sublist(1).join(',').trim();
       }
     }
 
     return StoreModel(
       id: json['id'],
       name: json['name'] ?? '',
-      email: json['email'] ?? '',
       mobile: json['mobile'] ?? '',
-      address: json['address'] ?? '',
+      email: json['email'] ?? '',
+      address: address,
+      landmark: landmark,
       city: json['city'] ?? '',
       country: json['country'] ?? '',
-      types: parsedTypes, // Use parsed types
+      types: parsedTypes,
       statusId: json['status_id'] ?? 0,
       workingHours: json['working_hours'] ?? '',
+      deliveryBySeller: json['delivery_by_seller'] ?? 0,
+      selfPickup: json['self_pickup'] ?? 0,
+      description: json['description'],
+      logo: json['logo'],
+      storeBackgroundImage: json['store_background_image'],
+      backgroundColor: json['background_color'],
+      socialLinks: json['social_links'] is List
+          ? List<Map<String, dynamic>>.from(json['social_links'])
+          : null,
+      deliveryPolicy: json['delivery_policy'] is Map
+          ? Map<String, dynamic>.from(json['delivery_policy'])
+          : null,
+      returnPolicy: json['return_policy'] is Map
+          ? Map<String, dynamic>.from(json['return_policy'])
+          : null,
+      deliveryDays: json['delivery_days'],
     );
   }
 
-  /// UI Helpers
   bool get isActive => statusId == 1;
 
   String get typeText {
     if (types.isEmpty) return 'Other';
-
     List<String> typeNames = [];
     for (var type in types) {
       switch (type) {
@@ -357,7 +424,13 @@ class StoreModel {
           typeNames.add('Retail');
           break;
         case 2:
+          typeNames.add('Online');
+          break;
+        case 3:
           typeNames.add('Wholesale');
+          break;
+        case 4:
+          typeNames.add('Offline');
           break;
         default:
           typeNames.add('Other');
@@ -366,5 +439,10 @@ class StoreModel {
     return typeNames.join(', ');
   }
 
-  String get fullAddress => '$address, $city, $country';
+  String get fullAddress {
+    if (landmark != null && landmark!.isNotEmpty) {
+      return '$address, $landmark';
+    }
+    return address;
+  }
 }

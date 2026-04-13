@@ -799,7 +799,7 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
                   children: [
                     if (hasDiscount && discountPrice != null) ...[
                       Text(
-                        '₹${price.toStringAsFixed(0)}',
+                        '${price.toStringAsFixed(0)} c.',
                         style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
                           fontSize: 11,
@@ -808,7 +808,7 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '₹${discountPrice.toStringAsFixed(0)}',
+                        '${discountPrice.toStringAsFixed(0)} c.',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -817,7 +817,7 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
                       ),
                     ] else
                       Text(
-                        '₹${price.toStringAsFixed(0)}',
+                        '${price.toStringAsFixed(0)} c.',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,

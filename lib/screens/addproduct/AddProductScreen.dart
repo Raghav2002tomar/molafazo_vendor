@@ -1727,7 +1727,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
         ),
         subtitle: Text(
-          'Price: c. ${combo.price.toStringAsFixed(2)} | Stock: ${combo.stock} | Images: ${combo.images.length}/${c.productImages.length} selected',
+          'Price: ${combo.price.toStringAsFixed(2)} c. | Stock: ${combo.stock} | Images: ${combo.images.length}/${c.productImages.length} selected',
           style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
         ),
         trailing: Row(

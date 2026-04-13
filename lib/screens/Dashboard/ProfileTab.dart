@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../didit_demo_screen.dart';
 import '../../services/local_user_storage.dart';
 import '../../services/storage_service.dart';
 import '../profile/screens/bank_info.dart';
@@ -350,7 +351,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _MenuTile(
                     icon: Icons.privacy_tip_outlined,
                     title: 'Terms & Conditions',
-                    onTap: () {},
+                    onTap: () {
+                       // Navigator.push(context, MaterialPageRoute(builder: (context)=>VerificationScreen()));
+                    },
                   ),
                   const SizedBox(height: 4),
                   _MenuTile(
