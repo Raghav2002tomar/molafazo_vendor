@@ -167,76 +167,86 @@ class _StoreCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(Icons.store, color: scheme.primary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(store.name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        _statusChip(store.isActive),
-                        const SizedBox(width: 8),
-                        Text(store.typeText),
-                      ],
-                    )
-                  ],
+    return InkWell(onTap: (){
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              StoreDetailScreen(storeId: store.id),
+        ),
+      );
+    },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(Icons.store, color: scheme.primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(store.name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          _statusChip(store.isActive),
+                          const SizedBox(width: 8),
+                          Text(store.typeText),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              // Edit Button - Pass full store data
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.blue),
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddStoreScreen(
-                        storeData: store, // Pass the full store object
+                // Edit Button - Pass full store data
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddStoreScreen(
+                          storeData: store, // Pass the full store object
+                        ),
                       ),
-                    ),
-                  );
-                  // Refresh list after edit
-                  if (result == true) {
-                    final storeListScreen = context.findAncestorStateOfType<_StoreListScreenState>();
-                    storeListScreen?.fetchStores();
-                  }
-                },
-              ),
-              // View Details Button
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          StoreDetailScreen(storeId: store.id),
-                    ),
-                  );
-                },
-              )
-            ],
-          ),
-          const Divider(height: 20),
-          _InfoRow(label: 'Email', value: store.email.isNotEmpty ? store.email : 'Not provided'),
-          _InfoRow(label: 'Phone', value: store.mobile),
-          _InfoRow(label: 'Address', value: store.fullAddress),
-          _InfoRow(label: 'Hours', value: store.workingHours),
-        ],
+                    );
+                    // Refresh list after edit
+                    if (result == true) {
+                      final storeListScreen = context.findAncestorStateOfType<_StoreListScreenState>();
+                      storeListScreen?.fetchStores();
+                    }
+                  },
+                ),
+                // View Details Button
+                // IconButton(
+                //   icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                //   onPressed: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (_) =>
+                //             StoreDetailScreen(storeId: store.id),
+                //       ),
+                //     );
+                //   },
+                // )
+              ],
+            ),
+            const Divider(height: 20),
+            _InfoRow(label: 'Email', value: store.email.isNotEmpty ? store.email : 'Not provided'),
+            _InfoRow(label: 'Phone', value: store.mobile),
+            _InfoRow(label: 'Address', value: store.fullAddress),
+            _InfoRow(label: 'Hours', value: store.workingHours),
+          ],
+        ),
       ),
     );
   }

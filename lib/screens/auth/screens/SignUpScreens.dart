@@ -1561,16 +1561,16 @@ class _AccountCreatedStep extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12),
-
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton(
-              onPressed: onSkip,
-              child: const Text('Skip for now'),
-            ),
-          ),
+          // const SizedBox(height: 12),
+          //
+          // SizedBox(
+          //   width: double.infinity,
+          //   height: 48,
+          //   child: OutlinedButton(
+          //     onPressed: onSkip,
+          //     child: const Text('Skip for now'),
+          //   ),
+          // ),
         ],
       ),
     );
