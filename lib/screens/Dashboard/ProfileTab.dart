@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../didit_demo_screen.dart';
 import '../../services/local_user_storage.dart';
 import '../../services/storage_service.dart';
+import '../profile/screens/Policy_Conten_Screen.dart';
 import '../profile/screens/bank_info.dart';
 import '../profile/screens/edit_profile_screen.dart';
 import '../profile/screens/store_list_screen.dart';
@@ -345,14 +346,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _MenuTile(
                     icon: Icons.policy_outlined,
                     title: 'Privacy Policy',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PolicyContentScreen(
+                            title: 'Privacy Policy',
+                            endpoint: '/privacy-policy',
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 4),
                   _MenuTile(
                     icon: Icons.privacy_tip_outlined,
                     title: 'Terms & Conditions',
                     onTap: () {
-                       // Navigator.push(context, MaterialPageRoute(builder: (context)=>VerificationScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PolicyContentScreen(
+                            title: 'Terms & Conditions',
+                            endpoint: '/terms-conditions',
+                          ),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 4),
