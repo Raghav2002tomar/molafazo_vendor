@@ -1121,6 +1121,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1161,7 +1162,7 @@ class _PhoneSignupView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: c.back,
         ),
-        title: const Text('Create your account'),
+        title: Text(context.tr('txt_create_account')),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -1261,7 +1262,7 @@ class _PhoneSignupView extends StatelessWidget {
                           if (c.isDocumentVerified) {
                             c.goToStep(SignupStep.address);
                           } else {
-                            Fluttertoast.showToast(msg: 'Please verify your government ID first');
+                            Fluttertoast.showToast(msg: context.tr('txt_please_verify_gov_id'));
                           }
                           break;
 
@@ -1269,7 +1270,7 @@ class _PhoneSignupView extends StatelessWidget {
                           if (c.acceptedTerms) {
                             await c.saveAndFinish(context);
                           } else {
-                            Fluttertoast.showToast(msg: 'Accept Terms & Conditions');
+                            Fluttertoast.showToast(msg: context.tr('txt_accept_terms'));
                           }
                           break;
                       }
@@ -1359,12 +1360,12 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Phone Verification",
+              context.tr('txt_phone_verification'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
             Text(
-              "Enter your phone number to receive a verification code",
+              context.tr('txt_enter_phone_number_for_code'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -1416,10 +1417,10 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
               style: GoogleFonts.poppins(color: Colors.black87),
               validator: (v) {
                 if (v == null || v.isEmpty) {
-                  return 'Phone number is required';
+                  return context.tr('required_phone_number');
                 }
                 if (v.length != 10) {
-                  return 'Enter exactly 10 digits';
+                  return context.tr('enter_phone_number');
                 }
                 return null;
               },
@@ -1429,7 +1430,7 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
             if (c.otpSent) ...[
               const SizedBox(height: 24),
               Text(
-                'Enter the 6-digit code sent to +234 ${widget.phoneCtrl.text}',
+                '${context.tr('txt_enter_6_digit_code')} +234 ${widget.phoneCtrl.text}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -1473,7 +1474,7 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Didn't receive OTP?",
+                    context.tr('txt_not_receive_otp'),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(width: 6),
@@ -1486,8 +1487,8 @@ class _PhoneOtpStepState extends State<_PhoneOtpStep> {
                         : null,
                     child: Text(
                       _resendCountdown == 0
-                          ? "Resend OTP"
-                          : "Resend in $_resendCountdown s",
+                          ? context.tr('txt_resend_otp')
+                          : "${context.tr('txt_resend_in')} $_resendCountdown s",
                       style: TextStyle(
                         color: _resendCountdown == 0
                             ? scheme.primary
@@ -1536,7 +1537,7 @@ class _AccountCreatedStep extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Account Created Successfully',
+            context.tr('txt_account_created_success'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -1544,7 +1545,7 @@ class _AccountCreatedStep extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'You can complete your profile now or skip for later',
+            context.tr('txt_you_can_complete'),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[600],
             ),
@@ -1557,7 +1558,7 @@ class _AccountCreatedStep extends StatelessWidget {
             height: 48,
             child: ElevatedButton(
               onPressed: onProceed,
-              child: const Text('Complete Profile'),
+              child: Text(context.tr('txt_complete_profile')),
             ),
           ),
 
@@ -1568,7 +1569,7 @@ class _AccountCreatedStep extends StatelessWidget {
             height: 48,
             child: OutlinedButton(
               onPressed: onSkip,
-              child: const Text('Skip for now'),
+              child: Text(context.tr('txt_skip_for_now')),
             ),
           ),
         ],
@@ -1610,14 +1611,14 @@ class _EmailPasswordStepState extends State<_EmailPasswordStep> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Email & Password',
+              context.tr('txt_email_password'),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Please provide your email and create a password',
+              context.tr('txt_please_provide_email'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -1626,15 +1627,15 @@ class _EmailPasswordStepState extends State<_EmailPasswordStep> {
 
             // Email Field
             Text(
-              'Email Address',
+              context.tr('txt_email_address'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             TextFormField(
               controller: widget.emailCtrl,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                hintText: 'Enter your email address',
+              decoration: InputDecoration(
+                hintText: context.tr('txt_enter_email_address'),
                 filled: true,
                 fillColor: Color(0xFFF5F5F5),
               ),
@@ -1645,7 +1646,7 @@ class _EmailPasswordStepState extends State<_EmailPasswordStep> {
 
             // Password Field
             Text(
-              'Password',
+              context.tr('txt_password'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -1653,7 +1654,7 @@ class _EmailPasswordStepState extends State<_EmailPasswordStep> {
               controller: widget.pwdCtrl,
               obscureText: !_showPassword,
               decoration: InputDecoration(
-                hintText: 'Enter password (min 6 characters)',
+                hintText: context.tr('txt_enter_pswd_6_character'),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
                 suffixIcon: IconButton(
@@ -1665,14 +1666,14 @@ class _EmailPasswordStepState extends State<_EmailPasswordStep> {
                 ),
               ),
               validator: (v) =>
-              v != null && v.length >= 6 ? null : 'Min 6 characters',
+              v != null && v.length >= 6 ? null : context.tr('txt_min_6_character'),
             ),
 
             const SizedBox(height: 20),
 
             // Confirm Password Field
             Text(
-              'Confirm Password',
+              context.tr('txt_confirm_password'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -1680,7 +1681,7 @@ class _EmailPasswordStepState extends State<_EmailPasswordStep> {
               controller: widget.confirmCtrl,
               obscureText: !_showConfirmPassword,
               decoration: InputDecoration(
-                hintText: 'Re-enter your password',
+                hintText: context.tr('txt_renter_pswd'),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
                 suffixIcon: IconButton(
@@ -1694,7 +1695,7 @@ class _EmailPasswordStepState extends State<_EmailPasswordStep> {
                 ),
               ),
               validator: (v) =>
-              v == widget.pwdCtrl.text ? null : 'Passwords do not match',
+              v == widget.pwdCtrl.text ? null : context.tr('password_dont_match'),
             ),
           ],
         ),
@@ -1715,21 +1716,23 @@ class _GovtIdStepState extends State<_GovtIdStep> {
   Widget build(BuildContext context) {
     final c = context.watch<PhoneSignupController>();
     final scheme = Theme.of(context).colorScheme;
-
+    String t(String key) =>
+        Provider.of<TranslateProvider>(context, listen: false).t(key);
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Identity Verification',
+            context.tr('txt_identity_verification'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Please verify your identity using our secure KYC process',
+            context.tr('txt_please_verify_identity'),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[600],
             ),
@@ -1762,7 +1765,7 @@ class _GovtIdStepState extends State<_GovtIdStep> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  c.isDocumentVerified ? 'Document Verified!' : 'Verification Required',
+                  c.isDocumentVerified ? context.tr('txt_document_verified') : context.tr('txt_verification_required'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: c.isDocumentVerified ? Colors.green.shade800 : Colors.blue.shade800,
@@ -1771,8 +1774,8 @@ class _GovtIdStepState extends State<_GovtIdStep> {
                 const SizedBox(height: 8),
                 Text(
                   c.isDocumentVerified
-                      ? 'Your identity has been successfully verified'
-                      : 'Click the button below to start the verification process',
+                      ? context.tr('txt_your_identity_verified')
+                      : context.tr('txt_click_btn_verification'),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: c.isDocumentVerified ? Colors.green.shade700 : Colors.blue.shade700,
@@ -1789,11 +1792,11 @@ class _GovtIdStepState extends State<_GovtIdStep> {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children:  [
                         Icon(Icons.check_circle, color: Colors.white, size: 18),
                         SizedBox(width: 8),
                         Text(
-                          'Verified',
+                          context.tr('txt_verified'),
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -1822,7 +1825,7 @@ class _GovtIdStepState extends State<_GovtIdStep> {
                           c.notifyListeners();
 
                           Fluttertoast.showToast(
-                            msg: 'Document verified successfully!',
+                            msg: t('txt_document_verified_successful'),
                             backgroundColor: Colors.green,
                           );
 
@@ -1834,7 +1837,7 @@ class _GovtIdStepState extends State<_GovtIdStep> {
                           });
                         } else if (result == false) {
                           Fluttertoast.showToast(
-                            msg: 'Verification failed. Please try again.',
+                            msg: t('txt_verification_failed'),
                             backgroundColor: Colors.red,
                           );
                         }
@@ -1846,7 +1849,7 @@ class _GovtIdStepState extends State<_GovtIdStep> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                           : const Icon(Icons.verified_user),
-                      label: Text(c.isVerifying ? 'Verifying...' : 'Start Verification'),
+                      label: Text(c.isVerifying ? t('txt_verifying') : t('txt_start_verification')),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: scheme.primary,
                         foregroundColor: Colors.white,
@@ -1942,14 +1945,14 @@ class _AddressStepState extends State<_AddressStep> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Delivery Address',
+            context.tr('txt_delivery_address'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Please provide your delivery address',
+            context.tr('txt_please_provide_delivery_address'),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[600],
             ),
@@ -1987,7 +1990,7 @@ class _AddressStepState extends State<_AddressStep> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Select Address',
+                            context.tr('txt_select_address'),
                             style: textTheme.labelMedium?.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
@@ -1995,7 +1998,7 @@ class _AddressStepState extends State<_AddressStep> {
                           const SizedBox(height: 4),
                           Text(
                             widget.selectedAddress == null || widget.selectedAddress!.isEmpty
-                                ? 'Choose your address on map'
+                                ? context.tr('txt_choose_your_address')
                                 : widget.selectedAddress!,
                             style: textTheme.bodyMedium?.copyWith(
                               color: widget.selectedAddress == null || widget.selectedAddress!.isEmpty
@@ -2019,7 +2022,7 @@ class _AddressStepState extends State<_AddressStep> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Coordinates selected',
+                                  context.tr('txt_coordinated_selected'),
                                   style: textTheme.labelSmall?.copyWith(
                                     color: scheme.primary,
                                   ),
@@ -2044,7 +2047,7 @@ class _AddressStepState extends State<_AddressStep> {
             Padding(
               padding: const EdgeInsets.only(top: 8, left: 12),
               child: Text(
-                'Address is required',
+                context.tr('txt_address_required'),
                 style: TextStyle(
                   color: Colors.red.shade700,
                   fontSize: 12,
@@ -2069,8 +2072,8 @@ class _AddressStepState extends State<_AddressStep> {
               value: widget.accepted,
               onChanged: widget.onAccept,
               controlAffinity: ListTileControlAffinity.leading,
-              title: const Text(
-                'I accept the Terms & Conditions',
+              title: Text(
+                context.tr('txt_i_accept_conditions'),
                 style: TextStyle(fontSize: 14),
               ),
             ),

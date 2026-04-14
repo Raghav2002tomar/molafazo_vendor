@@ -1,5 +1,6 @@
 // lib/onboarding/onboarding_screen.dart
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../auth/screens/SignInScreen.dart';
@@ -15,31 +16,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _index = 0;
 
-  final _pages = const [
+  late final _pages =  [
     _OnbPageData(
       image: 'assets/images/onb_3.jpg',
-      title: 'Grow your business',
+      title: context.tr('txt_onboard_1_title'),
       subtitle:
-      'Effortlessly manage your store, connect with customers, and elevate your brand.',
+      context.tr('txt_onboard_1_desc'),
     ),
     _OnbPageData(
       image: 'assets/images/onb_2.jpg',
-      title: 'Connect with shoppers',
+      title: context.tr('txt_onboard_2_title'),
       subtitle:
-      'Tap into a thriving market and showcase products—simple and effective.',
+      context.tr('txt_onboard_2_desc'),
     ),
     _OnbPageData(
       image: 'assets/images/onb_1.jpg',
-      title: 'Supercharge your business',
+      title: context.tr('txt_onboard_3_title'),
       subtitle:
-      'Amplify reach by presenting your products beautifully and converting faster.',
+      context.tr('txt_onboard_3_desc'),
     ),
   ];
 
   void _finish() {
-    // TODO: Navigate to auth/home
     Navigator.push(context, MaterialPageRoute(builder: (context)=>SignInScreen()));
-
   }
 
   @override
@@ -70,8 +69,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onPressed: _finish,
               child: Row(
                 children: [
-                  const Text(
-                    'Skip',
+                   Text(
+                     context.tr('txt_skip'),
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600,fontSize: 16),
                   ),
                   SizedBox(width: 5,),
@@ -126,7 +125,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         duration: const Duration(milliseconds: 320),
                         curve: Curves.easeOut,
                       ),
-                      child: Text(_index == _pages.length - 1 ? 'Get Started' : 'Get Started',style: TextStyle(fontWeight: FontWeight.bold),),
+                      child: Text(_index == _pages.length - 1 ? context.tr('txt_get_started') : context.tr('txt_get_started'),style: TextStyle(fontWeight: FontWeight.bold),),
                     ),
                   ),
                   const SizedBox(height: 90),

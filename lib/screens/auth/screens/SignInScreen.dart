@@ -6,8 +6,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../providers/translate_provider.dart';
 import '../../../services/api_service.dart';
 import '../../../services/local_user_storage.dart';
 import 'SignUpScreens.dart';
@@ -46,28 +49,28 @@ class _SignInScreenState extends State<SignInScreen> {
   // ================= VALIDATORS =================
   String? _phoneValidator(String? v) {
     if (v == null || v.trim().isEmpty) {
-      return 'Phone number is required';
+      return context.tr('required_phone_number');
     }
     if (v.trim().length != 10) {
-      return 'Enter exactly 10 digits';
+      return context.tr('enter_phone_number');
     }
     return null;
   }
 
   String? _otpValidator(String? v) {
-    if (v == null || v.isEmpty) return 'OTP is required';
-    if (v.length < 4) return 'Invalid OTP';
+    if (v == null || v.isEmpty) return context.tr('required_otp');
+    if (v.length < 4) return context.tr('invalid_otp');
     return null;
   }
 
   String? _emailValidator(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Email required';
-    return RegExp(r'^\S+@\S+\.\S+$').hasMatch(v) ? null : 'Invalid email';
+    if (v == null || v.trim().isEmpty) return context.tr('required_email');
+    return RegExp(r'^\S+@\S+\.\S+$').hasMatch(v) ? null : context.tr('invalid_email');
   }
 
   String? _passwordValidator(String? v) {
-    if (v == null || v.isEmpty) return 'Password required';
-    if (v.length < 6) return 'Minimum 6 characters';
+    if (v == null || v.isEmpty) return context.tr('required_password');
+    if (v.length < 6) return context.tr('invalid_password');
     return null;
   }
   void showTopToast(
@@ -180,7 +183,8 @@ class _SignInScreenState extends State<SignInScreen> {
     // final fcmToken = await LocalUserStorage.getFcmToken();
     final token = await FirebaseMessaging.instance.getToken();
     await LocalUserStorage.saveFcmToken(token!);
-
+    String t(String key) =>
+        Provider.of<TranslateProvider>(context, listen: false).t(key);
     final deviceId = await getDeviceId();
     final deviceType = await getDeviceType();
 
@@ -203,7 +207,7 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {});
       final otp = res["data"]?["otp"]?.toString() ?? "";
 
-      _toast("OTP sent successfully");
+      _toast(t('txt_otp_sent_successful'));
 
       showTopToast(
         context,
@@ -212,7 +216,7 @@ class _SignInScreenState extends State<SignInScreen> {
         backgroundColor: Colors.green,
       );
     } else {
-      _toast(res["message"] ?? "Failed to send OTP");
+      _toast(res["message"] ?? t('txt_failed_to_send_otp'));
     }
   }
 
@@ -221,6 +225,9 @@ class _SignInScreenState extends State<SignInScreen> {
     if (!_formKey.currentState!.validate()) return;
     final token = await FirebaseMessaging.instance.getToken();
     await LocalUserStorage.saveFcmToken(token!);
+    String t(String key) =>
+        Provider.of<TranslateProvider>(context, listen: false).t(key);
+
 
     // final fcmToken = await LocalUserStorage.getFcmToken();
     final deviceId = await getDeviceId();
@@ -248,7 +255,7 @@ class _SignInScreenState extends State<SignInScreen> {
       final token = res["data"]?["api_token"];
 
       if (token == null || token.toString().isEmpty) {
-        _toast("Authentication failed - No token received");
+        _toast(t('txt_auth_failed'));
         return;
       }
 
@@ -259,12 +266,12 @@ class _SignInScreenState extends State<SignInScreen> {
       await _saveUser(res["data"]);
 
       // Show success message
-      _toast(res["data"]["message"] ?? "Login successful");
+      _toast(res["data"]["message"] ?? t('txt_login_successful'));
 
       // Navigate to dashboard
       _goDashboard();
     } else {
-      _toast(res["data"]["message"] ?? "Invalid OTP");
+      _toast(res["data"]["message"] ?? t('invalid_otp'));
     }
   }
 
@@ -272,6 +279,8 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> emailLogin() async {
     final token = await FirebaseMessaging.instance.getToken();
     await LocalUserStorage.saveFcmToken(token!);
+    String t(String key) =>
+        Provider.of<TranslateProvider>(context, listen: false).t(key);
 
     if (!_formKey.currentState!.validate()) return;
     // final fcmToken = await LocalUserStorage.getFcmToken();
@@ -304,10 +313,10 @@ class _SignInScreenState extends State<SignInScreen> {
       }
 
       await _saveUser(res["data"]);
-      _toast(res["message"] ?? "Login successful");
+      _toast(res["message"] ?? t('txt_login_successful'));
       _goDashboard();
     } else {
-      _toast(res["message"] ?? "Login failed");
+      _toast(res["message"] ?? t('txt_login_failed'));
     }
   }
 
@@ -426,7 +435,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Experience business sales on another level',
+                            context.tr('txt_experience_business'),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 15,
@@ -444,14 +453,14 @@ class _SignInScreenState extends State<SignInScreen> {
 
                     /// WELCOME TEXT
                     Text(
-                      'Welcome Back!',
+                      context.tr('txt_welcome_back'),
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Sign in to continue',
+                      context.tr('txt_signin_to_continue'),
                       style: TextStyle(
                         fontSize: 15,
                         color: Colors.grey[600],
@@ -471,7 +480,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         children: [
                           Expanded(
                             child: _ModeButton(
-                              label: 'Phone',
+                              label: context.tr('txt_phone'),
                               icon: Icons.phone_android,
                               selected: _mode == LoginMode.phone,
                               onTap: () {
@@ -484,7 +493,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                           Expanded(
                             child: _ModeButton(
-                              label: 'Email',
+                              label: context.tr('txt_email'),
                               icon: Icons.email_outlined,
                               selected: _mode == LoginMode.email,
                               onTap: () {
@@ -511,13 +520,13 @@ class _SignInScreenState extends State<SignInScreen> {
                     Center(
                       child: Text.rich(
                         TextSpan(
-                          text: "Don't have an account? ",
+                          text: context.tr('txt_dont_have_account'),
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[700],
                           ),
                           children: [
                             TextSpan(
-                              text: 'Sign Up',
+                              text: context.tr('txt_signup'),
                               style: TextStyle(
                                 color: scheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -555,7 +564,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     return [
       Text(
-        'Phone Number',
+        context.tr('txt_phone_number'),
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w600,
         ),
@@ -563,7 +572,7 @@ class _SignInScreenState extends State<SignInScreen> {
       const SizedBox(height: 8),
       AppTextField(
         controller: phoneCtrl,
-        hintText: 'Enter your phone number',
+        hintText: context.tr('txt_enter_phone_number'),
         keyboardType: TextInputType.number,
         validator: _phoneValidator,
         enabled: !otpSent,
@@ -577,7 +586,7 @@ class _SignInScreenState extends State<SignInScreen> {
       if (otpSent) ...[
         const SizedBox(height: 20),
         Text(
-          'Verification Code',
+          context.tr('txt_verification_otp'),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -585,7 +594,7 @@ class _SignInScreenState extends State<SignInScreen> {
         const SizedBox(height: 8),
         AppTextField(
           controller: otpCtrl,
-          hintText: 'Enter OTP',
+          hintText: context.tr('txt_enter_otp'),
           keyboardType: TextInputType.number,
           validator: _otpValidator,
           prefixIcon: const Icon(Icons.lock_outline),
@@ -602,7 +611,7 @@ class _SignInScreenState extends State<SignInScreen> {
             TextButton.icon(
               onPressed: loading ? null : sendOtp,
               icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Resend OTP'),
+              label: Text(context.tr('txt_resend_otp')),
               style: TextButton.styleFrom(
                 foregroundColor: scheme.primary,
               ),
@@ -630,7 +639,7 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           )
               : Text(
-            otpSent ? 'Verify & Sign In' : 'Send OTP',
+            otpSent ? context.tr('txt_verify_signin') : context.tr('txt_send_otp'),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -645,7 +654,7 @@ class _SignInScreenState extends State<SignInScreen> {
   List<Widget> _emailUI() {
     return [
       Text(
-        'Email Address',
+        context.tr('txt_email_address'),
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w600,
         ),
@@ -653,14 +662,14 @@ class _SignInScreenState extends State<SignInScreen> {
       const SizedBox(height: 8),
       AppTextField(
         controller: emailCtrl,
-        hintText: 'Enter your email',
+        hintText: context.tr('txt_enter_email'),
         keyboardType: TextInputType.emailAddress,
         validator: _emailValidator,
         prefixIcon: const Icon(Icons.email_outlined),
       ),
       const SizedBox(height: 20),
       Text(
-        'Password',
+        context.tr('txt_password'),
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w600,
         ),
@@ -669,7 +678,7 @@ class _SignInScreenState extends State<SignInScreen> {
       PasswordTextField(
         controller: passwordCtrl,
         validator: _passwordValidator,
-        hintText: 'Enter your password',
+        hintText: context.tr('txt_enter_your_pswd'),
       ),
       const SizedBox(height: 12),
       Row(
@@ -677,9 +686,9 @@ class _SignInScreenState extends State<SignInScreen> {
         children: [
           TextButton(
             onPressed: () {
-              _toast('Forgot password feature coming soon');
+              _toast(context.tr('txt_forgot_pswd_feature'));
             },
-            child: const Text('Forgot Password?'),
+            child: Text(context.tr('txt_forgot_pswd')),
           ),
         ],
       ),
@@ -702,8 +711,8 @@ class _SignInScreenState extends State<SignInScreen> {
               color: Colors.white,
             ),
           )
-              : const Text(
-            'Sign In',
+              : Text(
+            context.tr('txt_sign_in'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

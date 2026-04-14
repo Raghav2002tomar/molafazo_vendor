@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/product_provider.dart';
@@ -37,7 +38,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          context.watch<TranslateProvider>().t('checkout'), // ✅ use watch
+          context.tr('txt_checkout'), // ✅ use watch
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
@@ -71,7 +72,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
 
           IconButton(
-            tooltip: isDark ? 'Switch to Light' : 'Switch to Dark',
+            tooltip: isDark ? context.tr('txt_switch_to_light') : context.tr('txt_switch_to_dark'),
             icon: Icon(isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined),
             onPressed: () => context.read<ThemeProvider>().toggle(),
             color: cs.onSurfaceVariant,
@@ -150,7 +151,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               child: TextField(
                 style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
                 decoration: InputDecoration(
-                  hintText: 'Search ShopEase',
+                  hintText: context.tr('txt_search_'),
                   hintStyle: textTheme.bodyMedium?.copyWith(
                     color: cs.onSurfaceVariant,
                   ),
@@ -191,7 +192,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           Icon(Icons.error_outline, size: 48, color: cs.onSurfaceVariant),
                           const SizedBox(height: 12),
                           Text(
-                            'Something went wrong',
+                            context.tr('txt_something_went_wrong'),
                             style: textTheme.titleMedium?.copyWith(
                               color: cs.onSurface,
                               fontWeight: FontWeight.w600,
@@ -206,7 +207,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () => productProvider.fetchProducts(),
-                            child: const Text('Try Again'),
+                            child: Text(context.tr('txt_try_again')),
                           ),
                         ],
                       ),
@@ -224,7 +225,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           Icon(Icons.shopping_bag_outlined, size: 64, color: cs.onSurfaceVariant),
                           const SizedBox(height: 16),
                           Text(
-                            'No products found',
+                            context.tr('txt_no_product_found'),
                             style: textTheme.titleMedium?.copyWith(
                               color: cs.onSurface,
                               fontWeight: FontWeight.w600,
