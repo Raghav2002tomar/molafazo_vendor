@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/product.dart';
@@ -25,7 +26,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text('Product Details', style: tt.titleLarge?.copyWith(color: cs.onSurface)),
+        title: Text(context.tr('txt_product_details'), style: tt.titleLarge?.copyWith(color: cs.onSurface)),
         backgroundColor: cs.surface,
         elevation: 1,
         iconTheme: IconThemeData(color: cs.onSurface),
@@ -44,7 +45,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     color: cs.surface,
                     padding: const EdgeInsets.all(20),
                     child: Hero(
-                      tag: 'product-${widget.product.id}',
+                      tag: '${context.tr('txt_product')}-${widget.product.id}',
                       child: CachedNetworkImage(
                         imageUrl: widget.product.image,
                         fit: BoxFit.contain,
@@ -133,7 +134,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Description',
+                          context.tr('txt_description'),
                           style: tt.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: cs.onSurface,
@@ -163,7 +164,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Quantity',
+                          context.tr('txt_quantity'),
                           style: tt.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: cs.onSurface,
@@ -239,8 +240,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 context.read<CartProvider>().addItem(widget.product, quantity);
                 CustomModals.showSuccessModal(
                   context,
-                  'Added to Cart',
-                  '${widget.product.title} has been added to your cart.',
+                  context.tr('txt_added_to_cart'),
+                  '${widget.product.title} ${context.tr('txt_added_cart')}',
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -252,7 +253,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 elevation: 0,
               ),
               child: Text(
-                'Add to Cart - \$${(widget.product.price * quantity).toStringAsFixed(2)}',
+                '${context.tr('txt_add_cart')} - \$${(widget.product.price * quantity).toStringAsFixed(2)}',
                 style: tt.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

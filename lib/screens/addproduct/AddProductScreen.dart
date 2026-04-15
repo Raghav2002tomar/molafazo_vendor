@@ -1,8 +1,10 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:molafzo_vendor/screens/addproduct/model.dart';
 import 'package:provider/provider.dart';
+import '../../providers/translate_provider.dart';
 import 'StoreListScreen.dart';
 import 'CategorySelectScreen.dart';
 import 'VariantManagerScreen.dart';
@@ -68,7 +70,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               backgroundColor: Colors.white,
               appBar: AppBar(
                 title: Text(
-                  widget.editMode ? 'Edit Product' : 'Add Product',
+                  widget.editMode ? context.tr('txt_edit_product') : context.tr('txt_add_product'),
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
@@ -76,13 +78,13 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   ),
                 ),
               ),
-              body: const Center(
+              body:  Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('Loading product data...'),
+                    Text(context.tr('txt_loading_product_data')),
                   ],
                 ),
               ),
@@ -92,7 +94,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             backgroundColor: Colors.white,
             appBar: AppBar(
               title: Text(
-                widget.editMode ? 'Edit Product' : 'Add Product',
+                widget.editMode ? context.tr('txt_edit_product') : context.tr('txt_add_product'),
                 style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
@@ -123,7 +125,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                        : Text(widget.editMode ? 'Update' : 'Submit'),
+                        : Text(widget.editMode ? context.tr('txt_update') : context.tr('txt_submit')),
                   ),
                 ),
               ],
@@ -178,7 +180,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               Icon(Icons.image, color: Colors.black, size: 18),
               const SizedBox(width: 8),
               Text(
-                'Product Images',
+                context.tr('txt_product_imagess'),
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -210,8 +212,8 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   color: Colors.black.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(3),
                 ),
-                child: const Text(
-                  'Max 1MB each',
+                child: Text(
+                  context.tr('txt_max_each'),
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 10,
@@ -238,7 +240,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Only ${AddProductControllernew.MAX_IMAGES - c.productImages.length} slot${(AddProductControllernew.MAX_IMAGES - c.productImages.length) > 1 ? 's' : ''} remaining',
+                      '${context.tr('txt_only')} ${AddProductControllernew.MAX_IMAGES - c.productImages.length} ${context.tr('txt_slot')}${(AddProductControllernew.MAX_IMAGES - c.productImages.length) > 1 ? 's' : ''} ${context.tr('txt_remaining')}',
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.orange.shade800,
@@ -281,9 +283,9 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
 
           const SizedBox(height: 8),
           Text(
-            '• Maximum ${AddProductControllernew.MAX_IMAGES} images\n'
-                '• Each image must be less than ${AddProductControllernew.MAX_IMAGE_SIZE_MB}MB\n'
-                '• First image will be used as thumbnail (you can change it later)',
+            '• ${context.tr('txt_maximum')} ${AddProductControllernew.MAX_IMAGES} ${context.tr('txt_images')}\n'
+                '• ${context.tr('txt_each_images_less')} ${AddProductControllernew.MAX_IMAGE_SIZE_MB}MB\n'
+                '• ${context.tr('txt_first_image')}',
             style: TextStyle(
               fontSize: 10,
               color: Colors.grey.shade500,
@@ -345,8 +347,8 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
 
     return Tooltip(
       message: isMaxReached
-          ? 'Maximum ${AddProductControllernew.MAX_IMAGES} images reached'
-          : 'Add images (max ${AddProductControllernew.MAX_IMAGE_SIZE_MB}MB each)',
+          ? '${context.tr('txt_maximum')} ${AddProductControllernew.MAX_IMAGES} ${context.tr('txt_images_reached')}'
+          : '${context.tr('txt_add_images')} (max ${AddProductControllernew.MAX_IMAGE_SIZE_MB}MB ${context.tr('txt_each')})',
       child: GestureDetector(
         key: key,
         onTap: isMaxReached ? null : () => _showImageSourceDialog(c),
@@ -370,7 +372,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               if (isLarge) ...[
                 const SizedBox(height: 4),
                 Text(
-                  isMaxReached ? 'Maximum reached' : 'Add Images',
+                  isMaxReached ? context.tr('txt_max_reached') : context.tr('add_images'),
                   style: TextStyle(
                     color: isMaxReached ? Colors.grey.shade500 : Colors.black54,
                     fontSize: 11,
@@ -570,12 +572,12 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Remove Image', style: TextStyle(fontSize: 16)),
-          content: const Text('Are you sure you want to remove this image?', style: TextStyle(fontSize: 14)),
+          title: Text(context.tr('txt_remove_images'), style: TextStyle(fontSize: 16)),
+          content: Text(context.tr('txt_are_you_sure_remove'), style: TextStyle(fontSize: 14)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+              child:  Text(context.tr('txt_cancel'), style: TextStyle(color: Colors.black)),
             ),
             TextButton(
               onPressed: () {
@@ -584,7 +586,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                 setState(() {});
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Remove'),
+              child: Text(context.tr('txt_remove')),
             ),
           ],
         );
@@ -895,8 +897,8 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             children: [
               Icon(Icons.info, color: Colors.black, size: 18),
               const SizedBox(width: 8),
-              const Text(
-                'Product Information',
+              Text(
+                context.tr('txt_product_info'),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -910,9 +912,9 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             controller: c.titleController,
             style: const TextStyle(color: Colors.black, fontSize: 14),
             decoration: InputDecoration(
-              labelText: 'Product Title *',
+              labelText: context.tr('txt_product_title'),
               labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-              hintText: 'e.g., Premium Cotton T-Shirt',
+              hintText: context.tr('txt_product_desc'),
               hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
@@ -930,7 +932,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               fillColor: Colors.grey.shade50,
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
-            validator: (v) => v!.isEmpty ? 'Title is required' : null,
+            validator: (v) => v!.isEmpty ? context.tr('txt_title_required') : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
@@ -938,9 +940,9 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             maxLines: 2,
             style: const TextStyle(color: Colors.black, fontSize: 14),
             decoration: InputDecoration(
-              labelText: 'Short Description',
+              labelText: context.tr('txt_short_desc'),
               labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-              hintText: 'Brief description',
+              hintText: context.tr('txt_brief_desc'),
               hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
@@ -965,9 +967,9 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             maxLines: 3,
             style: const TextStyle(color: Colors.black, fontSize: 14),
             decoration: InputDecoration(
-              labelText: 'Long Description *',
+              labelText: context.tr('txt_long_desc'),
               labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-              hintText: 'Detailed product description',
+              hintText: context.tr('txt_detailed_desc'),
               hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6),
@@ -985,7 +987,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               fillColor: Colors.grey.shade50,
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
-            validator: (v) => v!.isEmpty ? 'Description is required' : null,
+            validator: (v) => v!.isEmpty ? context.tr('txt_desc_required') : null,
           ),
         ],
       ),
@@ -1034,12 +1036,12 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Store',
+                    context.tr('txt_store'),
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    c.selectedStore?.name ?? 'Select Store *',
+                    c.selectedStore?.name ?? context.tr('txt_select_store'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: c.selectedStore != null ? FontWeight.w600 : FontWeight.normal,
@@ -1060,7 +1062,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
     );
   }
   Widget _buildCategorySelectionCard(AddProductControllernew c) {
-    String selectedCategoryText = 'Select Category *';
+    String selectedCategoryText = context.tr('txt_select_category');
     if (c.selectedChildCategory != null) {
       selectedCategoryText =
       '${c.selectedCategory?.name} → ${c.selectedSubCategory?.name} → ${c.selectedChildCategory?.name}';
@@ -1112,7 +1114,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Category',
+                    context.tr('txt_category'),
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 2),
@@ -1154,8 +1156,8 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             children: [
               Icon(Icons.price_change, color: Colors.black, size: 18),
               const SizedBox(width: 8),
-              const Text(
-                'Default Pricing',
+              Text(
+                context.tr('txt_default_pricing'),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -1173,7 +1175,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.black, fontSize: 14),
                   decoration: InputDecoration(
-                    labelText: 'Price *',
+                    labelText: context.tr('txt_price'),
                     prefixText: 'c. ',
                     labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                     border: OutlineInputBorder(
@@ -1201,7 +1203,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.black, fontSize: 14),
                   decoration: InputDecoration(
-                    labelText: 'Discounted Price',
+                    labelText: context.tr('txt_discounted_price'),
                     prefixText: 'c. ',
                     labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                     border: OutlineInputBorder(
@@ -1233,7 +1235,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.black, fontSize: 14),
                   decoration: InputDecoration(
-                    labelText: 'Discount %',
+                    labelText: '${context.tr('txt_discount')} %',
                     suffixText: '%',
                     labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                     border: OutlineInputBorder(
@@ -1261,7 +1263,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.black, fontSize: 14),
                   decoration: InputDecoration(
-                    labelText: 'Stock *',
+                    labelText: context.tr('txt_stock'),
                     labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
@@ -1303,8 +1305,8 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             children: [
               Icon(Icons.style, color: Colors.black, size: 18),
               const SizedBox(width: 8),
-              const Text(
-                'Product Variants',
+              Text(
+                context.tr('txt_product_variants'),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -1334,10 +1336,10 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Icon(Icons.add_circle_outline, color: Colors.black, size: 14),
                         SizedBox(width: 4),
-                        Text('Manage', style: TextStyle(color: Colors.black, fontSize: 12)),
+                        Text(context.tr('txt_manage'), style: TextStyle(color: Colors.black, fontSize: 12)),
                       ],
                     ),
                   ),
@@ -1360,7 +1362,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Select a category first to add variants',
+                      context.tr('txt_select_category_first'),
                       style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                     ),
                   ),
@@ -1388,7 +1390,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Selected Variants (${selectedVariants.length})',
+            '${context.tr('txt_selected_variants')} (${selectedVariants.length})',
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
@@ -1421,7 +1423,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                                 borderRadius: BorderRadius.circular(2),
                               ),
                               child: Text(
-                                'Custom',
+                                context.tr('txt_custom'),
                                 style: TextStyle(fontSize: 8, color: Colors.grey.shade700),
                               ),
                             ),
@@ -1468,7 +1470,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               Icon(Icons.grid_view, color: Colors.black, size: 18),
               const SizedBox(width: 8),
               Text(
-                'Variant Combinations (${c.combinations.length})',
+                '${context.tr('txt_variant_combinations')} (${c.combinations.length})',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -1727,7 +1729,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
         ),
         subtitle: Text(
-          'Price: ${combo.price.toStringAsFixed(2)} c. | Stock: ${combo.stock} | Images: ${combo.images.length}/${c.productImages.length} selected',
+          '${context.tr('txt_price_')}: ${combo.price.toStringAsFixed(2)} c. | ${context.tr('txt_stock_')}: ${combo.stock} | ${context.tr('txt_images_')}: ${combo.images.length}/${c.productImages.length} ${context.tr('txt_selected')}',
           style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
         ),
         trailing: Row(
@@ -1743,7 +1745,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                     c.updateCombination(index, combo);
                   });
                 },
-                tooltip: 'Deselect all',
+                tooltip: context.tr('txt_deselect_all'),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               )
@@ -1756,7 +1758,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                     c.updateCombination(index, combo);
                   });
                 },
-                tooltip: 'Select all',
+                tooltip: context.tr('txt_select_all'),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               )
@@ -1766,7 +1768,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                 onPressed: () {
                   _showImageSelectionDialog(context, c, index);
                 },
-                tooltip: 'Customize selection',
+                tooltip: context.tr('txt_customize_selection'),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -1796,7 +1798,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                         keyboardType: TextInputType.number,
                         style: const TextStyle(fontSize: 13),
                         decoration: InputDecoration(
-                          labelText: 'Price',
+                          labelText: context.tr('txt_price_'),
                           prefixText: 'c. ',
                           labelStyle: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                           border: OutlineInputBorder(
@@ -1819,7 +1821,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                         keyboardType: TextInputType.number,
                         style: const TextStyle(fontSize: 13),
                         decoration: InputDecoration(
-                          labelText: 'Discounted Price',
+                          labelText: context.tr('txt_discounted_price'),
                           prefixText: 'c. ',
                           labelStyle: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                           border: OutlineInputBorder(
@@ -1848,7 +1850,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                         keyboardType: TextInputType.number,
                         style: const TextStyle(fontSize: 13),
                         decoration: InputDecoration(
-                          labelText: 'Discount %',
+                          labelText: '${context.tr('txt_discount')} %',
                           suffixText: '%',
                           labelStyle: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                           border: OutlineInputBorder(
@@ -1871,7 +1873,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                         keyboardType: TextInputType.number,
                         style: const TextStyle(fontSize: 13),
                         decoration: InputDecoration(
-                          labelText: 'Stock',
+                          labelText: context.tr('txt_stock_'),
                           labelStyle: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(4),
@@ -1895,7 +1897,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                   initialValue: combo.sku,
                   style: const TextStyle(fontSize: 13),
                   decoration: InputDecoration(
-                    labelText: 'SKU (Optional)',
+                    labelText: context.tr('txt_sku_optional'),
                     labelStyle: TextStyle(fontSize: 11, color: Colors.grey.shade700),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
@@ -1915,8 +1917,8 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Select images for this combination:',
+                     Text(
+                      context.tr('txt_select_images_from_combo'),
                       style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
                     ),
                     Row(
@@ -1945,7 +1947,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                             },
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
-                            tooltip: 'Select all',
+                            tooltip: context.tr('txt_select_all'),
                           ),
                         if (combo.images.isNotEmpty)
                           IconButton(
@@ -1958,7 +1960,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                             },
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
-                            tooltip: 'Clear all',
+                            tooltip: context.tr('txt_clear_all'),
                           ),
                       ],
                     ),
@@ -2088,7 +2090,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
 
                 // Help text for image selection
                 Text(
-                  'Tap to select/deselect • Long press to preview full screen',
+                  context.tr('tap_to_deselect'),
                   style: TextStyle(
                     fontSize: 9,
                     color: Colors.grey.shade500,
@@ -2110,12 +2112,12 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Combination', style: TextStyle(fontSize: 16)),
-          content: const Text('Are you sure?', style: TextStyle(fontSize: 14)),
+          title: Text(context.tr('txt_delete_combo'), style: TextStyle(fontSize: 16)),
+          content: Text(context.tr('txt_are_you_sure'), style: TextStyle(fontSize: 14)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+              child: Text(context.tr('txt_cancel'), style: TextStyle(color: Colors.black)),
             ),
             TextButton(
               onPressed: () {
@@ -2123,7 +2125,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.black),
-              child: const Text('Delete'),
+              child: Text(context.tr('txt_delete')),
             ),
           ],
         );
@@ -2143,7 +2145,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Select Images', style: TextStyle(fontSize: 16)),
+                  Text(context.tr('txt_select_images'), style: TextStyle(fontSize: 16)),
                   Text(
                     '${combo.images.length}/${c.productImages.length}',
                     style: TextStyle(
@@ -2172,7 +2174,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                               c.updateCombination(comboIndex, combo);
                             });
                           },
-                          child: const Text('Select All', style: TextStyle(fontSize: 12)),
+                          child: Text(context.tr('txt_select_all'), style: TextStyle(fontSize: 12)),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
@@ -2182,7 +2184,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                               c.updateCombination(comboIndex, combo);
                             });
                           },
-                          child: const Text('Clear All', style: TextStyle(fontSize: 12)),
+                          child: Text(context.tr('txt_clear_all'), style: TextStyle(fontSize: 12)),
                         ),
                       ],
                     ),
@@ -2262,7 +2264,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Done', style: TextStyle(color: Colors.black)),
+                  child: Text(context.tr('txt_done'), style: TextStyle(color: Colors.black)),
                 ),
               ],
             );
@@ -2285,7 +2287,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
           children: [
             ListTile(
               leading: Icon(Icons.photo_library, color: Colors.black),
-              title: const Text('Gallery', style: TextStyle(color: Colors.black)),
+              title: Text(context.tr('gallery'), style: TextStyle(color: Colors.black)),
               onTap: () {
                 Navigator.pop(context);
                 c.pickProductImages();
@@ -2293,7 +2295,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
             ),
             ListTile(
               leading: Icon(Icons.camera_alt, color: Colors.black),
-              title: const Text('Camera', style: TextStyle(color: Colors.black)),
+              title: Text(context.tr('camera'), style: TextStyle(color: Colors.black)),
               onTap: () {
                 Navigator.pop(context);
                 c.pickCameraImage();
@@ -2415,33 +2417,35 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
 
 
   Future<void> _submitProduct(BuildContext context, AddProductControllernew c) async {
+    final t = context.watch<TranslateProvider>().t;
+
     // Check if already submitting
     if (c.isSubmitting) {
       return;
     }
 
     if (c.productImages.isEmpty) {
-      _showSnackBar('Please add at least one product image');
+      _showSnackBar(t('please_add_at_least_1'));
       return;
     }
     if (c.titleController.text.isEmpty) {
-      _showSnackBar('Please enter product title');
+      _showSnackBar(t('enter_prod_title'));
       return;
     }
     if (c.selectedStore == null) {
-      _showSnackBar('Please select a store');
+      _showSnackBar(t('select_store'));
       return;
     }
     if (c.selectedChildCategory == null) {
-      _showSnackBar('Please select a complete category');
+      _showSnackBar(t('select_category'));
       return;
     }
     if (c.defaultPriceController.text.isEmpty) {
-      _showSnackBar('Please enter price');
+      _showSnackBar(t('enter_price'));
       return;
     }
     if (c.defaultStockController.text.isEmpty) {
-      _showSnackBar('Please enter stock');
+      _showSnackBar(t('enter_stock'));
       return;
     }
 
@@ -2459,8 +2463,8 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
                 CircularProgressIndicator(),
                 const SizedBox(height: 16),
                 Text(widget.originalProductIdForCopy != null
-                    ? 'Copying product...'
-                    : (widget.editMode ? 'Updating product...' : 'Adding product...')),
+                    ? t('copying_prod')
+                    : (widget.editMode ? t('updating_prod') : t('adding_prod'))),
               ],
             ),
           ),

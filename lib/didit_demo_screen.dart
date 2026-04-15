@@ -120,7 +120,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:didit_sdk/sdk_flutter.dart';
+// import 'package:didit_sdk/sdk_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:molafzo_vendor/services/api_service.dart';
@@ -143,7 +143,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
     try {
       final token = await _fetchSessionToken();
 
-      final result = await DiditSdk.startVerification(
+      /*final result = await DiditSdk.startVerification(
         token,
         config: DiditConfig(loggingEnabled: true),
       );
@@ -172,7 +172,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
             Navigator.pop(context, false);
           }
           break;
-      }
+      }*/
     } catch (e) {
       if (mounted) {
         Navigator.pop(context, false);

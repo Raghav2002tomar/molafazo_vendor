@@ -324,6 +324,7 @@
 
 // screens/ChatListScreen.dart (updated - shows only latest rejection)
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import '../../services/api_service.dart';
 import '../chat/controller/AdminRejectionService.dart';
 import '../chat/model/AdminRejectionModel.dart';
@@ -434,7 +435,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       backgroundColor: cs.surface,
       appBar: AppBar(
         title: Text(
-          'Chats',
+          context.tr('txt_chat'),
           style: tt.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: cs.onSurface,
@@ -478,7 +479,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              "No Conversations Yet",
+              context.tr('txt_no_conv_yet'),
               style: tt.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: cs.onSurface,
@@ -486,7 +487,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              "Start a chat to see it here",
+              context.tr('txt_start_chat_here'),
               style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
           ],
@@ -593,7 +594,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   Row(
                     children: [
                       Text(
-                        'Admin Support',
+                        context.tr('txt_admin_support'),
                         style: tt.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -608,7 +609,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           border: Border.all(color: Colors.red.shade200),
                         ),
                         child: Text(
-                          'Rejection',
+                          context.tr('txt_rejection'),
                           style: tt.labelSmall?.copyWith(
                             color: Colors.red.shade700,
                             fontSize: 9,
@@ -630,8 +631,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       Expanded(
                         child: Text(
                           rejection.type == 'store'
-                              ? (rejection.storeName ?? 'Store Rejected')
-                              : (rejection.productName ?? 'Product Rejected'),
+                              ? (rejection.storeName ?? context.tr('txt_store_rejected'))
+                              : (rejection.productName ?? context.tr('txt_prod_rejected')),
                           style: tt.bodySmall?.copyWith(
                             color: cs.primary,
                             fontWeight: FontWeight.w500,

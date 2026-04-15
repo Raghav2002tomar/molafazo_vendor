@@ -1,5 +1,6 @@
 // screens/AdminRejectionDetailScreen.dart
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:molafzo_vendor/services/api_service.dart';
 import '../model/AdminRejectionModel.dart';
 
@@ -88,7 +89,7 @@ class AdminRejectionDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Admin Support',
+                  context.tr('txt_admin_support'),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: cs.onBackground,
@@ -97,7 +98,7 @@ class AdminRejectionDetailScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$count ${count == 1 ? 'Rejection' : 'Rejections'}',
+                  '$count ${count == 1 ? context.tr('txt_rejection') : context.tr('txt_rejections')}',
                   style: TextStyle(
                     fontSize: 12,
                     color: cs.onBackground.withOpacity(0.6),
@@ -132,7 +133,7 @@ class AdminRejectionDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'No Rejections',
+            context.tr('txt_no_rejections'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
@@ -142,7 +143,7 @@ class AdminRejectionDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'All your stores and products are approved',
+            context.tr('txt_stores_approved'),
             style: TextStyle(
               fontSize: 14,
               color: cs.onBackground.withOpacity(0.6),
@@ -257,7 +258,7 @@ class AdminRejectionDetailScreen extends StatelessWidget {
                     // Reason Card (if exists)
                     if (rejection.reason != null && rejection.reason!.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      _buildReasonCard(rejection.reason!),
+                      _buildReasonCard(context,rejection.reason!),
                     ],
 
                     const SizedBox(height: 8),
@@ -423,7 +424,7 @@ class AdminRejectionDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          isStore ? 'Store' : 'Product',
+                          isStore ? context.tr('txt_store') : context.tr('txt_prod'),
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,
@@ -450,7 +451,9 @@ class AdminRejectionDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildReasonCard(String reason) {
+  Widget _buildReasonCard(
+      BuildContext context,
+      String reason) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -489,7 +492,7 @@ class AdminRejectionDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Rejection Reason',
+                  context.tr('txt_rejection_reason'),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,

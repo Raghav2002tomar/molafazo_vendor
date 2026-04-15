@@ -254,6 +254,7 @@
 // CategorySelectScreen.dart - Updated with black theme
 
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:molafzo_vendor/screens/addproduct/model.dart';
 import 'package:provider/provider.dart';
 import 'contreller.dart';
@@ -272,7 +273,7 @@ class AddProductCategoryScreen extends StatelessWidget {
             backgroundColor: Colors.white,
             appBar: AppBar(
               backgroundColor: Colors.white,
-              title: const Text('Select Category', style: TextStyle(color: Colors.black, fontSize: 16)),
+              title: Text(context.tr('sel_category'), style: TextStyle(color: Colors.black, fontSize: 16)),
               elevation: 0.5,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -292,13 +293,13 @@ class AddProductCategoryScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Product Category',
+                   Text(
+                    context.tr('prod_category'),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Select category, subcategory, and child category',
+                    context.tr('select_cat_sub_child_cat'),
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
                   const SizedBox(height: 16),
@@ -326,7 +327,7 @@ class AddProductCategoryScreen extends StatelessWidget {
                                 Navigator.pop(context, true);
                               },
                               style: TextButton.styleFrom(foregroundColor: Colors.black),
-                              child: const Text('Done', style: TextStyle(fontSize: 12)),
+                              child: Text(context.tr('txt_done'), style: TextStyle(fontSize: 12)),
                             ),
                         ],
                       ),
@@ -338,7 +339,7 @@ class AddProductCategoryScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildCategorySection(
-                            title: 'Category',
+                            title: context.tr('txt_category'),
                             items: c.categories,
                             selectedItem: c.selectedCategory,
                             loading: c.loadingCategory,
@@ -356,7 +357,7 @@ class AddProductCategoryScreen extends StatelessWidget {
                             const Divider(height: 1),
                             const SizedBox(height: 16),
                             _buildCategorySection(
-                              title: 'Subcategory',
+                              title: context.tr('txt_subcategory'),
                               items: c.subCategories,
                               selectedItem: c.selectedSubCategory,
                               loading: c.loadingSubCategory,
@@ -373,7 +374,7 @@ class AddProductCategoryScreen extends StatelessWidget {
                             const Divider(height: 1),
                             const SizedBox(height: 16),
                             _buildCategorySection(
-                              title: 'Child Category',
+                              title: context.tr('txt_child_category'),
                               items: c.childCategories,
                               selectedItem: c.selectedChildCategory,
                               loading: c.loadingChildCategory,

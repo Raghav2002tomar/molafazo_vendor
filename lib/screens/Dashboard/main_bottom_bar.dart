@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 
 import '../products/controller/add_product_controller.dart';
@@ -49,13 +50,13 @@ class _MainBottombarScreenState extends State<MainBottombarScreen> {
                 children: [
                   _NavItem(
                     svgPath: 'assets/images/product.svg',
-                    label: 'List',
+                    label: context.tr('txt_list'),
                     isSelected: _currentIndex == 1,
                     onTap: () => setState(() => _currentIndex = 1),
                   ),
                   _NavItem(
                     svgPath: 'assets/images/order.svg',
-                    label: 'Orders',
+                    label: context.tr('txt_order'),
                     isSelected: _currentIndex == 2,
                     onTap: () => setState(() => _currentIndex = 2),
                   ),
@@ -85,13 +86,13 @@ class _MainBottombarScreenState extends State<MainBottombarScreen> {
                 children: [
                   _NavItem(
                     svgPath: 'assets/images/chat.svg',
-                    label: 'Chat',
+                    label: context.tr('txt_chats'),
                     isSelected: _currentIndex == 3,
                     onTap: () => setState(() => _currentIndex = 3),
                   ),
                   _NavItem(
                     svgPath: 'assets/images/profile.svg',
-                    label: 'Profile',
+                    label: context.tr('txt_profile'),
                     isSelected: _currentIndex == 4,
                     onTap: () => setState(() => _currentIndex = 4),
                   ),
@@ -248,7 +249,7 @@ class _ProductItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-                Text('$sales sales today', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600)),
+                Text('$sales ${context.tr('txt_sales_today')}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600)),
               ],
             ),
           ),

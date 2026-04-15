@@ -35,13 +35,13 @@ class CartScreen extends StatelessWidget {
                         backgroundColor: cs.surface,
                         title: Text(t('clear_cart'), style: tt.titleMedium?.copyWith(color: cs.onSurface)),
                         content: Text(
-                          'Are you sure you want to remove all items?',
+                          t('are_you_sure'),
                           style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: Text('Cancel', style: tt.labelLarge?.copyWith(color: cs.primary)),
+                            child: Text(t('txt_cancel'), style: tt.labelLarge?.copyWith(color: cs.primary)),
                           ),
                           ElevatedButton(
                             onPressed: () {
@@ -52,14 +52,14 @@ class CartScreen extends StatelessWidget {
                               backgroundColor: cs.error,
                               foregroundColor: cs.onError,
                             ),
-                            child: const Text('Clear All'),
+                            child: Text(t('txt_clear_all')),
                           ),
                         ],
                       ),
                     );
                   },
                   child: Text(
-                    'Clear All',
+                    t('txt_clear_all'),
                     style: tt.labelLarge?.copyWith(color: cs.error, fontWeight: FontWeight.w600),
                   ),
                 );
@@ -91,7 +91,7 @@ class CartScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Your cart is empty',
+                    t('txt_your_cart_is_empty'),
                     style: tt.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: cs.onSurface,
@@ -99,7 +99,7 @@ class CartScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Add some products to get started',
+                    t('txt_add_some_products'),
                     style: tt.bodyMedium?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
@@ -116,7 +116,7 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Continue Shopping'),
+                    child: Text(t('txt_continue_shopping')),
                   ),
                 ],
               ),
@@ -131,7 +131,7 @@ class CartScreen extends StatelessWidget {
                 color: cs.surface,
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  '${cart.itemCount} Items in Cart',
+                  '${cart.itemCount} ${t('txt_items_in_cart')}',
                   style: tt.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: cs.onSurface,
@@ -171,7 +171,7 @@ class CartScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Total (${cart.itemCount} items):',
+                            '${t('txt_total')} (${cart.itemCount} ${t('items')}):',
                             style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                           ),
                           Text(
@@ -202,7 +202,7 @@ class CartScreen extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'Proceed to Checkout',
+                            t('txt_proceed_to_checkout'),
                             style: tt.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
