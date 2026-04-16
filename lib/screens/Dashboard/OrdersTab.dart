@@ -447,10 +447,13 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:molafzo_vendor/screens/orders/screens/order_detail_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../widgets/profile_not_eligible_widget.dart';
+import '../../providers/translate_provider.dart';
 import '../orders/controller/order_controller.dart';
 import '../orders/model/order_model.dart';
 
@@ -503,15 +506,15 @@ class _OrderListScreenState extends State<OrderListScreen> {
   String _getStatusText(int statusId) {
     switch (statusId) {
       case 1:
-        return 'New';
+        return context.tr('new_order');
       case 2:
-        return 'Pickup';
+        return context.tr('pickup');
       case 3:
-        return 'Completed';
+        return context.tr('completed');
       case 4:
-        return 'Cancelled';
+        return context.tr('cancelled');
       default:
-        return 'Unknown';
+        return context.tr('unknown');
     }
   }
 
@@ -601,8 +604,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Filter Orders',
+                   Text(
+                    context.tr('filter_orders'),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -661,7 +664,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.grey,
                       ),
-                      child: const Text('Cancel'),
+                      child: Text(context.tr('cancel')),
                     ),
                   ),
                 ],
@@ -700,7 +703,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Orders'),
+        title: Text(context.tr('orders')),
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -733,15 +736,15 @@ class _OrderListScreenState extends State<OrderListScreen> {
       body: (profilestatus != '1')
           ? ProfileNotEligibleWidget(
         title: _isProfileIncomplete
-            ? "Profile incomplete"
+            ? context.tr('profile_incomplete')
             : profilestatus == '2'
-            ? "Profile under review"
-            : "Access restricted",
+            ? context.tr('profile_under_review')
+            : context.tr('access_restricted'),
         subtitle: _isProfileIncomplete
-            ? "Complete your profile to access orders."
+            ? context.tr('complete_profile_access_orders')
             : profilestatus == '2'
-            ? "Please wait for admin approval."
-            : "You cannot access this section.",
+            ? context.tr('wait_admin_approval')
+            : context.tr('cannot_access_section'),
       )
           : Column(
         children: [
@@ -751,8 +754,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  const Text(
-                    'Active Filter:',
+                  Text(
+                    context.tr('active_filter'),
                     style: TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   const SizedBox(width: 8),
@@ -809,15 +812,15 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       children: [
                         const Icon(Icons.inbox, size: 60, color: Colors.grey),
                         const SizedBox(height: 12),
-                        const Text(
-                          "No orders found",
+                         Text(
+                          context.tr('no_orders_found'),
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           currentFilter == 'All'
-                              ? "New orders will appear here"
-                              : "No ${currentFilter.toLowerCase()} orders",
+                              ? context.tr('new_orders_appear_here')
+                              : "No ${currentFilter.toLowerCase()} ${context.tr('txt_orders')}",
                           style: const TextStyle(color: Colors.grey),
                         ),
                         if (currentFilter != 'All') ...[
@@ -830,7 +833,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                               });
                             },
                             icon: const Icon(Icons.clear_all),
-                            label: const Text('Clear Filter'),
+                            label: Text(context.tr('clear_filter')),
                           ),
                         ],
                       ],
@@ -845,7 +848,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     return _OrderTile(
                       orderId: "#${order.id}",
                       date: _formatDate(order.createdAt),
-                      items: "${order.items.length} items",
+                      items: "${order.items.length} ${context.tr('items')}",
                       statusId: order.statusId,
                       statusColor: _getStatusColor(order.statusId),
                       statusText: _getStatusText(order.statusId),
@@ -957,7 +960,7 @@ class _OrderTile extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'Order $orderId',
+                          '${context.tr('order')} $orderId',
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

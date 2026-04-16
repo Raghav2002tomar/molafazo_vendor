@@ -828,10 +828,9 @@
 //   }
 // }
 
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:molafzo_vendor/services/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pdf/pdf.dart';
@@ -866,11 +865,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   String _statusText(int id) {
     switch (id) {
-      case 1: return "New Order";
-      case 2: return "Awaiting Pickup";
-      case 3: return "Completed";
-      case 4: return "Cancelled";
-      default: return "Unknown";
+      case 1: return context.tr('new_orders');
+      case 2: return context.tr('awaiting_pickup');
+      case 3: return context.tr('completed');
+      case 4: return context.tr('cancelled');
+      default: return context.tr('unknown');
     }
   }
 
@@ -994,7 +993,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'ORDER RECEIPT',
+                      context.tr('order_receipt'),
                       style: pw.TextStyle(
                         color: PdfColors.white,
                         fontSize: 22,
@@ -1004,7 +1003,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      'Order #${order.id}',
+                      '${context.tr('order')} #${order.id}',
                       style: pw.TextStyle(color: PdfColors.white, fontSize: 14),
                     ),
                   ],
@@ -1048,12 +1047,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               pw.SizedBox(height: 16),
 
               // ── Customer Info ──────────────────────────────────────────
-              _pdfSectionTitle('Customer Information'),
+              _pdfSectionTitle(context.tr('customer_info')),
               pw.SizedBox(height: 10),
-              _pdfRow('Name', order.customer.name),
-              _pdfRow('Phone', order.customer.mobile),
+              _pdfRow(context.tr('txt_name'), order.customer.name),
+              _pdfRow(context.tr('txt_phone'), order.customer.mobile),
               _pdfRow(
-                order.deliveryMethod == 'store_pickup' ? 'Pickup Location' : 'Delivery Address',
+                order.deliveryMethod == 'store_pickup' ? context.tr('txt_pickup_loc') : context.tr('txt_delivery_address'),
                 order.deliveryAddress,
               ),
 
@@ -1062,21 +1061,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               pw.SizedBox(height: 16),
 
               // ── Order Details ──────────────────────────────────────────
-              _pdfSectionTitle('Order Details'),
+              _pdfSectionTitle(context.tr('txt_order_details')),
               pw.SizedBox(height: 10),
-              _pdfRow('Payment Method', order.paymentType.toUpperCase()),
+              _pdfRow(context.tr('txt_payment_method'), order.paymentType.toUpperCase()),
               _pdfRow(
-                'Delivery Type',
-                order.deliveryMethod == 'store_pickup' ? 'Store Pickup' : 'Home Delivery',
+                context.tr('txt_delivery_type'),
+                order.deliveryMethod == 'store_pickup' ? context.tr('txt_store_pickup') : context.tr('txt_home_delivery'),
               ),
-              _pdfRow('Order Date', _formatDateTime(order.createdAt)),
+              _pdfRow(context.tr('txt_order_date'), _formatDateTime(order.createdAt)),
 
               pw.SizedBox(height: 16),
               pw.Divider(color: PdfColors.grey300, thickness: 1),
               pw.SizedBox(height: 16),
 
               // ── Items ──────────────────────────────────────────────────
-              _pdfSectionTitle('Items'),
+              _pdfSectionTitle(context.tr('txt_items')),
               pw.SizedBox(height: 10),
               ...order.items.map((item) {
                 final hasVariant = item.variant != null && item.variant!.isNotEmpty;
@@ -1125,7 +1124,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text(
-                    'TOTAL',
+                    context.tr('txt_totals'),
                     style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
                   ),
                   pw.Text(
@@ -1142,7 +1141,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               pw.SizedBox(height: 36),
               pw.Center(
                 child: pw.Text(
-                  'Thank you for your order!',
+                  context.tr('txt_thanks_for_order'),
                   style: const pw.TextStyle(fontSize: 13, color: PdfColors.grey600),
                 ),
               ),
@@ -1221,8 +1220,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         );
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to start conversation"),
+           SnackBar(
+            content: Text(context.tr('txt_failed_to_start')),
             backgroundColor: Colors.red,
           ),
         );
@@ -1231,7 +1230,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text("${context.tr('error')}: $e"), backgroundColor: Colors.red),
         );
       }
     }
@@ -1243,7 +1242,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       await launchUrl(url);
     } else if (mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Cannot open dialer")));
+          .showSnackBar( SnackBar(content: Text(context.tr('txt_cant_open_dialer'))));
     }
   }
 
@@ -1301,8 +1300,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Colors.black87),
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text(
-        "Order Details",
+      title: Text(
+        context.tr('txt_order_details'),
         style: TextStyle(
           color: Colors.black87,
           fontSize: 17,
@@ -1361,7 +1360,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "Order #${order.id}",
+                "${context.tr('order')} #${order.id}",
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
@@ -1449,11 +1448,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             icon: isPickup ? Icons.store_rounded : Icons.location_on_rounded,
             iconBg: isPickup ? Colors.orange.shade50 : Colors.green.shade50,
             iconColor: isPickup ? Colors.orange.shade700 : Colors.green.shade700,
-            label: isPickup ? "Pickup Location" : "Delivery Address",
+            label: isPickup ? context.tr('txt_pickup_loc') : context.tr('txt_delivery_address'),
             value: order.deliveryAddress,
             subtitle: isPickup
-                ? "Customer will collect from your store"
-                : "Deliver to customer's address",
+                ? context.tr('txt_customer_will_collect')
+                : context.tr('txt_deliver_to_customer'),
             subtitleColor: isPickup ? Colors.orange.shade700 : Colors.green.shade700,
           ),
 
@@ -1466,7 +1465,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             icon: Icons.payment_rounded,
             iconBg: Colors.blue.shade50,
             iconColor: Colors.blue.shade700,
-            label: "Payment Mode",
+            label: context.tr('txt_payment_mode'),
             value: order.paymentType.toUpperCase(),
           ),
         ],
@@ -1545,10 +1544,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget _buildItemsCard(Order order) {
     if (order.items.isEmpty) {
       return _card(
-        child: const Center(
+        child: Center(
           child: Padding(
             padding: EdgeInsets.all(12),
-            child: Text("No items found", style: TextStyle(color: Colors.black38)),
+            child: Text(context.tr('txt_no_item_found'), style: TextStyle(color: Colors.black38)),
           ),
         ),
       );
@@ -1558,8 +1557,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Order Items",
+           Text(
+            context.tr('txt_order_items'),
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black87),
           ),
           const SizedBox(height: 14),
@@ -1703,8 +1702,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Order Information",
+           Text(
+            context.tr('txt_order_info'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -1716,7 +1715,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             icon: Icons.calendar_today_rounded,
             iconBg: const Color(0xFFEEF2FF),
             iconColor: const Color(0xFF6366F1),
-            label: "Order Date",
+            label: context.tr('txt_order_date'),
             value: _formatDateTime(order.createdAt),
           ),
           const SizedBox(height: 10),
@@ -1726,8 +1725,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             icon: Icons.local_shipping_rounded,
             iconBg: const Color(0xFFEFF6FF),
             iconColor: const Color(0xFF3B82F6),
-            label: "Shipping Method",
-            value: order.deliveryMethod == 'store_pickup' ? 'Store Pickup' : 'To the door',
+            label: context.tr('txt_shipping_method'),
+            value: order.deliveryMethod == 'store_pickup' ? context.tr('txt_store_pickup') : context.tr('txt_to_door'),
           ),
           const SizedBox(height: 10),
           _divider(),
@@ -1736,7 +1735,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             icon: Icons.payment_rounded,
             iconBg: const Color(0xFFF0FDF4),
             iconColor: const Color(0xFF22C55E),
-            label: "Payment",
+            label: context.tr('txt_payment'),
             value: order.paymentType.toUpperCase(),
           ),
         ],
@@ -1754,8 +1753,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "Total Amount",
+           Text(
+            context.tr('txt_total_amount'),
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 15,
@@ -1790,13 +1789,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFF22C55E), width: 1.5),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.receipt_long_rounded, color: Color(0xFF22C55E), size: 20),
             SizedBox(width: 8),
             Text(
-              "View Receipt",
+              context.tr('txt_view_receipt'),
               style: TextStyle(
                 color: Color(0xFF22C55E),
                 fontWeight: FontWeight.w600,
@@ -1842,8 +1841,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           height: 22,
           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
         )
-            : const Text(
-          "Mark as Completed",
+            : Text(
+          context.tr('txt_mark_as_completed'),
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
@@ -1869,7 +1868,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-                  : const Text("Reject", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  : Text(context.tr('txt_reject'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
           ),
         ),
@@ -1891,7 +1890,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 height: 20,
                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
               )
-                  : const Text("Accept", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  : Text(context.tr('txt_accept'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             ),
           ),
         ),

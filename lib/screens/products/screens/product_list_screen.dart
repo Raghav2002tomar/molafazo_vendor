@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:molafzo_vendor/screens/products/screens/product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -139,8 +140,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          'Out of Stock',
+                        child: Text(
+                          context.tr('txt_out_of_stock'),
                           style:
                           TextStyle(color: Colors.white, fontSize: 12),
                         ),
@@ -188,7 +189,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
                   const SizedBox(height: 4),
                   Text(
-                    "Stock: ${p['stock']}",
+                    "${context.tr('stock')}: ${p['stock']}",
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],
@@ -205,7 +206,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Products'),
+        title: Text(context.tr('txt_my_products')),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,8 +215,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
           /// STORE FILTER
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 0, 10),
-            child: const Text(
-              'Filter by Store',
+            child: Text(
+              context.tr('txt_filter_by_store'),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
@@ -234,7 +235,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           /// PRODUCT GRID
           Expanded(
             child: filteredProducts.isEmpty
-                ? const Center(child: Text('No products found'))
+                ?  Center(child: Text(context.tr('txt_no_product_found')))
                 : GridView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: filteredProducts.length,

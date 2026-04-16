@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/api_service.dart';
 
@@ -229,12 +230,12 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Bank'),
-        content: Text('Are you sure you want to remove ${savedBanks[index].bankName}?'),
+        title:  Text(context.tr('txt_remove_bank')),
+        content: Text('${context.tr('txt_are_you_sure_to_remove')} ${savedBanks[index].bankName}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child:  Text(context.tr('cancel')),
           ),
           TextButton(
             onPressed: () {
@@ -242,10 +243,10 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
                 savedBanks.removeAt(index);
               });
               Navigator.pop(context);
-              _showSnackBar('Bank removed successfully', Colors.green);
+              _showSnackBar(context.tr('txt_bank_removed_success'), Colors.green);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Remove'),
+            child:  Text(context.tr('txt_remove')),
           ),
         ],
       ),
@@ -304,8 +305,8 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        title: const Text(
-          "Account Management",
+        title:  Text(
+          context.tr('txt_account_management'),
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -326,7 +327,7 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
                 )
                     : const Icon(Icons.save, size: 20),
                 label: Text(
-                  isSaving ? "Saving..." : "Save",
+                  isSaving ? context.tr('txt_saving') : context.tr('txt_save'),
                   style: const TextStyle(fontSize: 14),
                 ),
                 style: TextButton.styleFrom(
@@ -349,7 +350,7 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
             CircularProgressIndicator(color: colorScheme.primary),
             const SizedBox(height: 16),
             Text(
-              "Loading your account details...",
+              context.tr('txt_loading_acc_details'),
               style: TextStyle(color: Colors.grey[600]),
             ),
           ],
@@ -367,8 +368,8 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _SectionHeader(
-                    title: 'Payment Methods',
-                    subtitle: 'Choose how you want to receive payments',
+                    title: context.tr('txt_payment_methods'),
+                    subtitle: context.tr('txt_choose_payment_mode'),
                     icon: Icons.payment,
                   ),
                   const SizedBox(height: 16),
@@ -393,8 +394,8 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
                               isCodSelected = value ?? false;
                             });
                           },
-                          title: "Cash on Delivery",
-                          subtitle: "Get paid when delivering the order",
+                          title: context.tr('txt_cash_on_delivery'),
+                          subtitle: context.tr('txt_cod_desc'),
                           icon: Icons.money,
                         ),
                         const Divider(height: 1, indent: 56),
@@ -410,8 +411,8 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
                               }
                             });
                           },
-                          title: "Digital Payment",
-                          subtitle: "Get paid directly to your bank account",
+                          title: context.tr('txt_digital_payment'),
+                          subtitle: context.tr('txt_digital_desc'),
                           icon: Icons.account_balance,
                         ),
                       ],
@@ -431,9 +432,9 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SectionHeader(
-                        title: 'Linked Banks',
+                        title: context.tr('txt_linked_bank'),
                         subtitle: savedBanks.isEmpty
-                            ? 'Add your bank accounts to receive digital payments'
+                            ? context.tr('txt_add_your_bank_account')
                             : 'You have ${savedBanks.length} bank ${savedBanks.length == 1 ? 'account' : 'accounts'} linked',
                         icon: Icons.account_balance_wallet,
                       ),
@@ -441,7 +442,7 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
 
                       if (savedBanks.isEmpty)
                         _EmptyStateCard(
-                          message: "No bank accounts added yet",
+                          message: context.tr('txt_no_bank_added'),
                           icon: Icons.account_balance,
                           onAdd: () => _openAddBankSheet(),
                         )
@@ -471,8 +472,8 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
                                     ? null
                                     : _openAddBankSheet,
                                 icon: const Icon(Icons.add, size: 20),
-                                label: const Text(
-                                  "Add Another Bank Account",
+                                label: Text(
+                                  context.tr('txt_add_bank_account'),
                                   style: TextStyle(fontSize: 16),
                                 ),
                                 style: ElevatedButton.styleFrom(
@@ -625,7 +626,7 @@ class _EmptyStateCard extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add, size: 18),
-            label: const Text("Add Bank Account"),
+            label: Text(context.tr('txt_add_bank')),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
@@ -906,8 +907,8 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill all fields"),
+         SnackBar(
+          content: Text(context.tr('please_fill_all_fields')),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
         ),
@@ -944,7 +945,7 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
           ),
           const SizedBox(height: 20),
           Text(
-            widget.initialBank == null ? "Add Bank Account" : "Edit Bank Account",
+            widget.initialBank == null ? context.tr('txt_add_bank') : context.tr('txt_edit_bank'),
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -952,7 +953,7 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
           ),
           const SizedBox(height: 4),
           Text(
-            "Select your bank and enter account details",
+            context.tr('select_bank_account_details'),
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -961,8 +962,8 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
           const SizedBox(height: 24),
 
           // Bank Selection Label
-          const Text(
-            "Select Bank",
+          Text(
+            context.tr('txt_select_bank'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -1054,7 +1055,7 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Account Details",
+                    context.tr('txt_account_details'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -1065,8 +1066,8 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
                   TextField(
                     controller: holderNameController,
                     decoration: InputDecoration(
-                      labelText: "Account Holder Name",
-                      hintText: "Enter account holder name",
+                      labelText: context.tr('txt_account_holder_name'),
+                      hintText: context.tr('txt_enter_account_holder'),
                       prefixIcon: const Icon(Icons.person_outline, size: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1079,8 +1080,8 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
                   TextField(
                     controller: accountController,
                     decoration: InputDecoration(
-                      labelText: "Account Number",
-                      hintText: "Enter account number",
+                      labelText: context.tr('txt_account_number'),
+                      hintText: context.tr('txt_enter_account_number'),
                       prefixIcon: const Icon(Icons.numbers, size: 20),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1110,7 +1111,7 @@ class _SelectBankSheetState extends State<SelectBankSheet> {
                 ),
               ),
               child: Text(
-                widget.initialBank == null ? "Add Bank Account" : "Update Bank Account",
+                widget.initialBank == null ? context.tr('txt_add_bank') : context.tr('txt_update_bank'),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

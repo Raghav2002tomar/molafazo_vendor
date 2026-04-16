@@ -417,7 +417,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: Column(
                         children: [
                           Text(
-                            'Molafzo',
+                            'inBozor',
                             style: TextStyle(
                               color: scheme.primary,
                               fontSize: 64,

@@ -143,7 +143,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
     try {
       final token = await _fetchSessionToken();
 
-      /*final result = await DiditSdk.startVerification(
+      final result = await DiditSdk.startVerification(
         token,
         config: DiditConfig(loggingEnabled: true),
       );
@@ -172,7 +172,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
             Navigator.pop(context, false);
           }
           break;
-      }*/
+      }
     } catch (e) {
       if (mounted) {
         Navigator.pop(context, false);

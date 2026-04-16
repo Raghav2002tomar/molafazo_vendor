@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:molafzo_vendor/extensions/context_extension.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import '../../../services/api_service.dart';
+import '../../providers/translate_provider.dart';
 import '../products/screens/add_product_basic_info.dart';
 import '../stores/screens/add_store_screen.dart';
 
@@ -45,9 +48,9 @@ class _DashboardTabState extends State<DashboardTab> {
   bool get _isProfileIncomplete => email.isEmpty;
 
   String get _profileStatusMessage {
-    if (_isProfileIncomplete) return "Complete your profile";
-    if (profilestatus == '2') return "Profile under review";
-    if (profilestatus == '1') return "Profile approved ✓";
+    if (_isProfileIncomplete) return context.tr('complete_profile');
+    if (profilestatus == '2') return context.tr('profile_under_review');
+    if (profilestatus == '1') return context.tr('profile_approved');
     return "";
   }
 
@@ -121,9 +124,12 @@ class _DashboardTabState extends State<DashboardTab> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('api_token');
+      final translateProvider =
+      Provider.of<TranslateProvider>(context, listen: false);
+      String t(String key) => translateProvider.t(key);
 
       if (token == null || token.isEmpty) {
-        Fluttertoast.showToast(msg: "Authentication token missing");
+        Fluttertoast.showToast(msg: t('authentication_missing'));
         if (!mounted) return;
         setState(() {
           _loadMockData();
@@ -285,8 +291,8 @@ class _DashboardTabState extends State<DashboardTab> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text(
-          'Dashboard',
+        title: Text(
+          context.tr('dashboard'),
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
@@ -318,7 +324,7 @@ class _DashboardTabState extends State<DashboardTab> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Loading dashboard...',
+              context.tr('loading_dashboard'),
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],
@@ -340,7 +346,7 @@ class _DashboardTabState extends State<DashboardTab> {
           const SizedBox(height: 24),
 
           if (_dailyRevenue.isNotEmpty) ...[
-            sectionTitle('Revenue Trend'),
+            sectionTitle(context.tr('revenue_trend')),
             const SizedBox(height: 12),
             _buildSimpleRevenueChart(),
             const SizedBox(height: 24),
@@ -350,7 +356,7 @@ class _DashboardTabState extends State<DashboardTab> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                sectionTitle("Today's Orders"),
+                sectionTitle(context.tr('todays_orders')),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -374,14 +380,14 @@ class _DashboardTabState extends State<DashboardTab> {
           ],
 
           if (_mostPurchasedProducts.isNotEmpty) ...[
-            sectionTitle('Most Purchased Products'),
+            sectionTitle(context.tr('most_purchased_products')),
             const SizedBox(height: 12),
             _buildMostPurchasedProducts(),
             const SizedBox(height: 24),
           ],
 
           if (_recentOrders.isNotEmpty) ...[
-            sectionTitle('Recent Orders'),
+            sectionTitle(context.tr('recent_orders')),
             const SizedBox(height: 12),
             _buildRecentOrders(),
             const SizedBox(height: 24),
@@ -442,7 +448,7 @@ class _DashboardTabState extends State<DashboardTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome, $username!',
+                      '${context.tr('welcome')}, $username!',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -474,7 +480,7 @@ class _DashboardTabState extends State<DashboardTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Revenue',
+                    context.tr('total_revenue'),
                     style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.9)),
                   ),
                   const SizedBox(height: 4),
@@ -488,7 +494,7 @@ class _DashboardTabState extends State<DashboardTab> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Total Orders',
+                    context.tr('total_orders'),
                     style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.9)),
                   ),
                   const SizedBox(height: 4),
@@ -507,6 +513,8 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildPeriodFilter() {
     final scheme = Theme.of(context).colorScheme;
+    String t(String key) =>
+        Provider.of<TranslateProvider>(context, listen: false).t(key);
 
     return Container(
       padding: const EdgeInsets.all(4),
@@ -517,10 +525,10 @@ class _DashboardTabState extends State<DashboardTab> {
       ),
       child: Row(
         children: [
-          _buildFilterChip('Daily', 'daily', scheme),
-          _buildFilterChip('Weekly', 'weekly', scheme),
-          _buildFilterChip('Monthly', 'monthly', scheme),
-          _buildFilterChip('Yearly', 'yearly', scheme),
+          _buildFilterChip(t('daily'), 'daily', scheme),
+          _buildFilterChip(t('weekly'), 'weekly', scheme),
+          _buildFilterChip(t('monthly'), 'monthly', scheme),
+          _buildFilterChip(t('yearly'), 'yearly', scheme),
         ],
       ),
     );
@@ -567,30 +575,30 @@ class _DashboardTabState extends State<DashboardTab> {
         _buildMetricCard(
           icon: Icons.attach_money,
           iconColor: Colors.green,
-          title: 'Revenue',
+          title: context.tr('revenue'),
           value: getPeriodRevenue(),
           bgColor: Colors.green.withOpacity(0.1),
         ),
         _buildMetricCard(
           icon: Icons.shopping_bag_outlined,
           iconColor: Colors.blue,
-          title: 'Orders',
+          title: context.tr('orders'),
           value: '$_totalOrders',
           bgColor: Colors.blue.withOpacity(0.1),
         ),
         _buildMetricCard(
           icon: Icons.people_outline,
           iconColor: Colors.purple,
-          title: 'Customers',
+          title: context.tr('customers'),
           value: '$_totalCustomers',
           bgColor: Colors.purple.withOpacity(0.1),
         ),
         _buildMetricCard(
           icon: Icons.inventory_outlined,
           iconColor: Colors.orange,
-          title: 'Products',
+          title: context.tr('products'),
           value: '$_totalProducts',
-          subtitle: '$_outOfStock low stock',
+          subtitle: '$_outOfStock ${context.tr('low_stock')}',
           bgColor: Colors.orange.withOpacity(0.1),
         ),
       ],
@@ -874,7 +882,7 @@ class _DashboardTabState extends State<DashboardTab> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.broken_image, color: Colors.grey.shade400, size: 30),
-                              Text('Error', style: TextStyle(fontSize: 8, color: Colors.grey.shade500)),
+                              Text(context.tr('error'), style: TextStyle(fontSize: 8, color: Colors.grey.shade500)),
                             ],
                           ),
                         );
@@ -903,14 +911,14 @@ class _DashboardTabState extends State<DashboardTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product['name'] ?? 'Product',
+                        product['name'] ?? context.tr('product'),
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$totalSold sold',
+                        '$totalSold ${context.tr('sold')}',
                         style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
                       ),
                     ],
@@ -940,15 +948,15 @@ class _DashboardTabState extends State<DashboardTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Low Stock Alert', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.orange)),
+                Text(context.tr('low_stock_alert'), style: TextStyle(fontWeight: FontWeight.w600, color: Colors.orange)),
                 Text(
-                  '$_outOfStock product${_outOfStock > 1 ? 's are' : ' is'} running low on stock',
+                  '$_outOfStock product${_outOfStock > 1 ? 's are' : ' is'} ${context.tr('running_low_stock')}',
                   style: const TextStyle(color: Colors.orange),
                 ),
               ],
             ),
           ),
-          TextButton(onPressed: () {}, child: const Text('View')),
+          TextButton(onPressed: () {}, child: Text(context.tr('view'))),
         ],
       ),
     );
@@ -956,13 +964,13 @@ class _DashboardTabState extends State<DashboardTab> {
 
   String _getStatusText(int statusId) {
     switch(statusId) {
-      case 1: return 'Pending';
-      case 2: return 'Confirmed';
-      case 3: return 'Processing';
-      case 4: return 'Shipped';
-      case 5: return 'Delivered';
-      case 6: return 'Cancelled';
-      default: return 'Unknown';
+      case 1: return context.tr('pending');
+      case 2: return context.tr('confirmed');
+      case 3: return context.tr('processing');
+      case 4: return context.tr('shipped');
+      case 5: return context.tr('delivered');
+      case 6: return context.tr('cancelled');
+      default: return context.tr('unknown');
     }
   }
 

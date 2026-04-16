@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -84,7 +85,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         ),
         child: Center(
           child: Text(
-            store?.name ?? "All",
+            store?.name ?? context.tr('all'),
             style: TextStyle(
               color: active ? Colors.white : Colors.black,
               fontWeight: FontWeight.w600,
@@ -289,10 +290,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   ),
 
                   if (outOfStock)
-                    _badge("Out of Stock", Colors.red, left: 8),
+                    _badge(context.tr('out_of_stock'), Colors.red, left: 8),
                   if (hasDiscount)
                     _badge(
-                      "${p.price - p.discountPrice!} c. OFF",
+                      "${p.price - p.discountPrice!} c. ${context.tr('off')}",
                       Colors.green,
                       right: 8,
                     ),
@@ -344,7 +345,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     ],
                   ),
                   Text(
-                    "Stock: ${p.availableQuantity}",
+                    "${context.tr('stock')}: ${p.availableQuantity}",
                     style: const TextStyle(fontSize: 12),
                   ),
                 ],
@@ -396,7 +397,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         );
       }
     } catch (e) {
-      debugPrint('Error loading product: $e');
+      debugPrint('${context.tr('error_loading_product')}: $e');
       if (mounted) {
         setState(() {
           _editingProductIds.remove(product.id);
@@ -404,7 +405,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading product: $e'),
+            content: Text('${context.tr('error_loading_product')}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -442,7 +443,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products'),
+        title: Text(context.tr('products')),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -474,17 +475,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
         ],
       ),
       body: profilestatus != '1'
-          ? const ProfileNotEligibleWidget(
-        title: "Profile not approved",
-        subtitle: "Complete your profile to continue",
+          ?  ProfileNotEligibleWidget(
+        title: context.tr('profile_not_approved'),
+        subtitle: context.tr('complete_profile_continue'),
       )
           : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+           Padding(
             padding: EdgeInsets.all(16),
             child: Text(
-              'Stores',
+              context.tr('stores'),
               style:
               TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
@@ -505,8 +506,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
             child: controller.loadingProducts
                 ? const Center(child: CircularProgressIndicator())
                 : controller.filteredProducts.isEmpty
-                ? const Center(
-              child: Text("No products found"),
+                ? Center(
+              child: Text(context.tr('no_products_found')),
             )
                 : GridView.builder(
               padding: const EdgeInsets.all(16),

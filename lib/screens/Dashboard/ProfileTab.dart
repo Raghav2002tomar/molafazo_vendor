@@ -338,6 +338,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     _MenuTile(
+                                        icon: Icons.language,
+                                        title: context.tr('language'),
+                                        onTap: () {
+                                            showModalBottomSheet(
+                                                context: context,
+                                                builder: (context) {
+                                                    return Column(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                            ListTile(
+                                                                title: const Text('English'),
+                                                                onTap: () {
+                                                                    context.read<TranslateProvider>().setLocale('en');
+                                                                    Navigator.pop(context);
+                                                                }
+                                                            ),
+                                                            ListTile(
+                                                                title: const Text('Русский'),
+                                                                onTap: () {
+                                                                    context.read<TranslateProvider>().setLocale('ru');
+                                                                    Navigator.pop(context);
+                                                                }
+                                                            ),
+                                                            ListTile(
+                                                                title: const Text('Тоҷикӣ'),
+                                                                onTap: () {
+                                                                    context.read<TranslateProvider>().setLocale('tg');
+                                                                    Navigator.pop(context);
+                                                                }
+                                                            )
+                                                        ]
+                                                    );
+                                                }
+                                            );
+                                        }
+                                    ),
+                                    const SizedBox(height: 4),
+                                    _MenuTile(
                                         icon: Icons.headset_mic_outlined,
                                         title: context.tr('live_support'),
                                         onTap: () {}
@@ -419,7 +457,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                                                 } else {
                                                     ScaffoldMessenger.of(context).showSnackBar(
-                                                         SnackBar(content: Text(context.tr('logout_failed')))
+                                                        SnackBar(content: Text(context.tr('logout_failed')))
                                                     );
                                                 }
                                             }

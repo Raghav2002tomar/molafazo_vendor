@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../promotion/add_review/screens/packages_screen.dart';
 import '../model/product_model.dart';
@@ -309,8 +310,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
       child: Text(
         inStock
-            ? 'In Stock ($stock units available)'
-            : 'Out of Stock',
+            ? '${context.tr('txt_in_stock')} ($stock ${context.tr('txt_units_available')})'
+            : context.tr('txt_out_of_stock'),
         style: TextStyle(
           color: inStock ? Colors.green[800] : Colors.red[800],
           fontWeight: FontWeight.w600,
@@ -328,13 +329,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
       child: Column(
         children: [
-          _buildInfoRow('Category', widget.product.category.name),
+          _buildInfoRow(context.tr('txt_category'), widget.product.category.name),
           const SizedBox(height: 8),
-          _buildInfoRow('Sub Category', widget.product.subCategory.name),
+          _buildInfoRow(context.tr('txt_sub_category'), widget.product.subCategory.name),
           if (widget.product.childCategory != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: _buildInfoRow('Child Category', widget.product.childCategory!.name),
+              child: _buildInfoRow(context.tr('txt_child_category'), widget.product.childCategory!.name),
             ),
         ],
       ),
@@ -350,12 +351,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
       child: Column(
         children: [
-          _buildInfoRow('Delivery', widget.product.deliveryAvailable ? 'Available' : 'Not Available'),
+          _buildInfoRow(context.tr('delivery'), widget.product.deliveryAvailable ? context.tr('txt_available') : context.tr('txt_not_available')),
           const SizedBox(height: 8),
           if (widget.product.deliveryAvailable) ...[
-            _buildInfoRow('Delivery Price', '₽${widget.product.deliveryPrice.toStringAsFixed(2)}'),
+            _buildInfoRow(context.tr('txt_delivery_price'), '₽${widget.product.deliveryPrice.toStringAsFixed(2)}'),
             const SizedBox(height: 8),
-            _buildInfoRow('Delivery Time', widget.product.deliveryTime),
+            _buildInfoRow(context.tr('txt_delivery_time'), widget.product.deliveryTime),
           ],
         ],
       ),
@@ -388,8 +389,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Description',
+         Text(
+          context.tr('txt_description'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -397,7 +398,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          widget.product.description.isEmpty ? 'No description available' : widget.product.description,
+          widget.product.description.isEmpty ? context.tr('txt_no_desc_available') : widget.product.description,
           style: const TextStyle(
             fontSize: 14,
             height: 1.5,
@@ -411,8 +412,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Tags',
+         Text(
+          context.tr('txt_tags'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -562,8 +563,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Selected Variant Details',
+                 Text(
+                  context.tr('txt_selected_variant'),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -630,8 +631,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Available Banks',
+         Text(
+          context.tr('txt_available_banks'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -656,8 +657,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Account: ${bank.accountHolderName}'),
-                  Text('Number: ${bank.accountNumber}'),
+                  Text('${context.tr('txt_account')}: ${bank.accountHolderName}'),
+                  Text('${context.tr('txt_number')}: ${bank.accountNumber}'),
                 ],
               ),
             );
