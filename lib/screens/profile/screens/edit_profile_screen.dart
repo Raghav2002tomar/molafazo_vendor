@@ -819,11 +819,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:molafzo_vendor/extensions/context_extension.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../didit_demo_screen.dart';
+import '../../../providers/translate_provider.dart';
 import '../../../services/api_service.dart';
 import '../../../widgets/address_selection_screen.dart';
 
@@ -1252,14 +1255,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Document Verified',
+                    context.tr('txt_document_verify'),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.green.shade800,
                     ),
                   ),
                   Text(
-                    'Your identity has been verified',
+                    context.tr('txt_your_identity_verify'),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.green.shade700,
@@ -1284,6 +1287,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         );
 
+        final translateProvider =
+        Provider.of<TranslateProvider>(context, listen: false);
+        String t(String key) => translateProvider.t(key);
+
         if (result == true) {
           setState(() {
             isDocumentVerified = true;
@@ -1294,18 +1301,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           await prefs.setBool("gov_id_verified", true);
 
           Fluttertoast.showToast(
-            msg: "Document verified successfully!",
+            msg: t('txt_document_verified_success'),
             backgroundColor: Colors.green,
           );
         } else if (result == false) {
           Fluttertoast.showToast(
-            msg: "Verification failed. Please try again.",
+            msg: t('txt_verify_failed'),
             backgroundColor: Colors.red,
           );
         }
       },
       icon: const Icon(Icons.verified_user, size: 18),
-      label: const Text('Verify Document'),
+      label: Text(context.tr('txt_verify_document')),
       style: OutlinedButton.styleFrom(
         foregroundColor: scheme.primary,
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1324,7 +1331,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: Text(context.tr('txt_edit_profile')),
         centerTitle: true,
         elevation: 0,
         backgroundColor: scheme.surface,
@@ -1342,7 +1349,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             Center(
               child: Text(
-                'Profile photo cannot be changed',
+                context.tr('txt_profile_photo_not_change'),
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade600,
@@ -1353,7 +1360,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 24),
 
             // Basic Information Section
-            Text('Basic Information', style: textTheme.titleMedium),
+            Text(context.tr('txt_basic_info'), style: textTheme.titleMedium),
             const SizedBox(height: 12),
 
             // Note about disabled fields
@@ -1370,7 +1377,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Name cannot be changed. Contact support for updates.',
+                      context.tr('txt_name_cant_change'),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.amber.shade800,
@@ -1388,7 +1395,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               controller: firstCtrl,
               enabled: false, // Disabled - cannot edit
               decoration: _inputDecoration(
-                'First Name',
+                context.tr('txt_first_name'),
                 prefixIcon: Icon(Icons.person_outline, color: scheme.onSurfaceVariant),
                 enabled: false,
               ),
@@ -1401,7 +1408,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               controller: lastCtrl,
               enabled: false, // Disabled - cannot edit
               decoration: _inputDecoration(
-                'Last Name',
+                context.tr('txt_last_name'),
                 prefixIcon: Icon(Icons.person_outline, color: scheme.onSurfaceVariant),
                 enabled: false,
               ),
@@ -1415,7 +1422,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               enabled: true, // Email is now editable
               keyboardType: TextInputType.emailAddress,
               decoration: _inputDecoration(
-                'Email',
+                context.tr('txt_email'),
                 prefixIcon: Icon(Icons.email_outlined, color: scheme.onSurfaceVariant),
                 enabled: true,
               ),
@@ -1430,7 +1437,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               controller: mobileCtrl,
               keyboardType: TextInputType.phone,
               decoration: _inputDecoration(
-                'Mobile Number',
+                context.tr('tct_mobile_number'),
                 prefixIcon: Icon(Icons.phone_outlined, color: scheme.onSurfaceVariant),
                 enabled: false,
               ),
@@ -1442,7 +1449,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               controller: pwdCtrl,
               obscureText: pwdObscure,
               decoration: _inputDecoration(
-                'Password',
+                context.tr('txt_password'),
                 prefixIcon: Icon(Icons.lock_outline, color: scheme.onSurfaceVariant),
                 suffix: _passwordToggle(true),
               ),
@@ -1455,7 +1462,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               controller: confirmCtrl,
               obscureText: confirmObscure,
               decoration: _inputDecoration(
-                'Confirm Password',
+                context.tr('txt_confirm_password'),
                 prefixIcon: Icon(Icons.lock_outline, color: scheme.onSurfaceVariant),
                 suffix: _passwordToggle(false),
               ),
@@ -1465,7 +1472,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 24),
 
             // Government ID Section
-            Text('Government ID', style: textTheme.titleMedium),
+            Text(context.tr('txt_gov_id'), style: textTheme.titleMedium),
             const SizedBox(height: 12),
 
             // Govt ID Verification (One-time only)
@@ -1474,7 +1481,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 24),
 
             // Address Section
-            Text('Address', style: textTheme.titleMedium),
+            Text(context.tr('prof_address'), style: textTheme.titleMedium),
             const SizedBox(height: 12),
 
             // Address Selection Card with Map
@@ -1508,7 +1515,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Delivery Address',
+                              context.tr('txt_delivery_address'),
                               style: textTheme.labelMedium?.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
@@ -1516,7 +1523,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             const SizedBox(height: 4),
                             Text(
                               addressCtrl.text.isEmpty
-                                  ? 'Select your address on map'
+                                  ? context.tr('select_address')
                                   : addressCtrl.text,
                               style: textTheme.bodyMedium?.copyWith(
                                 color: addressCtrl.text.isEmpty
@@ -1554,7 +1561,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 Expanded(
                   child: Text(
-                    "I accept the terms & conditions",
+                    context.tr('accept_terms_condition'),
                     style: textTheme.bodyMedium,
                   ),
                 ),
@@ -1583,8 +1590,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                 )
-                    : const Text(
-                  'Save Changes',
+                    : Text(
+                  context.tr('save_changes'),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),

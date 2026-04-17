@@ -459,6 +459,24 @@ const Map<String, Map<String, String>> translations = {
         'txt_account_number':'Account Number',
         'txt_enter_account_number':'Enter account number',
 
+        //Edit Profile
+        'txt_document_verify':'Document Verified',
+        'txt_your_identity_verify':'Your identity has been verified',
+        'txt_document_verified_success':'Document verified successfully!',
+        'txt_verify_failed':'Verification failed. Please try again.',
+        'txt_verify_document':'Verify Document',
+        'txt_edit_profile':'Edit Profile',
+        'txt_profile_photo_not_change':'Profile photo cannot be changed',
+        'txt_basic_info':'Basic Information',
+        'txt_name_cant_change':'Name cannot be changed. Contact support for updates.',
+        'txt_first_name':'First Name',
+        'txt_last_name':'Last Name',
+        'tct_mobile_number':'Mobile Number',
+        'txt_gov_id':'Government ID',
+        'prof_address':'Address',
+        'select_address':'Select your address on map',
+        'accept_terms_condition':'I accept the terms & conditions',
+        'save_changes':'Save Changes',
 
 
     },
@@ -923,6 +941,25 @@ const Map<String, Map<String, String>> translations = {
         'txt_account_number':'Номер счета',
         'txt_enter_account_number':'Введите номер счета',
 
+        //Edit Profile
+    'txt_document_verify':'Документ подтвержден',
+'txt_your_identity_verify':'Ваша личность подтверждена',
+'txt_document_verified_success':'Документ успешно подтвержден!',
+'txt_verify_failed':'Проверка не удалась. Попробуйте еще раз.',
+'txt_verify_document':'Подтвердить документ',
+'txt_edit_profile':'Редактировать профиль',
+'txt_profile_photo_not_change':'Фото профиля нельзя изменить',
+'txt_basic_info':'Основная информация',
+'txt_name_cant_change':'Имя нельзя изменить. Обратитесь в службу поддержки для получения обновлений.',
+'txt_first_name':'Имя',
+'txt_last_name':'Фамилия',
+'tct_mobile_number':'Номер мобильного телефона',
+'txt_gov_id':'Удостоверение личности',
+'prof_address':'Адрес',
+'select_address':'Выберите свой адрес на карте',
+'accept_terms_condition':'Я принимаю условия использования',
+'save_changes':'Сохранить изменения',
+
     },
 
     'tg': {
@@ -1386,7 +1423,23 @@ const Map<String, Map<String, String>> translations = {
         'txt_account_number':'Рақами ҳисоб',
         'txt_enter_account_number':'Рақами ҳисобиро ворид кунед',
 
-
-
+        //Edit Profile
+        'txt_document_verify':'Ҳуҷҷат тасдиқ шуд',
+        'txt_your_identity_verify':'Шумо тасдиқ шудед',
+        'txt_document_verified_success':'Ҳуҷҷат бо муваффақият тасдиқ шуд!',
+        'txt_verify_failed':'Тасдиқ ноком шуд. Лутфан боз як бор кӯшиш кунед.',
+        'txt_verify_document':'Ҳуҷҷатро тасдиқ кунед',
+        'txt_edit_profile':'Профилро таҳрир кунед',
+        'txt_profile_photo_not_change':'Аксро дар профил иваз кардан мумкин нест',
+        'txt_basic_info':'Маълумоти асосӣ',
+        'txt_name_cant_change':'Номи шуморо иваз кардан мумкин нест. Барои навсозӣ бо дастгирӣ тамос гиред.',
+        'txt_first_name':'Номи аввал',
+        'txt_last_name':'Номи охир',
+        'tct_mobile_number':'Рақами телефони мобилӣ',
+        'txt_gov_id':'Шумораи шиносномаи давлатӣ',
+        'prof_address':'Суроға',
+        'select_address':'Суроғаи худро дар харита интихоб кунед',
+        'accept_terms_condition':'Ман шартҳо ва қоидаҳоро қабул мекунам',
+        'save_changes':'Тағйиротро захира кунед',
     }
 };
