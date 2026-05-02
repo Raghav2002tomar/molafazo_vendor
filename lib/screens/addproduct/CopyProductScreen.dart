@@ -412,6 +412,7 @@ import 'package:flutter/material.dart';
 import 'package:molafzo_vendor/screens/addproduct/model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/api_service.dart';
+import '../../extensions/context_extension.dart';
 import '../addproduct/contreller.dart';
 import '../addproduct/AddProductScreen.dart';
 import '../products/model/product_model.dart';
@@ -545,7 +546,7 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
 
     if (selectedStoreId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a store first')),
+        SnackBar(content: Text(context.tr('txt_select_store_first'))),
       );
       return;
     }
@@ -600,7 +601,7 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading product: $e'),
+            content: Text('${context.tr('txt_error_loading_product')}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -634,8 +635,8 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
             ),
             child: Padding(
               padding: const EdgeInsets.only(left: 16, right: 16),
-              child: const Text(
-                'Add New',
+              child:
+                  Text(context.tr('txt_add_new'),
                 style: TextStyle(fontSize: 11),
               ),
             ),
@@ -654,13 +655,12 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
             ),
             child: Column(
               children: [
-                const Text('Copy Products from Marketplace'),
+                Text(context.tr('txt_copy_products_marketplace')),
                 Row(
                   children: [
                     const Icon(Icons.store, size: 20, color: Colors.black54),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Copy to:',
+            Text(context.tr('txt_copy_to'),
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(width: 12),
@@ -669,7 +669,7 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
                         value: selectedStoreId,
                         isExpanded: true,
                         underline: const SizedBox(),
-                        hint: const Text('Select Store'),
+                        hint: Text(context.tr('txt_select_store')),
                         items: stores.map((store) {
                           return DropdownMenuItem<int>(
                             value: store.id,
@@ -694,26 +694,25 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
         ),
       ),
       body: isInitialLoading
-          ? const Center(
+          ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading products...'),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(context.tr('txt_loading_products')),
           ],
         ),
       )
           : products.isEmpty
-          ? const Center(
+          ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No products available',
-              style: TextStyle(color: Colors.grey),
+            const Icon(Icons.inventory, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+          Text(context.tr('txt_no_products_available'),
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),
@@ -849,8 +848,7 @@ class _CopyProductScreenState extends State<CopyProductScreen> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                        : const Text(
-                      'Copy to My Store',
+                        : Text(context.tr('txt_copy_to_my_store'),
                       style: TextStyle(fontSize: 11),
                     ),
                   ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import '../../../extensions/context_extension.dart';
 import '../../../services/api_service.dart';
 
 class PolicyContentScreen extends StatefulWidget {
@@ -67,14 +68,13 @@ class _PolicyContentScreenState extends State<PolicyContentScreen> {
         print("CONTENT: $_htmlContent");
       } else {
         setState(() {
-          _error = res["message"]?.toString() ?? "No data found";
-          _isLoading = false;
+          _error = res["message"]?.toString() ?? context.tr('txt_no_data_found');          _isLoading = false;
         });
       }
     } catch (e) {
       print("LOAD ERROR: $e");
       setState(() {
-        _error = "Failed to load data: $e";
+        _error = "${context.tr('txt_failed_to_load_data')}: $e";
         _isLoading = false;
       });
     }
@@ -195,7 +195,7 @@ class _PolicyContentScreenState extends State<PolicyContentScreen> {
                 ),
               if (_htmlTitle.trim().isEmpty &&
                   _htmlContent.trim().isEmpty)
-                const Text("No content available"),
+                Text(context.tr('txt_no_content_available'))
             ],
           ),
         ),

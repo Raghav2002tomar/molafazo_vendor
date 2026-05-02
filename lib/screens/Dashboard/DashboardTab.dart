@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import '../../../services/api_service.dart';
 import '../../providers/translate_provider.dart';
+import '../../widgets/pending_approval_screen.dart';
 import '../products/screens/add_product_basic_info.dart';
 import '../stores/screens/add_store_screen.dart';
 
@@ -24,7 +25,12 @@ class _DashboardTabState extends State<DashboardTab> {
   // Dashboard data variables
   bool _isLoading = true;
   bool _hasError = false;
+  bool get _isVerified => profilestatus == '1';
 
+  bool get _shouldShowPendingScreen {
+    if (_isProfileIncomplete) return true;
+    return !_isVerified;
+  }
   // Filter state
   String _selectedPeriod = 'daily'; // daily, weekly, monthly, yearly
 
@@ -320,7 +326,9 @@ class _DashboardTabState extends State<DashboardTab> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -329,6 +337,13 @@ class _DashboardTabState extends State<DashboardTab> {
             ),
           ],
         ),
+      );
+    }
+
+    if (_shouldShowPendingScreen) {
+      return PendingApprovalScreen(
+        userName: username,
+        status: profilestatus,
       );
     }
 

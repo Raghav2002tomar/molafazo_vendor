@@ -18,19 +18,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   late final _pages =  [
     _OnbPageData(
-      image: 'assets/images/onb_3.jpg',
+      image: 'assets/images/onboading1.png',
       title: context.tr('txt_onboard_1_title'),
       subtitle:
       context.tr('txt_onboard_1_desc'),
     ),
     _OnbPageData(
-      image: 'assets/images/onb_2.jpg',
+      image: 'assets/images/onboading2.png',
       title: context.tr('txt_onboard_2_title'),
       subtitle:
       context.tr('txt_onboard_2_desc'),
     ),
     _OnbPageData(
-      image: 'assets/images/onb_1.jpg',
+      image: 'assets/images/onboading3.png',
       title: context.tr('txt_onboard_3_title'),
       subtitle:
       context.tr('txt_onboard_3_desc'),
@@ -186,25 +186,25 @@ class _OnbPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    data.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    data.subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
-                      fontSize: 13,
-                      height: 1.35,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+                  // Text(
+                  //   data.title,
+                  //   style: const TextStyle(
+                  //     color: Colors.white,
+                  //     fontSize: 22,
+                  //     fontWeight: FontWeight.w700,
+                  //     height: 1.2,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 10),
+                  // Text(
+                  //   data.subtitle,
+                  //   style: TextStyle(
+                  //     color: Colors.white.withOpacity(0.85),
+                  //     fontSize: 13,
+                  //     height: 1.35,
+                  //     fontWeight: FontWeight.w400,
+                  //   ),
+                  // ),
 
                 ],
 

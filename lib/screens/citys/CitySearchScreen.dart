@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../extensions/context_extension.dart';
 import 'CityService.dart';
 
 
@@ -71,7 +72,7 @@ class _CitySearchScreenState extends State<CitySearchScreen> {
     return Scaffold(
 
       appBar: AppBar(
-        title: const Text("Select City"),
+        title: Text(context.tr('txt_select_city')),
       ),
 
       body: Column(
@@ -84,7 +85,7 @@ class _CitySearchScreenState extends State<CitySearchScreen> {
               controller: searchController,
               onChanged: searchCity,
               decoration: InputDecoration(
-                hintText: "Search city...",
+                hintText: context.tr('txt_search_city'),
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),

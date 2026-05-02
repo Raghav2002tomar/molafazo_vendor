@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:molafzo_vendor/screens/promotion/add_review/screens/packages_screen.dart';
+import '../../../../extensions/context_extension.dart';
 import '../controller/vendor_api_service.dart';
 import '../model/payment_details_model.dart';
 
@@ -60,8 +61,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
   Future<void> _submitPromotionRequest() async {
     if (_screenshot == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please upload payment screenshot')),
-      );
+        SnackBar(content: Text(context.tr('txt_payment_screenshot_required'))),      );
       return;
     }
 
@@ -88,25 +88,25 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
           barrierDismissible: false,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Row(
+              title:  Row(
                 children: [
                   Icon(Icons.check_circle, color: Colors.green),
                   SizedBox(width: 8),
-                  Text('Success!'),
+                  Text(context.tr('txt_success_title'))
                 ],
               ),
-              content: const Column(
+              content:  Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Your promotion request has been submitted successfully!'),
+                  Text(context.tr('txt_promotion_submitted_success')),
                   SizedBox(height: 16),
-                  Text(
-                    'Next Steps:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(context.tr('txt_next_steps'),
+
+            style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text('• Wait for admin approval'),
-                  Text('• You will be notified when approved'),
-                  Text('• Then you can add your review'),
+                  Text(context.tr('txt_wait_admin_approval')),
+                  Text(context.tr('txt_notified_when_approved')),
+                  Text(context.tr('txt_then_add_review'))
                 ],
               ),
               actions: [
@@ -115,7 +115,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
                     Navigator.of(context).pop(); // Close dialog
                     _navigateToPackagesScreen();
                   },
-                  child: const Text('OK'),
+                  child: Text(context.tr('txt_ok'))
                 ),
               ],
             );
@@ -124,7 +124,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result['message'] ?? 'Submission failed'),
+            content: Text(result['message'] ?? context.tr('txt_submission_failed')),
             backgroundColor: Colors.red,
           ),
         );
@@ -135,7 +135,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${e.toString()}'),
+          content: Text('${context.tr('txt_error_prefix')}: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -165,8 +165,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Upload Payment Screenshot'),
-          // backgroundColor: Colors.deepPurple,
+          title: Text(context.tr('txt_upload_payment_screenshot')),          // backgroundColor: Colors.deepPurple,
           // foregroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -203,15 +202,15 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Payment Summary',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(context.tr('txt_payment_summary'),
+
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
-            _buildSummaryRow('Package', widget.packageTitle.toUpperCase()),
-            _buildSummaryRow('Amount', '\$${widget.packagePrice}'),
+            _buildSummaryRow(context.tr('txt_package'), widget.packageTitle.toUpperCase()),
+            _buildSummaryRow(context.tr('txt_amount'), '\$${widget.packagePrice}'),
             _buildSummaryRow(
-              'Pay to',
+              context.tr('txt_pay_to'),
               widget.paymentDetails.accountName,
             ),
           ],
@@ -245,9 +244,8 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Upload Payment Screenshot',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        Text(context.tr('txt_upload_payment_screenshot'),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             GestureDetector(
@@ -278,13 +276,11 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
                       color: Colors.black54,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Tap to upload screenshot',
-                      style: TextStyle(color: Colors.grey),
+                  Text(context.tr('txt_tap_upload_screenshot'),
+                  style: TextStyle(color: Colors.grey),
                     ),
-                    const Text(
-                      'JPG, PNG accepted',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                  Text(context.tr('txt_jpg_png_accepted'),
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -302,7 +298,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
                       });
                     },
                     icon: const Icon(Icons.delete, size: 16),
-                    label: const Text('Remove'),
+    label: Text(context.tr('txt_remove')),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.red,
                     ),
@@ -330,7 +326,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Make sure the screenshot clearly shows the transaction ID and amount',
+                context.tr('txt_screenshot_clear_message'),
               style: TextStyle(color: Colors.blue.shade700),
             ),
           ),
@@ -361,8 +357,7 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
           ),
         )
-            : const Text(
-          'Submit Promotion Request',
+            : Text(context.tr('txt_submit_promotion_request'),
           style: TextStyle(fontSize: 16),
         ),
       ),
@@ -382,15 +377,15 @@ class _PromotionRequestScreenState extends State<PromotionRequestScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Gallery'),
-                onTap: () {
+                title: Text(context.tr('txt_choose_from_gallery')),
+            onTap: () {
                   Navigator.pop(context);
                   _pickScreenshot();
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a Photo'),
+                title: Text(context.tr('txt_take_photo')),
                 onTap: () {
                   Navigator.pop(context);
                   _takePhoto();

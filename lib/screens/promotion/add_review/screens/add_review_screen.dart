@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../../../extensions/context_extension.dart';
 import '../controller/api_service.dart';
 
 class AddReviewScreen extends StatefulWidget {
@@ -64,14 +65,14 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
 
     if (_profileImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select profile image')),
+        SnackBar(content: Text(context.tr('txt_select_profile_image'))),
       );
       return;
     }
 
     if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one review image')),
+        SnackBar(content: Text(context.tr('txt_select_one_review_image'))),
       );
       return;
     }
@@ -139,15 +140,15 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Success'),
-              content: const Text('Review submitted successfully!'),
+              title: Text(context.tr('txt_success')),
+              content: Text(context.tr('txt_review_submitted_successfully')),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context); // Close dialog
                     Navigator.pop(context); // Go back to packages screen
                   },
-                  child: const Text('OK'),
+                  child: Text(context.tr('txt_ok')),
                 ),
               ],
             ),
@@ -167,8 +168,9 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
         _isSubmitting = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+        SnackBar(
+          content: Text('${context.tr('txt_error_prefix')}: ${e.toString()}'),
+        ),      );
     }
   }
 
@@ -176,7 +178,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Your Review'),
+        title: Text(context.tr('txt_add_your_review')),
         // backgroundColor: Colors.deepPurple,
         // foregroundColor: Colors.white,
       ),
@@ -198,8 +200,9 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Adding review for ${widget.packageTitle} package',
-                          style: TextStyle(
+                          context
+                              .tr('txt_adding_review_for_package')
+                              .replaceAll('{package}', widget.packageTitle),                          style: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: Colors.black87,
                           ),
@@ -241,14 +244,14 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
               // Username
               TextFormField(
                 controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Username *',
-                  border: OutlineInputBorder(),
+                decoration:  InputDecoration(
+                    labelText: context.tr('txt_username'),
+                    border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.person),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter username';
+                    return context.tr('txt_please_enter_username');
                   }
                   return null;
                 },
@@ -258,14 +261,14 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
               // Title
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Review Title *',
-                  border: OutlineInputBorder(),
+                decoration:  InputDecoration(
+                    labelText: context.tr('txt_review_title'),
+                    border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.title),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter title';
+                    return context.tr('txt_please_enter_title');
                   }
                   return null;
                 },
@@ -276,8 +279,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Rating *',
+              Text(context.tr('txt_rating'),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -306,15 +308,14 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
               TextFormField(
                 controller: _reviewController,
                 maxLines: 5,
-                decoration: const InputDecoration(
-                  labelText: 'Your Review *',
-                  border: OutlineInputBorder(),
+                decoration:  InputDecoration(
+                    labelText: context.tr('txt_your_review'),
+                    border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your review';
-                  }
+                    return context.tr('txt_please_enter_review');                  }
                   return null;
                 },
               ),
@@ -324,8 +325,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Review Images *',
+              Text(context.tr('txt_review_images'),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -347,14 +347,13 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
                               border: Border.all(color: Colors.grey, width: 2),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Center(
+                            child:  Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.add_photo_alternate, size: 40),
                                   SizedBox(height: 4),
-                                  Text('Add Image'),
-                                ],
+                                  Text(context.tr('txt_add_image'))                                ],
                               ),
                             ),
                           ),
@@ -416,8 +415,7 @@ class _AddReviewScreenState extends State<AddReviewScreen> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                      : const Text(
-                    'Submit Review',
+                      : Text(context.tr('txt_submit_review'),
                     style: TextStyle(fontSize: 16),
                   ),
                 ),

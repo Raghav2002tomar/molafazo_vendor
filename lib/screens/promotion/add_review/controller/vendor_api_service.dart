@@ -20,7 +20,7 @@ class VendorApiService {
     } catch (e) {
       return {
         "success": false,
-        "message": "Failed to fetch packages: ${e.toString()}",
+        "message": "txt_failed_fetch_packages: ${e.toString()}",
       };
     }
   }
@@ -37,7 +37,7 @@ class VendorApiService {
     } catch (e) {
       return {
         "success": false,
-        "message": "Failed to fetch payment details: ${e.toString()}",
+        "message": "txt_failed_fetch_payment_details: ${e.toString()}",
       };
     }
   }
@@ -85,13 +85,12 @@ class VendorApiService {
       } else {
         return {
           "success": false,
-          "message": decoded['message'] ?? "Failed to submit promotion request",
-        };
+          "message": decoded['message'] ?? "txt_failed_submit_promotion_request",        };
       }
     } catch (e) {
       return {
         "success": false,
-        "message": "Error: ${e.toString()}",
+        "message": "txt_error_prefix: ${e.toString()}",
       };
     }
   }
@@ -169,7 +168,7 @@ class VendorApiService {
     } catch (e) {
       return {
         "success": false,
-        "message": "Error: ${e.toString()}",
+        "message": "txt_error_prefix: ${e.toString()}",
       };
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../extensions/context_extension.dart';
 import '../controller/vendor_api_service.dart';
 import '../model/package_model.dart';
 import 'payment_details_screen.dart';
@@ -58,8 +59,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Promotion Packages'),
-        // backgroundColor: Colors.deepPurple,
+        title: Text(context.tr('txt_promotion_packages')),        // backgroundColor: Colors.deepPurple,
         // foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -77,7 +77,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _fetchPackages,
-              child: const Text('Retry'),
+              child: Text(context.tr('txt_retry')),
             ),
           ],
         ),
@@ -162,7 +162,8 @@ class _PackagesScreenState extends State<PackagesScreen> {
                       const Icon(Icons.star, size: 16, color: Colors.amber),
                       const SizedBox(width: 4),
                       Text(
-                        '${package.reviewCount} reviews',
+                        context.tr('txt_reviews_count')
+                            .replaceAll('{count}', package.reviewCount.toString()),
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],
@@ -188,7 +189,8 @@ class _PackagesScreenState extends State<PackagesScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${package.remainingReviews} remaining',
+                          context.tr('txt_remaining_count')
+                              .replaceAll('{count}', package.remainingReviews.toString()),
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: package.remainingReviews > 0 ? Colors.blue : Colors.red,
@@ -208,8 +210,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Package Price',
+                    Text(context.tr('txt_package_price'),
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     Text(
@@ -244,7 +245,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Your request is pending admin approval. You will be notified once approved.',
+                        context.tr('txt_pending_admin_approval'),
                         style: TextStyle(fontSize: 12, color: Colors.orange.shade700),
                       ),
                     ),
@@ -269,7 +270,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'You have used all reviews for this package. Please select a new plan to continue.',
+                        context.tr('txt_all_reviews_used'),
                         style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                       ),
                     ),
@@ -327,7 +328,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
       // Check if we have promotionRequestId
       if (package.promotionRequestId == null || package.promotionRequestId!.isEmpty) {
         return buildButton(
-          text: 'Request ID Missing',
+          text: context.tr('txt_request_id_missing'),
           icon: Icons.error_outline,
           bgColor: Colors.transparent,
           textColor: Colors.grey.shade600,
@@ -337,8 +338,8 @@ class _PackagesScreenState extends State<PackagesScreen> {
       }
 
       return buildButton(
-        text: 'Add Review (${package.remainingReviews} left)',
-        icon: Icons.rate_review,
+        text: context.tr('txt_add_review_left')
+            .replaceAll('{count}', package.remainingReviews.toString()),        icon: Icons.rate_review,
         bgColor: Colors.green,
         textColor: Colors.white,
         onTap: () async {
@@ -360,7 +361,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
     // Case 2: Approved + Applied + No remaining reviews - Show Select Plan
     else if (package.isApproved && package.isApplied && package.remainingReviews == 0) {
       return buildButton(
-        text: 'Select New Plan',
+        text: context.tr('txt_select_new_plan'),
         icon: Icons.shopping_cart,
         bgColor: Colors.black,
         textColor: Colors.white,
@@ -371,7 +372,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
     // Case 3: Pending
     else if (package.isPending) {
       return buildButton(
-        text: 'Pending Approval',
+        text: context.tr('txt_pending_approval'),
         icon: Icons.pending,
         bgColor: Colors.transparent,
         textColor: Colors.grey.shade600,
@@ -383,7 +384,7 @@ class _PackagesScreenState extends State<PackagesScreen> {
     // Case 4: Default (Not applied or status is null)
     else {
       return buildButton(
-        text: 'Select Plan',
+        text: context.tr('txt_select_plan'),
         icon: Icons.shopping_cart,
         bgColor: Colors.black,
         textColor: Colors.white,
@@ -414,8 +415,8 @@ class _PackagesScreenState extends State<PackagesScreen> {
     // Check if we have promotionRequestId
     if (package.promotionRequestId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to add review: Promotion request ID not found'),
+         SnackBar(
+          content: Text(context.tr('txt_unable_add_review')),
           backgroundColor: Colors.red,
         ),
       );

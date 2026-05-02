@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../extensions/context_extension.dart';
+
 class DeliveryPolicyWidget extends StatefulWidget {
   final Map<String, dynamic>? initialPolicy;
   final String? initialDays;
@@ -59,14 +61,14 @@ class _DeliveryPolicyWidgetState extends State<DeliveryPolicyWidget> {
     if (_selectedPolicyType == 'standard') {
       widget.onPolicyChanged({
         'type': 'standard',
-        'message': 'Standard delivery: 3-5 business days',
+        'message': context.tr('txt_standard_delivery_message'),
         'days': '3-5',
       });
       widget.onDaysChanged('3-5');
     } else if (_selectedPolicyType == 'custom' && _deliveryDays.isNotEmpty) {
       widget.onPolicyChanged({
         'type': 'custom',
-        'message': 'Delivery in $_deliveryDays days',
+        'message': context.tr('txt_delivery_in_days').replaceAll('{days}', _deliveryDays),
         'days': _deliveryDays,
       });
       widget.onDaysChanged(_deliveryDays);
@@ -87,8 +89,7 @@ class _DeliveryPolicyWidgetState extends State<DeliveryPolicyWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Delivery Policy',
+           Text(context.tr('txt_delivery_policy_title'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -98,9 +99,8 @@ class _DeliveryPolicyWidgetState extends State<DeliveryPolicyWidget> {
 
           // Standard Delivery Option
           RadioListTile<String>(
-            title: const Text('Standard Delivery (3-5 days)'),
-            subtitle: const Text(
-              'Free shipping on orders above 499 c.',
+            title: Text(context.tr('txt_standard_delivery')),
+            subtitle: Text(context.tr('txt_free_shipping_above'),
               style: TextStyle(fontSize: 12),
             ),
             value: 'standard',
@@ -119,9 +119,9 @@ class _DeliveryPolicyWidgetState extends State<DeliveryPolicyWidget> {
 
           // Custom Delivery Option
           RadioListTile<String>(
-            title: const Text('Custom Delivery Timeline'),
-            subtitle: const Text(
-              'Set your own delivery days',
+            title: Text(context.tr('txt_custom_delivery_timeline')),
+            subtitle:  Text(
+              context.tr('txt_set_own_delivery_days'),
               style: TextStyle(fontSize: 12),
             ),
             value: 'custom',
@@ -147,8 +147,8 @@ class _DeliveryPolicyWidgetState extends State<DeliveryPolicyWidget> {
                       controller: _daysController,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
-                        labelText: 'Delivery timeline',
-                        hintText: 'e.g., 3-5, 2-3, 5-7 days',
+                        labelText: context.tr('txt_delivery_timeline'),
+                        hintText: context.tr('txt_delivery_hint'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -164,8 +164,8 @@ class _DeliveryPolicyWidgetState extends State<DeliveryPolicyWidget> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'days',
+                   Text(
+    context.tr('txt_days'),
                     style: TextStyle(fontSize: 16),
                   ),
                 ],
@@ -195,8 +195,8 @@ class _DeliveryPolicyWidgetState extends State<DeliveryPolicyWidget> {
                   Expanded(
                     child: Text(
                       _selectedPolicyType == 'standard'
-                          ? 'Standard delivery: 3-5 business days'
-                          : 'Delivery in $_deliveryDays days',
+                          ? context.tr('txt_standard_delivery_message')
+                          : context.tr('txt_delivery_in_days').replaceAll('{days}', _deliveryDays),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.green.shade800,

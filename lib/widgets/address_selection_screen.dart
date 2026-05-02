@@ -767,6 +767,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../extensions/context_extension.dart';
 import '../screens/citys/CitySearchScreen.dart';
 
 class AddressSelectionScreen extends StatefulWidget {
@@ -840,12 +841,12 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
 
   void _confirmSelection() {
     if (_selectedCity == null) {
-      _showErrorSnackBar("Please select city first");
+      _showErrorSnackBar(context.tr('txt_error_select_city'));
       return;
     }
 
     if (_addressController.text.trim().isEmpty) {
-      _showErrorSnackBar("Please enter your address");
+      _showErrorSnackBar(context.tr('txt_error_enter_address'));
       return;
     }
 
@@ -888,8 +889,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Enter Address',
+        title: Text(context.tr('txt_enter_address'),
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -899,7 +899,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
           TextButton(
             onPressed: _confirmSelection,
             child: Text(
-              'Done',
+              context.tr('txt_done'),
               style: TextStyle(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.w600,
@@ -915,8 +915,8 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // City Selection
-            const Text(
-              'City *',
+             Text(
+              context.tr('txt_city_required'),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
@@ -938,7 +938,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedCity ?? "Select city",
+                        _selectedCity ?? context.tr('txt_select_city'),
                         style: TextStyle(
                           color: _selectedCity == null ? Colors.grey : Colors.black,
                         ),
@@ -953,8 +953,8 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
             const SizedBox(height: 20),
 
             // Address Field
-            const Text(
-              'Address *',
+             Text(
+              context.tr('txt_address_required'),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
@@ -965,8 +965,8 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
               controller: _addressController,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 'Enter complete address (street, area, etc.)',
-                hintStyle: TextStyle(color: Colors.grey.shade400),
+                  hintText: context.tr('txt_enter_full_address'),
+                  hintStyle: TextStyle(color: Colors.grey.shade400),
                 filled: true,
                 fillColor: Colors.grey.shade50,
                 border: OutlineInputBorder(
@@ -987,8 +987,8 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
             const SizedBox(height: 20),
 
             // Landmark Field (Optional)
-            const Text(
-              'Landmark (Optional)',
+             Text(
+              context.tr('txt_landmark_optional'),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
@@ -999,8 +999,8 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
               controller: _landmarkController,
               maxLines: 2,
               decoration: InputDecoration(
-                hintText: 'e.g., near city mall, opposite bank, etc.',
-                hintStyle: TextStyle(color: Colors.grey.shade400),
+                  hintText: context.tr('txt_enter_landmark'),
+                  hintStyle: TextStyle(color: Colors.grey.shade400),
                 filled: true,
                 fillColor: Colors.grey.shade50,
                 border: OutlineInputBorder(
@@ -1034,7 +1034,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Please enter your complete address including street, area, and any additional details for accurate delivery.',
+                      context.tr('txt_address_info'),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.blue.shade700,
@@ -1049,42 +1049,42 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
             const SizedBox(height: 30),
 
             // Example Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.location_disabled_rounded, color: Colors.grey.shade600, size: 18),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Example Address',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '123 Main Street, Sector 15,\nNear Central Park,\nNew Delhi, Delhi ',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   padding: const EdgeInsets.all(16),
+            //   decoration: BoxDecoration(
+            //     color: Colors.grey.shade50,
+            //     borderRadius: BorderRadius.circular(12),
+            //     border: Border.all(color: Colors.grey.shade200),
+            //   ),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       Row(
+            //         children: [
+            //           Icon(Icons.location_disabled_rounded, color: Colors.grey.shade600, size: 18),
+            //           const SizedBox(width: 8),
+            //           Text(
+            //             context.tr('txt_example_address'),
+            //             style: TextStyle(
+            //               fontWeight: FontWeight.w600,
+            //               fontSize: 13,
+            //               color: Colors.grey.shade700,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //       const SizedBox(height: 8),
+            //       Text(
+            //         '123 Main Street, Sector 15,\nNear Central Park,\nNew Delhi, Delhi ',
+            //         style: TextStyle(
+            //           fontSize: 12,
+            //           color: Colors.grey.shade600,
+            //           height: 1.4,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -1164,11 +1164,11 @@ enum AddressType {
   String get displayName {
     switch (this) {
       case AddressType.home:
-        return 'Home';
+        return 'txt_home';
       case AddressType.work:
-        return 'Work';
+        return 'txt_work';
       case AddressType.other:
-        return 'Other';
+        return 'txt_other';
     }
   }
 

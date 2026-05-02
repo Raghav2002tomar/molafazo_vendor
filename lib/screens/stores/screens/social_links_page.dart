@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../extensions/context_extension.dart';
+
 class SocialLink {
   String type;
   String url;
@@ -60,8 +62,12 @@ class _SocialLinksPageState extends State<SocialLinksPage> {
   void _addSocialLink(String type, String platformName) {
     if (_socialLinks.any((link) => link.type == type)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$platformName already added')),
-      );
+        SnackBar(
+          content: Text(
+            context.tr('txt_platform_already_added')
+                .replaceAll('{platform}', platformName),
+          ),
+        ),      );
       return;
     }
 
@@ -89,8 +95,7 @@ class _SocialLinksPageState extends State<SocialLinksPage> {
     for (var link in _socialLinks) {
       if (link.url.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill all social links or remove empty ones')),
-        );
+          SnackBar(content: Text(context.tr('txt_fill_or_remove_empty_links'))),        );
         return;
       }
     }
@@ -101,8 +106,8 @@ class _SocialLinksPageState extends State<SocialLinksPage> {
   String _getPlaceholder(String type) {
     switch (type) {
       case 'email':
-        return 'e.g., store@example.com';
-      case 'instagram':
+        return context.tr('txt_placeholder_email');
+        case 'instagram':
         return 'e.g., https://instagram.com/username';
       case 'facebook':
         return 'e.g., https://facebook.com/username';
@@ -125,15 +130,14 @@ class _SocialLinksPageState extends State<SocialLinksPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Social & Contact Links'),
+        title: Text(context.tr('txt_social_contact_links')),
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
         actions: [
           TextButton(
             onPressed: _save,
-            child: const Text(
-              'Save',
+            child: Text(context.tr('txt_save'),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
@@ -157,8 +161,8 @@ class _SocialLinksPageState extends State<SocialLinksPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Add your social media and contact links. Customers can use these to connect with your store.',
-                          style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
+                            context.tr('txt_social_links_info'),
+                            style: TextStyle(fontSize: 12, color: Colors.blue.shade800),
                         ),
                       ),
                     ],
@@ -168,8 +172,8 @@ class _SocialLinksPageState extends State<SocialLinksPage> {
 
                 // Existing Links
                 if (_socialLinks.isNotEmpty) ...[
-                  const Text(
-                    'Your Links',
+                   Text(
+    context.tr('txt_your_links'),
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
@@ -230,8 +234,8 @@ class _SocialLinksPageState extends State<SocialLinksPage> {
                 ],
 
                 // Add New Link Section
-                const Text(
-                  'Add New Link',
+                 Text(
+                context.tr('txt_add_new_link'),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),

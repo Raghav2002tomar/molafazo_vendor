@@ -18,6 +18,9 @@ class ApiService {
   static const String banner_images_URL = "assets/banner_images/";
   static const String chat_images_URL = "assets/customervendorchat_images";
 
+  static bool IsBebugMode = true;
+
+
   /// 🔹 Common headers
   static Map<String, String> _headers({String? token}) {
     return {

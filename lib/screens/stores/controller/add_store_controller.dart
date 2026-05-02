@@ -1,370 +1,3 @@
-//
-// import 'dart:io';
-// import 'package:flutter/material.dart';
-// import 'package:image_picker/image_picker.dart';
-// import 'package:flutter_image_compress/flutter_image_compress.dart';
-// import 'package:path_provider/path_provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
-// import '../../../services/api_service.dart';
-//
-// class AddStoreController extends ChangeNotifier {
-//
-//   final formKey = GlobalKey<FormState>();
-//   final ImagePicker picker = ImagePicker();
-//
-//   /// ---------------- Images ----------------
-//   XFile? storeBackgroundImage;
-//   XFile? storeProofImage;
-//
-//   /// ---------------- Store Info ----------------
-//   bool submitting = false;
-//   List<String> selectedStoreTypes = [];
-//
-//   final storeTypes = const [
-//     {'label': 'Retail', 'value': '1'},
-//     {'label': 'Online', 'value': '2'},
-//     {'label': 'Wholesale', 'value': '3'},
-//     {'label': 'Offline', 'value': '4'},
-//   ];
-//
-//   bool selfPickup = false;
-//   bool deliveryBySeller = true;
-//
-//   TimeOfDay? openingTime;
-//   TimeOfDay? closingTime;
-//
-//   /// ---------------- Time Picker ----------------
-//   Future<void> pickTime(BuildContext context, bool isOpening) async {
-//     final picked = await showTimePicker(
-//       context: context,
-//       initialTime: TimeOfDay.now(),
-//     );
-//
-//     if (picked != null) {
-//       if (isOpening) {
-//         openingTime = picked;
-//       } else {
-//         closingTime = picked;
-//       }
-//       notifyListeners();
-//     }
-//   }
-//
-//   String _workingHoursString() {
-//     if (openingTime == null || closingTime == null) return '';
-//
-//     return '${openingTime!.hour}:${openingTime!.minute.toString().padLeft(2, '0')}'
-//         ' - '
-//         '${closingTime!.hour}:${closingTime!.minute.toString().padLeft(2, '0')}';
-//   }
-//
-//   /// ---------------- Image Compression ----------------
-//   Future<XFile?> compressImage(File file) async {
-//     try {
-//       final dir = await getTemporaryDirectory();
-//
-//       int quality = 80;
-//       int width = 1000;
-//       int height = 1000;
-//
-//       File? compressedFile;
-//
-//       while (true) {
-//         final targetPath =
-//             "${dir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
-//
-//         final result = await FlutterImageCompress.compressAndGetFile(
-//           file.absolute.path,
-//           targetPath,
-//           quality: quality,
-//           minWidth: width,
-//           minHeight: height,
-//           format: CompressFormat.jpeg,
-//         );
-//
-//         if (result == null) return null;
-//
-//         compressedFile = File(result.path);
-//
-//         int size = await compressedFile.length();
-//         double sizeMB = size / (1024 * 1024);
-//
-//         debugPrint(
-//             "Compressed -> ${sizeMB.toStringAsFixed(2)}MB | Q:$quality | W:$width");
-//
-//         /// SUCCESS CONDITION
-//         if (sizeMB <= 1) {
-//           return XFile(compressedFile.path);
-//         }
-//
-//         /// STEP 1 → reduce quality
-//         if (quality > 30) {
-//           quality -= 10;
-//         }
-//
-//         /// STEP 2 → reduce resolution
-//         else if (width > 400) {
-//           width -= 200;
-//           height -= 200;
-//         }
-//
-//         /// FINAL FALLBACK
-//         else {
-//           return XFile(compressedFile.path);
-//         }
-//
-//         file = compressedFile;
-//       }
-//     } catch (e) {
-//       debugPrint("Compression Error: $e");
-//       return null;
-//     }
-//   }
-//
-//
-//
-//   /// ---------------- Pick Background Image ----------------
-//   Future<void> pickStoreBackgroundImage() async {
-//
-//     final img = await picker.pickImage(
-//       source: ImageSource.gallery,
-//       imageQuality: 50,
-//       maxWidth: 800,
-//       maxHeight: 800,
-//     );
-//
-//     if (img == null) return;
-//
-//     File file = File(img.path);
-//
-//     final compressed = await compressImage(file);
-//
-//     if (compressed == null) return;
-//
-//     int size = await compressed.length();
-//     double sizeMB = size / (1024 * 1024);
-//
-//     if (sizeMB > 1) {
-//       Fluttertoast.showToast(msg: "Image must be less than 1MB");
-//       return;
-//     }
-//
-//     storeBackgroundImage = XFile(compressed.path);
-//
-//     notifyListeners();
-//   }
-//   void clearStoreBackground() {
-//     storeBackgroundImage = null;
-//     notifyListeners();
-//   }
-//
-//   /// ---------------- Pick Logo ----------------
-//   Future<void> pickStoreProofImage() async {
-//
-//     final img = await picker.pickImage(
-//       source: ImageSource.gallery,
-//       imageQuality: 40,
-//       maxWidth: 500,
-//       maxHeight: 500,
-//     );
-//
-//     if (img == null) return;
-//
-//     File file = File(img.path);
-//
-//     final compressed = await compressImage(file);
-//
-//     if (compressed == null) return;
-//
-//     int size = await compressed.length();
-//     double sizeMB = size / (1024 * 1024);
-//
-//     if (sizeMB > 1) {
-//       Fluttertoast.showToast(msg: "Image must be less than 1MB");
-//       return;
-//     }
-//
-//     storeProofImage = XFile(compressed.path);
-//
-//     notifyListeners();
-//   }
-//
-//   void clearStoreProof() {
-//     storeProofImage = null;
-//     notifyListeners();
-//   }
-//
-//   /// ---------------- Submit Store ----------------
-//   Future<void> submitStore({
-//     required String name,
-//     required String mobile,
-//     required String city,
-//     required String address,
-//     required String description,
-//     String? latitude,
-//     String? longitude,
-//   }) async {
-//
-//     /// ---------- FORM VALIDATION ----------
-//     if (name.trim().isEmpty) {
-//       Fluttertoast.showToast(msg: "Store name is required");
-//       return;
-//     }
-//
-//     if (mobile.trim().isEmpty || mobile.length != 10) {
-//       Fluttertoast.showToast(msg: "Enter valid 10 digit mobile number");
-//       return;
-//     }
-//
-//
-//
-//     if (address.trim().isEmpty) {
-//       Fluttertoast.showToast(msg: "Address is required");
-//       return;
-//     }
-//
-//     /// ---------- IMAGE VALIDATION ----------
-//     if (storeBackgroundImage == null) {
-//       Fluttertoast.showToast(msg: "Store background image is required");
-//       return;
-//     }
-//
-//     if (storeProofImage == null) {
-//       Fluttertoast.showToast(msg: "Store logo is required");
-//       return;
-//     }
-//
-//     // /// ---------- STORE TYPE ----------
-//     // if (selectedStoreTypes.isEmpty) {
-//     //   Fluttertoast.showToast(msg: "Select at least one store type");
-//     //   return;
-//     // }
-//
-//     /// ---------- WORKING HOURS ----------
-//     if (openingTime == null || closingTime == null) {
-//       Fluttertoast.showToast(msg: "Please select store working hours");
-//       return;
-//     }
-//
-//     /// ---------- LOCATION ----------
-//     if (latitude == null || longitude == null) {
-//       Fluttertoast.showToast(msg: "Store location missing");
-//       return;
-//     }
-//
-//     submitting = true;
-//     notifyListeners();
-//
-//     try {
-//
-//       /// ---------- TOKEN ----------
-//       final prefs = await SharedPreferences.getInstance();
-//       final token = prefs.getString('api_token');
-//
-//       if (token == null || token.isEmpty) {
-//         Fluttertoast.showToast(msg: "Authentication failed. Login again.");
-//         submitting = false;
-//         notifyListeners();
-//         return;
-//       }
-//
-//       /// ---------- IMAGE SIZE CHECK ----------
-//       int logoSize = await File(storeProofImage!.path).length();
-//       int bgSize = await File(storeBackgroundImage!.path).length();
-//
-//       double logoMB = logoSize / (1024 * 1024);
-//       double bgMB = bgSize / (1024 * 1024);
-//
-//       debugPrint("Logo Size: $logoMB MB");
-//       debugPrint("Background Size: $bgMB MB");
-//
-//       if (logoMB > 1 || bgMB > 1) {
-//         submitting = false;
-//         notifyListeners();
-//         Fluttertoast.showToast(msg: "Images must be less than 1MB");
-//         return;
-//       }
-//
-//       /// ---------- FILES ----------
-//       final Map<String, File> files = {
-//         'logo': File(storeProofImage!.path),
-//         'store_background_image': File(storeBackgroundImage!.path),
-//       };
-//
-//       /// ---------- FIELDS ----------
-//       Map<String, String> fields = {
-//         'name': name.trim(),
-//         'mobile': mobile.trim(),
-//         'country': 'india',
-//         'city': city.trim(),
-//         'address': address.trim(),
-//         'delivery_by_seller': deliveryBySeller ? '1' : '0',
-//         'self_pickup': selfPickup ? '1' : '0',
-//         'description': description.trim(),
-//         'working_hours': _workingHoursString(),
-//         'latitude': latitude,
-//         'longitude': longitude,
-//       };
-//
-//       /// ---------- STORE TYPES ARRAY ----------
-//       for (int i = 0; i < selectedStoreTypes.length; i++) {
-//         fields['type[$i]'] = selectedStoreTypes[i];
-//       }
-//
-//       debugPrint("FIELDS: $fields");
-//
-//       /// ---------- API REQUEST ----------
-//       final res = await ApiService.multipart(
-//         endpoint: '/vendor/store/create',
-//         token: token,
-//         fields: fields,
-//         files: files,
-//       );
-//
-//       submitting = false;
-//       notifyListeners();
-//
-//       /// ---------- SUCCESS ----------
-//       if (res != null &&
-//           (res['status'] == true ||
-//               res['success'] == true ||
-//               res['message'] == "Store created successfully")) {
-//
-//         Fluttertoast.showToast(
-//           msg: "Store created successfully 🎉",
-//           backgroundColor: Colors.green,
-//           textColor: Colors.white,
-//         );
-//
-//         Navigator.of(formKey.currentContext!).pop(true);
-//
-//       } else {
-//
-//         Fluttertoast.showToast(
-//           msg: res?['message'] ?? "Failed to create store",
-//           backgroundColor: Colors.red,
-//           textColor: Colors.white,
-//         );
-//       }
-//
-//     } catch (e) {
-//
-//       submitting = false;
-//       notifyListeners();
-//
-//       debugPrint("Store create error: $e");
-//
-//       Fluttertoast.showToast(
-//         msg: "Something went wrong. Try again",
-//         backgroundColor: Colors.red,
-//         textColor: Colors.white,
-//       );
-//     }
-//   }
-// }
-
-
 
 import 'dart:convert';
 import 'dart:io';
@@ -375,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../services/api_service.dart';
+import '../screens/delivery_settings_screen.dart';
 import '../screens/social_links_page.dart';
 
 class AddStoreController extends ChangeNotifier {
@@ -386,6 +20,28 @@ class AddStoreController extends ChangeNotifier {
 
   Map<String, dynamic>? get deliveryPolicy => _deliveryPolicy;
   String? get deliveryDays => _deliveryDays;
+
+  List<DeliveryConfigModel> deliveryConfigs = [];
+
+  void updateDeliveryConfigs(List<DeliveryConfigModel> configs) {
+    deliveryConfigs = configs;
+    notifyListeners();
+  }
+
+  void addDeliveryConfigFields(Map<String, String> fields) {
+    for (int i = 0; i < deliveryConfigs.length; i++) {
+      final item = deliveryConfigs[i].toApiMap();
+
+      fields['delivery_config[$i][city]'] = item['city']!;
+      fields['delivery_config[$i][enabled]'] = item['enabled']!;
+      fields['delivery_config[$i][delivery_type]'] = item['delivery_type']!;
+      fields['delivery_config[$i][delivery_time_value]'] =
+      item['delivery_time_value']!;
+      fields['delivery_config[$i][delivery_time_unit]'] =
+      item['delivery_time_unit']!;
+      fields['delivery_config[$i][description]'] = item['description']!;
+    }
+  }
 
   void updateDeliveryPolicy(Map<String, dynamic>? policy) {
     _deliveryPolicy = policy;
@@ -610,185 +266,6 @@ class AddStoreController extends ChangeNotifier {
   }
 
 
-
-  //
-  // Future<void> submitStore({
-  //   required String name,
-  //   required String mobile,
-  //   required String city,
-  //   required String address,
-  //   required String description,
-  //   String? latitude,
-  //   String? longitude,
-  // }) async {
-  //   /// ---------- FORM VALIDATION ----------
-  //   if (name.trim().isEmpty) {
-  //     Fluttertoast.showToast(msg: "Store name is required");
-  //     return;
-  //   }
-  //
-  //   if (mobile.trim().isEmpty || mobile.length != 10) {
-  //     Fluttertoast.showToast(msg: "Enter valid 10 digit mobile number");
-  //     return;
-  //   }
-  //
-  //   if (city.trim().isEmpty) {
-  //     Fluttertoast.showToast(msg: "City is required");
-  //     return;
-  //   }
-  //
-  //   /// ---------- IMAGE VALIDATION ----------
-  //   if (storeBackgroundImage == null) {
-  //     Fluttertoast.showToast(msg: "Store background image is required");
-  //     return;
-  //   }
-  //
-  //   if (storeProofImage == null) {
-  //     Fluttertoast.showToast(msg: "Store logo is required");
-  //     return;
-  //   }
-  //
-  //   /// ---------- WORKING HOURS ----------
-  //   if (openingTime == null || closingTime == null) {
-  //     Fluttertoast.showToast(msg: "Please select store working hours");
-  //     return;
-  //   }
-  //
-  //   submitting = true;
-  //   notifyListeners();
-  //
-  //   try {
-  //     /// ---------- TOKEN ----------
-  //     final prefs = await SharedPreferences.getInstance();
-  //     final token = prefs.getString('api_token');
-  //
-  //     if (token == null || token.isEmpty) {
-  //       Fluttertoast.showToast(msg: "Authentication failed. Login again.");
-  //       submitting = false;
-  //       notifyListeners();
-  //       return;
-  //     }
-  //
-  //     /// ---------- IMAGE SIZE CHECK ----------
-  //     int logoSize = await File(storeProofImage!.path).length();
-  //     int bgSize = await File(storeBackgroundImage!.path).length();
-  //
-  //     double logoMB = logoSize / (1024 * 1024);
-  //     double bgMB = bgSize / (1024 * 1024);
-  //
-  //     debugPrint("Logo Size: $logoMB MB");
-  //     debugPrint("Background Size: $bgMB MB");
-  //
-  //     if (logoMB > 1 || bgMB > 1) {
-  //       submitting = false;
-  //       notifyListeners();
-  //       Fluttertoast.showToast(msg: "Images must be less than 1MB");
-  //       return;
-  //     }
-  //
-  //     /// ---------- FILES ----------
-  //     final Map<String, File> files = {
-  //       'logo': File(storeProofImage!.path),
-  //       'store_background_image': File(storeBackgroundImage!.path),
-  //     };
-  //
-  //     /// ---------- FIELDS ----------
-  //     Map<String, String> fields = {
-  //       'name': name.trim(),
-  //       'mobile': mobile.trim(),
-  //       'country': 'Tajikistan',
-  //       'city': city.trim(),
-  //       'address': address.trim(),
-  //       'delivery_by_seller': deliveryBySeller ? '1' : '0',
-  //       'self_pickup': selfPickup ? '1' : '0',
-  //       'description': description.trim(),
-  //       'working_hours': _workingHoursString(),
-  //     };
-  //
-  //     // Add location only for offline stores
-  //     if (sellOffline && latitude != null && longitude != null) {
-  //       fields['latitude'] = latitude;
-  //       fields['longitude'] = longitude;
-  //     }
-  //
-  //     // Add return policy
-  //     if (_storePolicy != null) {
-  //       fields['return_policy'] = jsonEncode(_storePolicy);
-  //     }
-  //
-  //     // Add social links
-  //     if (_socialLinks.isNotEmpty) {
-  //       fields['social_links'] = jsonEncode(_socialLinks);
-  //     }
-  //
-  //     // Add delivery policy
-  //     if (_deliveryPolicy != null) {
-  //       fields['delivery_policy'] = jsonEncode(_deliveryPolicy);
-  //     }
-  //     if (_deliveryDays != null) {
-  //       fields['delivery_days'] = _deliveryDays.toString();
-  //     }
-  //
-  //     // Add ONLY background color (convert to hex string without alpha)
-  //     if (_storeBackgroundColor != null) {
-  //       // Convert to hex without alpha (e.g., "#FFFFFF")
-  //       final hex = '#${_storeBackgroundColor!.value.toRadixString(16).substring(2).toUpperCase()}';
-  //       fields['background_color'] = hex;
-  //     }
-  //
-  //     /// ---------- STORE TYPES (AUTO GENERATED) ----------
-  //     final storeTypes = getStoreTypes();
-  //     for (int i = 0; i < storeTypes.length; i++) {
-  //       fields['type[$i]'] = storeTypes[i];
-  //     }
-  //
-  //     debugPrint("STORE TYPES: $storeTypes");
-  //     debugPrint("FIELDS: $fields");
-  //
-  //     /// ---------- API REQUEST ----------
-  //     final res = await ApiService.multipart(
-  //       endpoint: '/vendor/store/create',
-  //       token: token,
-  //       fields: fields,
-  //       files: files,
-  //     );
-  //
-  //     submitting = false;
-  //     notifyListeners();
-  //
-  //     /// ---------- SUCCESS ----------
-  //     if (res != null &&
-  //         (res['status'] == true ||
-  //             res['success'] == true ||
-  //             res['message'] == "Store created successfully")) {
-  //       Fluttertoast.showToast(
-  //         msg: "Store created successfully 🎉",
-  //         backgroundColor: Colors.green,
-  //         textColor: Colors.white,
-  //       );
-  //
-  //       Navigator.of(formKey.currentContext!).pop(true);
-  //     } else {
-  //       Fluttertoast.showToast(
-  //         msg: res?['message'] ?? "Failed to create store",
-  //         backgroundColor: Colors.red,
-  //         textColor: Colors.white,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     submitting = false;
-  //     notifyListeners();
-  //
-  //     debugPrint("Store create error: $e");
-  //
-  //     Fluttertoast.showToast(
-  //       msg: "Something went wrong. Try again",
-  //       backgroundColor: Colors.red,
-  //       textColor: Colors.white,
-  //     );
-  //   }
-  // }
-
   Future<void> submitStore({
     required String name,
     required String mobile,
@@ -800,7 +277,7 @@ class AddStoreController extends ChangeNotifier {
   }) async {
     /// ---------- FORM VALIDATION ----------
     if (name.trim().isEmpty) {
-      Fluttertoast.showToast(msg: "Store name is required");
+      Fluttertoast.showToast(msg: "txt_store_name_required");
       return;
     }
 
@@ -816,18 +293,18 @@ class AddStoreController extends ChangeNotifier {
 
     /// ---------- IMAGE VALIDATION ----------
     if (storeBackgroundImage == null) {
-      Fluttertoast.showToast(msg: "Store background image is required");
+      Fluttertoast.showToast(msg: "txt_store_bg_required");
       return;
     }
 
     if (storeProofImage == null) {
-      Fluttertoast.showToast(msg: "Store logo is required");
+      Fluttertoast.showToast(msg: "txt_store_logo_required");
       return;
     }
 
     /// ---------- WORKING HOURS ----------
     if (openingTime == null || closingTime == null) {
-      Fluttertoast.showToast(msg: "Please select store working hours");
+      Fluttertoast.showToast(msg: "txt_select_working_hours");
       return;
     }
 
@@ -840,7 +317,7 @@ class AddStoreController extends ChangeNotifier {
       final token = prefs.getString('api_token');
 
       if (token == null || token.isEmpty) {
-        Fluttertoast.showToast(msg: "Authentication failed. Login again.");
+        Fluttertoast.showToast(msg: "txt_auth_failed");
         submitting = false;
         notifyListeners();
         return;
@@ -859,7 +336,7 @@ class AddStoreController extends ChangeNotifier {
       if (logoMB > 1 || bgMB > 1) {
         submitting = false;
         notifyListeners();
-        Fluttertoast.showToast(msg: "Images must be less than 1MB");
+        Fluttertoast.showToast(msg: "txt_image_max_1mb");
         return;
       }
 
@@ -960,7 +437,7 @@ class AddStoreController extends ChangeNotifier {
           fields['social_links[$i][url]'] = link['url']!;
         }
       }
-
+      addDeliveryConfigFields(fields);
       debugPrint("========== STORE SUBMISSION DEBUG ==========");
       debugPrint("STORE TYPES (Array format):");
       for (int i = 0; i < storeTypes.length; i++) {
@@ -988,7 +465,7 @@ class AddStoreController extends ChangeNotifier {
       /// ---------- SUCCESS ----------
       if (res != null && (res['status'] == true || res['success'] == true)) {
         Fluttertoast.showToast(
-          msg: res['message'] ?? "Store created successfully 🎉",
+          msg: res['message'] ?? "txt_store_created_success",
           backgroundColor: Colors.green,
           textColor: Colors.white,
           toastLength: Toast.LENGTH_LONG,
@@ -1000,7 +477,7 @@ class AddStoreController extends ChangeNotifier {
           }
         });
       } else {
-        String errorMsg = "Failed to create store";
+        String errorMsg = "txt_store_create_failed";
         if (res != null) {
           if (res['message'] != null) {
             errorMsg = res['message'].toString();
@@ -1052,12 +529,12 @@ class AddStoreController extends ChangeNotifier {
     }
 
     if (mobile.trim().isEmpty || mobile.length != 10) {
-      Fluttertoast.showToast(msg: "Enter valid 10 digit mobile number");
+      Fluttertoast.showToast(msg: "txt_mobile_invalid");
       return;
     }
 
     if (city.trim().isEmpty) {
-      Fluttertoast.showToast(msg: "City is required");
+      Fluttertoast.showToast(msg: "txt_city_required");
       return;
     }
 
@@ -1083,7 +560,7 @@ class AddStoreController extends ChangeNotifier {
         if (logoMB > 1) {
           submitting = false;
           notifyListeners();
-          Fluttertoast.showToast(msg: "Logo must be less than 1MB");
+          Fluttertoast.showToast(msg: "txt_logo_max_1mb");
           return;
         }
         files['logo'] = File(storeProofImage!.path);
@@ -1095,7 +572,7 @@ class AddStoreController extends ChangeNotifier {
         if (bgMB > 1) {
           submitting = false;
           notifyListeners();
-          Fluttertoast.showToast(msg: "Background image must be less than 1MB");
+          Fluttertoast.showToast(msg: "txt_bg_max_1mb");
           return;
         }
         files['store_background_image'] = File(storeBackgroundImage!.path);
@@ -1193,6 +670,8 @@ class AddStoreController extends ChangeNotifier {
         }
       }
 
+      addDeliveryConfigFields(fields);
+
       debugPrint("========== STORE UPDATE DEBUG ==========");
       debugPrint("STORE ID: $storeId");
       debugPrint("ENDPOINT: /vendor/store/edit/$storeId");
@@ -1213,7 +692,7 @@ class AddStoreController extends ChangeNotifier {
 
       if (res != null && (res['status'] == true || res['success'] == true)) {
         Fluttertoast.showToast(
-          msg: res['message'] ?? "Store updated successfully 🎉",
+          msg: res['message'] ?? "txt_store_updated_success",
           backgroundColor: Colors.green,
           textColor: Colors.white,
           toastLength: Toast.LENGTH_LONG,
@@ -1225,7 +704,7 @@ class AddStoreController extends ChangeNotifier {
           }
         });
       } else {
-        String errorMsg = "Failed to update store";
+        String errorMsg = "txt_store_update_failed";
         if (res != null && res['message'] != null) {
           errorMsg = res['message'].toString();
         }
@@ -1245,7 +724,7 @@ class AddStoreController extends ChangeNotifier {
       debugPrint("Store update error: $e");
 
       Fluttertoast.showToast(
-        msg: "Something went wrong: ${e.toString()}",
+        msg: "txt_something_wrong: ${e.toString()}",
         backgroundColor: Colors.red,
         textColor: Colors.white,
         toastLength: Toast.LENGTH_LONG,

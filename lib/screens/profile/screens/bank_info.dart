@@ -120,7 +120,7 @@ class _BankInfoScreenState extends State<BankInfoScreen> with SingleTickerProvid
   Future<void> savePaymentDetails() async {
     if (!isDigitalSelected && !isCodSelected) {
       _showSnackBar(
-        "Please select at least one payment mode",
+        context.tr("txt_select_payment_mode"),
         Colors.orange,
       );
       return;

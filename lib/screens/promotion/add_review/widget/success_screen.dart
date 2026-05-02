@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../extensions/context_extension.dart';
+
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({Key? key}) : super(key: key);
 
@@ -25,22 +27,19 @@ class SuccessScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Thank You!',
+        Text(context.tr('txt_thank_you',),
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Your review has been submitted successfully',
+        Text(context.tr('txt_review_submitted_success'),
                 style: TextStyle(fontSize: 16, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              const Text(
-                'Your review will be visible after admin approval',
+          Text(context.tr('txt_review_visible_after_admin'),
                 style: TextStyle(color: Colors.orange),
                 textAlign: TextAlign.center,
               ),
@@ -50,7 +49,7 @@ class SuccessScreen extends StatelessWidget {
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 icon: const Icon(Icons.home),
-                label: const Text('Back to Home'),
+                label: Text(context.tr('txt_back_to_home')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,

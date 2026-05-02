@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../../extensions/context_extension.dart';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // COLOR CUSTOMIZATION MODEL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,8 +119,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
     with TickerProviderStateMixin {
   late StoreColorCustomization _colors;
   bool _showColorPanel = false;
-  String _selectedCategory = 'Shop all';
-
+  late String _selectedCategory;
   late AnimationController _fadeCtrl;
   late Animation<double> _fadeAnim;
 
@@ -127,20 +128,20 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
   late AnimationController _rippleCtrl;
 
   final List<Map<String, String>> _sampleProducts = [
-    {'name': 'Premium Product', 'price': '1,299 c.', 'original': '1,999 c,', 'discount': '35%'},
-    {'name': 'Featured Item', 'price': '899 c.', 'original': '1,499 c.', 'discount': '40%'},
-    {'name': 'Best Seller', 'price': '2,499 c.', 'original': '3,499 c.', 'discount': '28%'},
-    {'name': 'New Arrival', 'price': '599 c.', 'original': '999 c.', 'discount': '40%'},
-    {'name': 'Trending Item', 'price': '1,799 c.', 'original': '2,499 c.', 'discount': '28%'},
-    {'name': 'Limited Edition', 'price': '3,299 c.', 'original': '4,999 c.', 'discount': '34%'},
+    {'name': 'txt_product_premium', 'price': '1,299 c.', 'original': '1,999 c.', 'discount': '35%'},
+    {'name': 'txt_product_featured', 'price': '899 c.', 'original': '1,499 c.', 'discount': '40%'},
+    {'name': 'txt_product_best_seller', 'price': '2,499 c.', 'original': '3,499 c.', 'discount': '28%'},
+    {'name': 'txt_product_new_arrival', 'price': '599 c.', 'original': '999 c.', 'discount': '40%'},
+    {'name': 'txt_product_trending', 'price': '1,799 c.', 'original': '2,499 c.', 'discount': '28%'},
+    {'name': 'txt_product_limited', 'price': '3,299 c.', 'original': '4,999 c.', 'discount': '34%'},
   ];
 
   final List<Map<String, dynamic>> _categories = [
-    {'label': 'Shop all', 'icon': null},
-    {'label': 'Notions', 'icon': null},
-    {'label': 'Books', 'icon': null},
-    {'label': 'Fabric', 'icon': null},
-    {'label': 'On Sale', 'icon': null},
+    {'label': 'txt_category_shop_all', 'icon': null},
+    {'label': 'txt_category_notions', 'icon': null},
+    {'label': 'txt_category_books', 'icon': null},
+    {'label': 'txt_category_fabric', 'icon': null},
+    {'label': 'txt_category_on_sale', 'icon': null},
   ];
 // Add this method to _StorePreviewScreenState class
 
@@ -194,6 +195,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
   @override
   void initState() {
     super.initState();
+    _selectedCategory = context.tr('txt_shop_all');
     _colors = StoreColorCustomization.defaultColors();
 
     _fadeCtrl = AnimationController(
@@ -236,7 +238,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
 
   void _saveColors() {
     widget.onColorSaved?.call(_colors.backgroundColor);
-    Fluttertoast.showToast(msg: "Background color saved!");
+    Fluttertoast.showToast(msg: context.tr('txt_background_color_saved'));
     setState(() => _showColorPanel = false);
   }
 
@@ -363,7 +365,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
         ),
       ),
       actions: [
-        _glassChipBtn('Follow'),
+        _glassChipBtn(context.tr('txt_follow')),
         const SizedBox(width: 8),
         Padding(
           padding: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
@@ -516,8 +518,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
                     )
                   ],
                 ),
-                child: Text(
-                  cat['label']!,
+                child: Text(context.tr(cat['label']),
                   style: TextStyle(
                     fontSize: 13.5,
                     fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
@@ -538,8 +539,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
         children: [
-          Text(
-            'All products',
+      Text(context.tr('txt_all_products'),
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
@@ -644,7 +644,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        '${p['discount']} off',
+                        '${p['discount']} ${context.tr('txt_off_suffix')}'       ,
                         style: TextStyle(
                           color: _isDark ? Colors.black87 : Colors.white,
                           fontSize: 10,
@@ -686,7 +686,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      p['name']!,
+                      context.tr(p['name']!),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -878,9 +878,9 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
-                  const Expanded(
+                   Expanded(
                     child: Text(
-                      'Store Theme',
+              context.tr('txt_store_theme'),
                       style: TextStyle(
                           fontSize: 17, fontWeight: FontWeight.w800),
                     ),
@@ -906,9 +906,9 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Background Color',
-                      style: TextStyle(
+                     Text(
+                context.tr('txt_background_color'),
+                  style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: Colors.black54,
@@ -990,7 +990,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Tap anywhere to see water ripple effect!',
+                                context.tr('txt_tap_ripple_effect'),
                               style: TextStyle(
                                   fontSize: 11.5,
                                   color: Colors.blue.shade700,
@@ -1020,8 +1020,9 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: const Text('Reset',
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      child:  Text(context.tr('txt_reset'),
+
+    style: TextStyle(fontWeight: FontWeight.w600)),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1036,7 +1037,7 @@ class _StorePreviewScreenState extends State<StorePreviewScreen>
                             borderRadius: BorderRadius.circular(10)),
                         elevation: 0,
                       ),
-                      child: const Text('Save',
+                      child:  Text(context.tr('txt_save'),
                           style: TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
@@ -1212,7 +1213,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
-              'Follow',
+    context.tr('txt_follow'),
               style: TextStyle(
                   color: _textColor,
                   fontSize: 14,
@@ -1270,7 +1271,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.storeName.isEmpty ? 'Your Store' : widget.storeName,
+    widget.storeName.isEmpty ? context.tr('txt_your_store') : widget.storeName,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -1283,7 +1284,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
                 Icon(Icons.star_rounded, size: 14, color: Colors.amber),
                 const SizedBox(width: 3),
                 Text(
-                  '4.8 (2.5K ratings)',
+                context.tr('txt_ratings_count'),
                   style: TextStyle(fontSize: 12, color: _subTextColor),
                 ),
               ],
@@ -1302,8 +1303,8 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
         children: [
           Row(
             children: [
-              Text('Reviews',
-                  style: TextStyle(
+              Text(context.tr('txt_reviews'),
+        style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: _textColor)),
@@ -1336,7 +1337,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
                           color: _textColor,
                           height: 1)),
                   const SizedBox(height: 4),
-                  Text('2.5K ratings',
+                  Text(context.tr('txt_ratings_count'),
                       style: TextStyle(fontSize: 13, color: _subTextColor)),
                 ],
               ),
@@ -1370,7 +1371,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Amazing store! Great quality products and fast delivery...',
+    context.tr('txt_sample_review'),
                         style: TextStyle(
                             fontSize: 13,
                             color: _subTextColor,
@@ -1386,8 +1387,8 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
                                   (_) => Icon(Icons.star_rounded,
                                   size: 12, color: Colors.amber)),
                           const SizedBox(width: 6),
-                          Text('Customer · 2 days ago',
-                              style: TextStyle(
+                          Text(context.tr('txt_customer_days_ago'),
+    style: TextStyle(
                                   fontSize: 11, color: _subTextColor)),
                         ],
                       ),
@@ -1418,17 +1419,17 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
   // ─── Policies card (Shopify style) ───────────────────────────────────────
   Widget _buildPoliciesCard() {
     final policies = [
-      {'label': 'Refund policy', 'icon': Icons.assignment_return_outlined},
-      {'label': 'Shipping policy', 'icon': Icons.local_shipping_outlined},
-      {'label': 'Privacy policy', 'icon': Icons.security_outlined},
-      {'label': 'Terms and conditions', 'icon': Icons.info_outlined},
+      {'label': context.tr('txt_refund_policy'), 'icon': Icons.assignment_return_outlined},
+      {'label': context.tr('txt_shipping_policy'), 'icon': Icons.local_shipping_outlined},
+      {'label': context.tr('txt_privacy_policy'), 'icon': Icons.security_outlined},
+      {'label': context.tr('txt_terms_conditions'), 'icon': Icons.info_outlined},
     ];
 
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Policies',
+          Text(context.tr('txt_policies'),
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -1538,7 +1539,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
   Widget _buildContactCard() {
     final List<Map<String, dynamic>> contacts = [
       {
-        'label': 'Website',
+        'label': context.tr('txt_website'),
         'icon': Icons.chat_bubble_outline_rounded,
         'show': true
       },
@@ -1570,8 +1571,8 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Contact',
-              style: TextStyle(
+          Text(context.tr('txt_contact'),
+        style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: _textColor)),
@@ -1650,7 +1651,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('About Store',
+          Text(context.tr('txt_about_store'),
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -1802,7 +1803,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Delivery',
+          Text(context.tr('delivery'),
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -1811,7 +1812,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
           if (widget.deliveryBySeller)
             _policyRow('Home Delivery Available', Icons.local_shipping_outlined),
           if (widget.selfPickup)
-            _policyRow('Self Pickup Available', Icons.storefront_outlined),
+            _policyRow(context.tr('txt_self_pickup_available'), Icons.storefront_outlined),
         ],
       ),
     );
@@ -1834,7 +1835,7 @@ class _StoreDetailsPageState extends State<StoreDetailsPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Visit Online Store',
+      context.tr('txt_visit_online_store'),
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -2041,7 +2042,7 @@ class _HeroBannerLocal extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '(2.5K ratings)',
+                      context.tr('txt_ratings_count'),
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.82),
                         fontSize: 12.5,

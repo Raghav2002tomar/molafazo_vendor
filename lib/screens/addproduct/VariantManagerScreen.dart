@@ -1,6 +1,7 @@
 // VariantManagerScreen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../extensions/context_extension.dart';
 import 'contreller.dart';
 import 'model.dart';
 
@@ -32,8 +33,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
             appBar: AppBar(
               backgroundColor: Colors.white,
               elevation: 0.5,
-              title: const Text(
-                'Manage Variants',
+              title: Text(context.tr('txt_manage_variants'),
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
@@ -50,7 +50,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                     Navigator.pop(context, true);
                   },
                   style: TextButton.styleFrom(foregroundColor: Colors.black),
-                  child: const Text('Done', style: TextStyle(fontSize: 14)),
+                  child:  Text(context.tr('txt_done'), style: TextStyle(fontSize: 14)),
                 ),
               ],
             ),
@@ -59,8 +59,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Add Variants',
+                   Text(
+                    context.tr('txt_add_variants'),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -69,7 +69,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Configure product variants by selecting options below',
+                    context.tr('txt_configure_variants'),
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
                   const SizedBox(height: 16),
@@ -108,8 +108,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                 child: const Icon(Icons.add_circle, color: Colors.black, size: 16),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Add New Variant',
+               Text(
+                context.tr('txt_add_new_variant'),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -140,7 +140,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text('Done Adding This Variant', style: TextStyle(fontSize: 13)),
+                child:  Text(context.tr('txt_done_adding_variant'), style: TextStyle(fontSize: 13)),
               ),
             ),
         ],
@@ -161,9 +161,9 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Select Variant Type:',
-          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+        Text(
+          context.tr('txt_select_variant_type'),
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
         ),
         const SizedBox(height: 8),
 
@@ -195,7 +195,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '+ Add Custom Variant Type',
+                  context.tr('txt_add_custom_variant_type'),
                   style: TextStyle(
                     color: _isCustomVariantTypeActive ? Colors.black : Colors.grey.shade700,
                     fontWeight: _isCustomVariantTypeActive ? FontWeight.w500 : FontWeight.normal,
@@ -250,7 +250,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                         ),
                       ),
                       Text(
-                        '${attr.values.length} values',
+                        context.tr('txt_values_count').replaceAll('{count}', attr.values.length.toString()),
                         style: TextStyle(
                           color: Colors.grey.shade500,
                           fontSize: 10,
@@ -268,7 +268,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'All variant types are already selected',
+              context.tr('txt_all_variant_selected'),
               style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontStyle: FontStyle.italic),
             ),
           ),
@@ -297,9 +297,9 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
             controller: _customVariantNameController,
             style: const TextStyle(color: Colors.black, fontSize: 13),
             decoration: InputDecoration(
-              labelText: 'Custom Variant Name',
+              labelText: context.tr('txt_custom_variant_name'),
               labelStyle: TextStyle(color: Colors.grey.shade700, fontSize: 12),
-              hintText: 'e.g., Size, Material, Pattern',
+              hintText: context.tr('txt_custom_variant_hint'),
               hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
@@ -316,8 +316,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
           ),
           const SizedBox(height: 8),
           if (_tempCustomValues.isNotEmpty) ...[
-            const Text(
-              'Added Values:',
+             Text(
+              context.tr('txt_added_values'),
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
             ),
             const SizedBox(height: 6),
@@ -409,7 +409,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Values for: $variantName',
+                      context.tr('txt_values_for').replaceAll('{name}', variantName),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                     if (!_isCustomVariantTypeActive && currentAttribute?.id != 0)
@@ -428,8 +428,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                 ),
                 child: Text(
                   _isCustomVariantTypeActive
-                      ? '${_tempCustomValues.length} selected'
-                      : '${selectedVariant?.values.length ?? 0} selected',
+                      ? context.tr('txt_selected_count').replaceAll('{count}', _tempCustomValues.length.toString())
+                      : context.tr('txt_selected_count').replaceAll('{count}', (selectedVariant?.values.length ?? 0).toString()),
                   style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
                 ),
               ),
@@ -454,10 +454,10 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.add_circle_outline, color: Colors.black, size: 14),
-                    SizedBox(width: 4),
-                    Text('Add New Value', style: TextStyle(color: Colors.black, fontSize: 12)),
+                  children: [
+                    const Icon(Icons.add_circle_outline, color: Colors.black, size: 14),
+                    const SizedBox(width: 4),
+                    Text(context.tr('txt_add_new_value'), style: const TextStyle(color: Colors.black, fontSize: 12)),
                   ],
                 ),
               ),
@@ -470,8 +470,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
 
           if (!_isCustomVariantTypeActive && availableAttributeValues.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const Text(
-              'Available Values:',
+             Text(
+              context.tr('txt_available_values'),
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
             ),
             const SizedBox(height: 6),
@@ -522,8 +522,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
               selectedVariant != null &&
               selectedVariant.values.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const Text(
-              'Selected Values:',
+             Text(
+              context.tr('txt_selected_values'),
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
             ),
             const SizedBox(height: 6),
@@ -579,8 +579,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                             color: Colors.orange.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'Custom',
+                          child:  Text(
+                            context.tr('txt_custom'),
                             style: TextStyle(
                               fontSize: 8,
                               color: Colors.orange,
@@ -686,7 +686,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                   controller: _customVariantValueController,
                   style: const TextStyle(fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Enter value',
+                    hintText: context.tr('txt_enter_value'),
                     hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 12),
                     border: InputBorder.none,
                     // contentPadding: EdgeInsets.zero,
@@ -725,7 +725,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Tip: Select from available values above for preset options',
+                  context.tr('txt_tip_preset_values'),
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 10,
@@ -748,7 +748,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
         _tempCustomValues.add(value);
         _customVariantValueController.clear();
       });
-      _showSnackBar('Custom value added: $value');
+      context.tr('txt_custom_value_added').replaceAll('{value}', value);
     } else {
       if (attribute != null && attribute.id != 0) {
         try {
@@ -763,8 +763,11 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
             attributeId: attribute.id,
             valueId: presetValue.id,
           );
-          _showSnackBar('Preset value added: $value (ID: ${presetValue.id})');
-        } catch (e) {
+    _showSnackBar(
+    context.tr('txt_preset_value_added')
+        .replaceAll('{value}', value)
+        .replaceAll('{id}', presetValue.id.toString()),
+    );        } catch (e) {
           c.toggleVariantValue(
             variantName,
             value,
@@ -775,8 +778,9 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
         }
       } else {
         c.toggleVariantValue(variantName, value, isCustom: true);
-        _showSnackBar('Value added: $value');
-      }
+    _showSnackBar(
+    context.tr('txt_value_added').replaceAll('{value}', value),
+    );      }
       _customVariantValueController.clear();
     }
   }
@@ -788,12 +792,13 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
         for (String value in _tempCustomValues) {
           c.toggleVariantValue(customName, value, isCustom: true);
         }
-        _showSnackBar('Custom variant "${customName}" added successfully');
-      } else if (customName.isEmpty) {
-        _showSnackBar('Please enter a variant name');
+        _showSnackBar(
+          context.tr('txt_custom_variant_added').replaceAll('{name}', customName),
+        );      } else if (customName.isEmpty) {
+        _showSnackBar(context.tr('txt_enter_variant_name'));
         return;
       } else if (_tempCustomValues.isEmpty) {
-        _showSnackBar('Please add at least one value');
+        _showSnackBar(context.tr('txt_add_at_least_one_value'));
         return;
       }
     }
@@ -831,7 +836,8 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
               Icon(Icons.check_circle, color: Colors.black, size: 16),
               const SizedBox(width: 6),
               Text(
-                'Selected Variants (${selectedVariants.length})',
+                context.tr('txt_selected_variants_count')
+                    .replaceAll('{count}', selectedVariants.length.toString()),
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
             ],
@@ -874,7 +880,7 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                                 child: Text(
-                                  'Custom Type',
+                                  context.tr('txt_custom_type'),
                                   style: TextStyle(
                                     fontSize: 8,
                                     color: Colors.orange.shade700,
@@ -946,7 +952,9 @@ class _VariantManagerScreenState extends State<VariantManagerScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              '${presetCount} preset, ${customCount} custom',
+                              context.tr('txt_preset_custom_count')
+                                  .replaceAll('{preset}', presetCount.toString())
+                                  .replaceAll('{custom}', customCount.toString()),
                               style: TextStyle(
                                 fontSize: 8,
                                 color: Colors.grey.shade500,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../extensions/context_extension.dart';
+
 class PolicySelectionWidget extends StatefulWidget {
   final Map<String, dynamic>? initialPolicy;
   final Function(Map<String, dynamic>?) onPolicyChanged;
@@ -47,13 +49,14 @@ class _PolicySelectionWidgetState extends State<PolicySelectionWidget> {
     if (_selectedPolicyType == 'no_return') {
       widget.onPolicyChanged({
         'type': 'no_return',
-        'message': 'This store does not accept returns.',
+        'message': context.tr('txt_store_does_not_accept_returns')
+
       });
     } else if (_selectedPolicyType == 'supplier_return' && _returnDays != null && _returnDays! > 0) {
       widget.onPolicyChanged({
         'type': 'supplier_return',
         'days': _returnDays,
-        'message': 'Returns accepted up to $_returnDays days.',
+        'message': context.tr('txt_returns_accepted_upto').replaceAll('{days}', _returnDays.toString())
       });
     } else if (_selectedPolicyType == null) {
       widget.onPolicyChanged(null);
@@ -72,8 +75,7 @@ class _PolicySelectionWidgetState extends State<PolicySelectionWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Return Policy',
+           Text(context.tr('txt_return_policy_title'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -83,9 +85,9 @@ class _PolicySelectionWidgetState extends State<PolicySelectionWidget> {
 
           // No Return Option
           RadioListTile<String>(
-            title: const Text('No Returns Accepted'),
-            subtitle: const Text(
-              'Store does not accept returns',
+            title: Text(context.tr('txt_no_returns_accepted')),
+            subtitle:  Text(
+    context.tr('txt_store_no_returns'),
               style: TextStyle(fontSize: 12),
             ),
             value: 'no_return',
@@ -104,9 +106,9 @@ class _PolicySelectionWidgetState extends State<PolicySelectionWidget> {
 
           // Supplier Return Option
           RadioListTile<String>(
-            title: const Text('Supplier Return Policy'),
-            subtitle: const Text(
-              'Check with supplier for return policy',
+            title: Text(context.tr('txt_supplier_return_policy')),
+            subtitle:  Text(
+    context.tr('txt_check_supplier_return'),
               style: TextStyle(fontSize: 12),
             ),
             value: 'supplier_return',
@@ -132,8 +134,8 @@ class _PolicySelectionWidgetState extends State<PolicySelectionWidget> {
                       controller: _daysController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'Return period (days)',
-                        hintText: 'e.g., 14',
+                        labelText: context.tr('txt_return_period_days'),
+                        hintText: context.tr('txt_return_hint'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -153,8 +155,8 @@ class _PolicySelectionWidgetState extends State<PolicySelectionWidget> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'days',
+                   Text(
+    context.tr('txt_days'),
                     style: TextStyle(fontSize: 16),
                   ),
                 ],
@@ -192,8 +194,8 @@ class _PolicySelectionWidgetState extends State<PolicySelectionWidget> {
                   Expanded(
                     child: Text(
                       _selectedPolicyType == 'no_return'
-                          ? 'This store does not accept returns.'
-                          : 'Returns accepted up to $_returnDays days. Terms and conditions apply.',
+                          ? context.tr('txt_store_does_not_accept_returns')
+                          : context.tr('txt_returns_terms_apply').replaceAll('{days}', _returnDays.toString()),
                       style: TextStyle(
                         fontSize: 12,
                         color: _selectedPolicyType == 'no_return'

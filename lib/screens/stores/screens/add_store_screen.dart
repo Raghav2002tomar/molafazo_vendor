@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 
+import '../../../extensions/context_extension.dart';
 import '../../../services/api_service.dart';
 import '../../addproduct/model.dart' hide StoreModel;
 import '../../profile/screens/store_list_screen.dart';
@@ -16,6 +17,7 @@ import '../../../screens/citys/CitySearchScreen.dart';
 import 'DeliveryPolicyWidget.dart';
 import 'PolicySelectionWidget.dart';
 import 'StorePreviewScreen.dart';
+import 'delivery_settings_screen.dart';
 
 class AddStoreScreen extends StatefulWidget {
   final StoreModel? storeData; // Pass full store data for editing
@@ -86,6 +88,16 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
     // Set delivery options
     c.selfPickup = store.selfPickup == 1;
     c.deliveryBySeller = store.deliveryBySeller == 1;
+
+    final configs = _parseDeliveryConfigs(store.deliveryConfig);
+    c.updateDeliveryConfigs(configs);
+
+    debugPrint("EDIT DELIVERY CONFIG COUNT: ${configs.length}");
+    for (final item in configs) {
+      debugPrint(
+        "CITY: ${item.city}, ENABLED: ${item.enabled}, TYPE: ${item.deliveryType}, TIME: ${item.deliveryTimeValue} ${item.deliveryTimeUnit}",
+      );
+    }
 
     // Parse working hours
     if (store.workingHours.isNotEmpty && store.workingHours != 'Not specified') {
@@ -172,7 +184,25 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
     print("Background URL: ${store.storeBackgroundImage}");
   }
 
+  List<DeliveryConfigModel> _parseDeliveryConfigs(dynamic deliveryConfig) {
+    if (deliveryConfig == null) return [];
 
+    final List data = deliveryConfig is List ? deliveryConfig : [];
+
+    return data.map((item) {
+      return DeliveryConfigModel(
+        city: item['city']?.toString() ?? '',
+        enabled: item['enabled']?.toString() == '1',
+        deliveryType: item['delivery_type']?.toString() ?? 'courier',
+        deliveryTimeValue: int.tryParse(
+          item['delivery_time_value']?.toString() ?? '3',
+        ) ??
+            3,
+        deliveryTimeUnit: item['delivery_time_unit']?.toString() ?? 'hours',
+        description: item['description']?.toString() ?? '',
+      );
+    }).where((e) => e.city.isNotEmpty).toList();
+  }
 
   TimeOfDay _parseTime(String timeStr) {
     try {
@@ -252,7 +282,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
         'height': image.height,
       };
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Failed to read image dimensions');
+      Fluttertoast.showToast(msg: context.tr('txt_failed_read_image_dimensions'));
       return null;
     }
   }
@@ -268,9 +298,10 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
     if (width < (requirements['minWidth'] as int) ||
         height < (requirements['minHeight'] as int)) {
       _showDimensionError(
-          'Image too small',
-          'Minimum size: ${requirements['minWidth']}x${requirements['minHeight']}px\n'
-              'Your image: ${width}x${height}px'
+          context.tr('txt_image_too_small'),
+          context.tr('txt_minimum_size')
+              .replaceAll('{size}', '${requirements['minWidth']}x${requirements['minHeight']}px')
+              .replaceAll('{current}', '${width}x${height}px')
       );
       return false;
     }
@@ -278,9 +309,10 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
     if (width > (requirements['maxWidth'] as int) ||
         height > (requirements['maxHeight'] as int)) {
       _showDimensionError(
-          'Image too large',
-          'Maximum size: ${requirements['maxWidth']}x${requirements['maxHeight']}px\n'
-              'Your image: ${width}x${height}px'
+          context.tr('txt_image_too_large'),
+          context.tr('txt_maximum_size')
+              .replaceAll('{size}', '${requirements['maxWidth']}x${requirements['maxHeight']}px')
+              .replaceAll('{current}', '${width}x${height}px')
       );
       return false;
     }
@@ -301,10 +333,10 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
 
     if (width != requiredWidth || height != requiredHeight) {
       _showDimensionError(
-          'Invalid Background Image',
-          'Required size: ${requiredWidth}x${requiredHeight}px\n'
-              'Your image: ${width}x${height}px\n\n'
-              'Please upload an image with exact dimensions 1408x768 pixels.'
+          context.tr('txt_invalid_background_image'),
+          context.tr('txt_required_size_your_image')
+              .replaceAll('{required}', '${requiredWidth}x${requiredHeight}px')
+              .replaceAll('{current}', '${width}x${height}px')
       );
       return false;
     }
@@ -321,7 +353,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(context.tr('txt_ok')),
           ),
         ],
       ),
@@ -364,7 +396,8 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
         c.notifyListeners();
 
         Fluttertoast.showToast(
-          msg: 'Logo uploaded (${dimensions['width']}x${dimensions['height']})',
+          msg: context.tr('txt_logo_uploaded')
+              .replaceAll('{size}', '${dimensions['width']}x${dimensions['height']}'),
           backgroundColor: Colors.green,
           textColor: Colors.white,
         );
@@ -384,7 +417,8 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
         c.notifyListeners();
 
         Fluttertoast.showToast(
-          msg: 'Background uploaded (${dimensions['width']}x${dimensions['height']})',
+          msg: context.tr('txt_background_uploaded')
+              .replaceAll('{size}', '${dimensions['width']}x${dimensions['height']}'),
           backgroundColor: Colors.green,
           textColor: Colors.white,
         );
@@ -392,7 +426,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
     } catch (e) {
       debugPrint("Image Pick Error: $e");
       Fluttertoast.showToast(
-        msg: "Failed to pick image",
+        msg: context.tr('txt_failed_pick_image'),
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );
@@ -434,8 +468,11 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
           return Scaffold(
             backgroundColor: Colors.grey[100],
             appBar: AppBar(
-              title: Text(widget.storeData != null ? "Edit Store" : "Create Store"),
-              backgroundColor: Colors.white,
+              title: Text(
+                widget.storeData != null
+                    ? context.tr('txt_edit_store')
+                    : context.tr('txt_create_store'),
+              ),              backgroundColor: Colors.white,
               elevation: 0,
               foregroundColor: Colors.black,
             ),
@@ -447,16 +484,12 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     /// STORE INFO
-                    sectionTitle("Store Information"),
-                    label("Store Name *"),
-                    textField(nameCtrl, "Enter store name"),
+                    sectionTitle(context.tr('txt_store_information')),
+                    label(context.tr('txt_store_name')),
+                    textField(nameCtrl, context.tr('txt_enter_store_name')),
+                    label(context.tr('txt_mobile_number')),
+                    textField(mobileCtrl, context.tr('txt_enter_mobile_number')),
 
-                    label("Mobile Number *"),
-                    textField(
-                      mobileCtrl,
-                      "Enter mobile number",
-                      keyboard: TextInputType.phone,
-                    ),
 
                     const SizedBox(height: 20),
 
@@ -474,16 +507,14 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                "Do you sell offline?",
-                                style: TextStyle(
+                               Text(context.tr('txt_do_you_sell_offline'),
+              style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                "Enable if you have a physical store location",
+              Text(context.tr('txt_physical_store_location'),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade600,
@@ -512,16 +543,14 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                     const SizedBox(height: 20),
 
                     /// CITY SELECTION (Always shown)
-                    label("City *"),
-                    InkWell(
+                    label(context.tr('txt_city_required')),                    InkWell(
                       onTap: _selectCity,
                       child: InputDecorator(
-                        decoration: inputDecoration("Select city").copyWith(
+                        decoration: inputDecoration(context.tr('txt_select_city')).copyWith(
                           suffixIcon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                         ),
                         child: Text(
-                          _selectedCity ?? "Select city",
-                          style: TextStyle(
+                          _selectedCity ?? context.tr('txt_select_city'),                          style: TextStyle(
                             color: _selectedCity == null ? Colors.grey : Colors.black,
                           ),
                         ),
@@ -531,21 +560,17 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                     /// ADDRESS FIELDS (Only shown if selling offline)
                     if (c.sellOffline) ...[
                       const SizedBox(height: 16),
-                      label("Store Address *"),
-                      textField(
-                        addressCtrl,
-                        "Enter complete store address",
-                        maxLines: 2,
-                      ),
+                      label(context.tr('txt_store_address')),
+                      textField(addressCtrl, context.tr('txt_enter_store_address'), maxLines: 2),
                       const SizedBox(height: 16),
-                      label("Landmark (Optional)"),
-                      optionalTextField(landmarkCtrl, "Enter landmark (e.g., near city mall)"),
+                      label(context.tr('txt_landmark_optional')),
+                      optionalTextField(landmarkCtrl, context.tr('txt_enter_landmark')),
                     ],
 
                     const SizedBox(height: 8),
 
                     SwitchListTile(
-                      title: const Text("Self Pickup"),
+                      title: Text(context.tr('txt_self_pickup')),
                       value: c.selfPickup,
                       onChanged: (v) {
                         c.selfPickup = v;
@@ -554,24 +579,63 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                     ),
 
                     SwitchListTile(
-                      title: const Text("Delivery By Seller"),
-                      value: c.deliveryBySeller,
+                      title: Text(context.tr('txt_delivery_by_seller')),                      value: c.deliveryBySeller,
                       onChanged: (v) {
                         c.deliveryBySeller = v;
                         c.notifyListeners();
                       },
                     ),
+                    if (c.deliveryBySeller) ...[
+                      const SizedBox(height: 12),
+                      InkWell(
+                        onTap: () async {
+                          final result = await Navigator.push<List<DeliveryConfigModel>>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DeliverySettingsScreen(
+                                initialConfigs: c.deliveryConfigs,
+                              ),
+                            ),
+                          );
 
+                          if (result != null) {
+                            c.updateDeliveryConfigs(result);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.local_shipping_outlined),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  c.deliveryConfigs.isEmpty
+                                      ? context.tr('txt_add_delivery_settings')
+                                      : '${c.deliveryConfigs.length} ${context.tr('txt_city_delivery_added')}',
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                              const Icon(Icons.arrow_forward_ios, size: 16),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     /// TIMING
-                    sectionTitle("Store Timing"),
-                    Row(
+                    sectionTitle(context.tr('txt_store_timing')),                    Row(
                       children: [
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () => c.pickTime(context, true),
                             child: Text(
                               c.openingTime == null
-                                  ? "Opening Time"
+                                  ? context.tr('txt_opening_time')
                                   : c.openingTime!.format(context),
                             ),
                           ),
@@ -582,7 +646,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                             onPressed: () => c.pickTime(context, false),
                             child: Text(
                               c.closingTime == null
-                                  ? "Closing Time"
+                                  ? context.tr('txt_closing_time')
                                   : c.closingTime!.format(context),
                             ),
                           ),
@@ -591,8 +655,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                     ),
 
                     /// BACKGROUND IMAGE
-                    sectionTitle("Store Background Image *"),
-                    Container(
+                    sectionTitle(context.tr('txt_store_background_image')),                    Container(
                       padding: const EdgeInsets.all(12),
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
@@ -609,8 +672,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Background Image Requirements:',
-                                  style: TextStyle(
+                                  context.tr('txt_background_requirements'),                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.blue.shade700,
                                   ),
@@ -620,12 +682,13 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '• Exact size required: ${_requiredDimensions['background']!['description']}',
-                            style: const TextStyle(fontSize: 12),
+          context.tr('txt_background_exact_size').replaceAll(
+          '{size}',
+          _requiredDimensions['background']!['description'].toString(),
+          ),                            style: const TextStyle(fontSize: 12),
                           ),
                           Text(
-                            '• Please ensure your image is exactly 1408x768 pixels',
-                            style: TextStyle(
+          context.tr('txt_background_exact_note'),                            style: TextStyle(
                               fontSize: 12,
                               color: Colors.red.shade700,
                               fontWeight: FontWeight.w500,
@@ -637,8 +700,8 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
 
                     if (c.storeBackgroundImage == null) ...[
                       uploadBox(
-                        title: "Tap to Upload Background Image",
-                        subtitle: "Must be exactly 1408x768 pixels",
+                        title: context.tr('txt_tap_upload_background'),
+                        subtitle: context.tr('txt_background_subtitle'),
                         icon: Icons.image,
                         onTap: () => _pickImageWithValidation(context, c, 'background'),
                       ),
@@ -698,9 +761,8 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                                   color: Colors.red,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Text(
-                                  'Wrong Size! Must be 1408x768',
-                                  style: TextStyle(color: Colors.white, fontSize: 10),
+                                child:  Text(
+          context.tr('txt_wrong_size'),                                  style: TextStyle(color: Colors.white, fontSize: 10),
                                 ),
                               ),
                             ),
@@ -711,8 +773,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                     const SizedBox(height: 20),
 
                     /// STORE LOGO
-                    sectionTitle("Store Logo *"),
-                    Container(
+                    sectionTitle(context.tr('txt_store_logo')),                    Container(
                       padding: const EdgeInsets.all(12),
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
@@ -726,8 +787,10 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Required size: ${_requiredDimensions['logo']!['description']}',
-                              style: TextStyle(
+                              context.tr('txt_logo_required_size').replaceAll(
+                                '{size}',
+                                _requiredDimensions['logo']!['description'].toString(),
+                              ),                              style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue.shade700,
                               ),
@@ -739,8 +802,8 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
 
                     if (c.storeProofImage == null) ...[
                       uploadBox(
-                        title: "Tap to Upload Logo",
-                        subtitle: "200x200 to 500x500 pixels",
+                        title: context.tr('txt_tap_upload_logo'),
+                        subtitle: context.tr('txt_logo_subtitle'),
                         icon: Icons.store,
                         onTap: () => _pickImageWithValidation(context, c, 'logo'),
                       ),
@@ -804,15 +867,9 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                     const SizedBox(height: 20),
 
                     /// DESCRIPTION
-                    sectionTitle("Description"),
-                    textField(
-                      descCtrl,
-                      "Enter store description",
-                      maxLines: 3,
-                    ),
-
-                    /// RETURN POLICY SECTION
-                    sectionTitle("Return Policy"),
+                    sectionTitle(context.tr('txt_description_title')),
+                    textField(descCtrl, context.tr('txt_enter_store_description'), maxLines: 3),
+                    sectionTitle(context.tr('txt_return_policy')),
                     const SizedBox(height: 8),
                     PolicySelectionWidget(
                       initialPolicy: c.storePolicy, // Pass the existing policy
@@ -823,21 +880,20 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                     const SizedBox(height: 20),
 
                     /// DELIVERY POLICY SECTION
-                    sectionTitle("Delivery Policy"),
-                    const SizedBox(height: 8),
-                    DeliveryPolicyWidget(
-                      initialPolicy: c.deliveryPolicy, // Pass existing delivery policy
-                      initialDays: c.deliveryDays, // Pass existing delivery days
-                      onPolicyChanged: (policy) {
-                        c.updateDeliveryPolicy(policy);
-                      },
-                      onDaysChanged: (days) {
-                        c.updateDeliveryDays(days);
-                      },
-                    ),
+                    // sectionTitle(context.tr('txt_delivery_policy')),
+                    // const SizedBox(height: 8),
+                    // DeliveryPolicyWidget(
+                    //   initialPolicy: c.deliveryPolicy, // Pass existing delivery policy
+                    //   initialDays: c.deliveryDays, // Pass existing delivery days
+                    //   onPolicyChanged: (policy) {
+                    //     c.updateDeliveryPolicy(policy);
+                    //   },
+                    //   onDaysChanged: (days) {
+                    //     c.updateDeliveryDays(days);
+                    //   },
+                    // ),
                     /// SOCIAL LINKS SECTION
-                    sectionTitle("Social & Contact Links"),
-                    Container(
+                    sectionTitle(context.tr('txt_social_links')),                    Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -850,9 +906,8 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Add your social media links',
-                                style: TextStyle(fontSize: 14),
+                               Text(context.tr('txt_add_social_links'),
+          style: TextStyle(fontSize: 14),
                               ),
                               TextButton.icon(
                                 onPressed: () async {
@@ -872,8 +927,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                                   );
                                 },
                                 icon: const Icon(Icons.add, size: 18),
-                                label: const Text('Manage Links'),
-                                style: TextButton.styleFrom(
+          label: Text(context.tr('txt_manage_links')),                                style: TextButton.styleFrom(
                                   foregroundColor: Colors.black,
                                 ),
                               ),
@@ -925,12 +979,12 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                                     Icon(Icons.share, size: 40, color: Colors.grey.shade400),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'No social links added yet',
+          context.tr('txt_no_social_links'),
                                       style: TextStyle(color: Colors.grey.shade600),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Tap "Manage Links" to add',
+                                    context.tr('txt_tap_manage_links'),
                                       style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                                     ),
                                   ],
@@ -949,8 +1003,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () {
                           if (nameCtrl.text.isEmpty) {
-                            Fluttertoast.showToast(msg: "Please enter store name");
-                            return;
+                            Fluttertoast.showToast(msg: context.tr('txt_please_enter_store_name'));                            return;
                           }
 
                           String workingHours = "Not specified";
@@ -984,8 +1037,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                           );
                         },
                         icon: const Icon(Icons.visibility_outlined),
-                        label: const Text("Preview Store", style: TextStyle(fontSize: 16)),
-                        style: OutlinedButton.styleFrom(
+                        label: Text(context.tr('txt_preview_store'), style: const TextStyle(fontSize: 16)),                        style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.black,
                           side: const BorderSide(color: Colors.black),
                           shape: RoundedRectangleBorder(
@@ -1007,17 +1059,17 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                           if (!c.formKey.currentState!.validate()) return;
 
                           if (_selectedCity == null) {
-                            Fluttertoast.showToast(msg: "Please select city");
+                            Fluttertoast.showToast(msg: context.tr('txt_please_select_city'));
                             return;
                           }
 
                           if (c.sellOffline && addressCtrl.text.trim().isEmpty) {
-                            Fluttertoast.showToast(msg: "Please enter store address");
+                            Fluttertoast.showToast(msg: context.tr('txt_please_enter_store_address'));
                             return;
                           }
 
                           if (c.storeBackgroundImage == null) {
-                            Fluttertoast.showToast(msg: "Background image required");
+                            Fluttertoast.showToast(msg: context.tr('txt_background_required'));
                             return;
                           }
 
@@ -1025,8 +1077,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                             if (_backgroundDimensions!['width'] != 1408 ||
                                 _backgroundDimensions!['height'] != 768) {
                               Fluttertoast.showToast(
-                                msg: "Background image must be exactly 1408x768 pixels",
-                                backgroundColor: Colors.red,
+                                msg: context.tr('txt_background_must_size'),                                backgroundColor: Colors.red,
                                 textColor: Colors.white,
                               );
                               return;
@@ -1034,10 +1085,12 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                           }
 
                           if (c.storeProofImage == null) {
-                            Fluttertoast.showToast(msg: "Logo image required");
+                            Fluttertoast.showToast(msg: context.tr('txt_logo_required'));                            return;
+                          }
+                          if (c.deliveryBySeller && c.deliveryConfigs.isEmpty) {
+                            Fluttertoast.showToast(msg: 'Please add delivery settings');
                             return;
                           }
-
                           // Build full address
                           String fullAddress = '';
                           if (c.sellOffline) {
@@ -1077,7 +1130,9 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
                         child: c.submitting
                             ? const CircularProgressIndicator(color: Colors.white)
                             : Text(
-                          widget.storeData != null ? "Update Store" : "Create Store",
+          widget.storeData != null
+          ? context.tr('txt_update_store')
+              : context.tr('txt_create_store'),
                           style: const TextStyle(fontSize: 16),
                         ),
                       ),
@@ -1141,8 +1196,7 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
       maxLines: maxLines,
       keyboardType: keyboard,
       decoration: inputDecoration(hint),
-      validator: (v) => v == null || v.isEmpty ? "Required" : null,
-    );
+      validator: (v) => v == null || v.isEmpty ? context.tr('txt_required') : null,    );
   }
 
   InputDecoration inputDecoration(String hint) {

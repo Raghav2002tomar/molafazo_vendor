@@ -98,13 +98,13 @@ class MyApp extends StatelessWidget {
 
         theme: lightTheme.copyWith(
           textTheme: lightTheme.textTheme.apply(
-            fontFamily: 'Circe Rounded Regular',
+            fontFamily: 'Nata Sans Regular',
           ),
         ),
 
         darkTheme: darkTheme.copyWith(
         textTheme: darkTheme.textTheme.apply(
-        fontFamily: 'Circe Rounded Regular',
+        fontFamily: 'Nata Sans Regular',
         ),
         ),
           /// ✅ CORRECT Locale handling

@@ -180,7 +180,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
               Icon(Icons.image, color: Colors.black, size: 18),
               const SizedBox(width: 8),
               Text(
-                context.tr('txt_product_imagess'),
+                context.tr('txt_product_images'),
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -2417,8 +2417,7 @@ class _AddProductBasicInfonewState extends State<AddProductBasicInfonew> {
 
 
   Future<void> _submitProduct(BuildContext context, AddProductControllernew c) async {
-    final t = context.watch<TranslateProvider>().t;
-
+    final t = context.tr;
     // Check if already submitting
     if (c.isSubmitting) {
       return;

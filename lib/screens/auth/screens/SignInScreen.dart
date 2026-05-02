@@ -265,6 +265,9 @@ class _SignInScreenState extends State<SignInScreen> {
       // Save complete user data
       await _saveUser(res["data"]);
 
+      await _fetchAndSaveProfile();
+
+
       // Show success message
       _toast(res["data"]["message"] ?? t('txt_login_successful'));
 
@@ -313,10 +316,35 @@ class _SignInScreenState extends State<SignInScreen> {
       }
 
       await _saveUser(res["data"]);
+      await _fetchAndSaveProfile();
       _toast(res["message"] ?? t('txt_login_successful'));
       _goDashboard();
     } else {
       _toast(res["message"] ?? t('txt_login_failed'));
+    }
+  }
+
+  Future<void> _fetchAndSaveProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("api_token");
+
+    if (token == null || token.isEmpty) return;
+
+    try {
+      final res = await ApiService.get(
+        endpoint: "/get-profile",
+        token: token,
+      );
+
+      if (res["success"] == true && res["data"] != null) {
+        final profile = Map<String, dynamic>.from(res["data"]);
+        await _saveUser(profile);
+        print("✅ Latest profile fetched and saved");
+      } else {
+        print("⚠️ Profile API failed, keeping login response data");
+      }
+    } catch (e) {
+      print("❌ Profile fetch error: $e");
     }
   }
 
@@ -325,6 +353,7 @@ class _SignInScreenState extends State<SignInScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("api_token", token);
   }
+
 
   Future<void> _saveUser(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
@@ -343,6 +372,10 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (userData["mobile"] != null) {
       await prefs.setString("user_mobile", userData["mobile"].toString());
+    }
+
+    if (userData["status_id"] != null) {
+      await prefs.setString("user_status_id", userData["status_id"].toString());
     }
 
     if (userData["email"] != null) {
@@ -371,6 +404,21 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (userData["country"] != null) {
       await prefs.setString("user_country", userData["country"].toString());
+    }
+
+    if (userData["email_verified"] != null) {
+      await prefs.setInt("email_verified", int.tryParse(userData["email_verified"].toString()) ?? 0);
+    }
+
+    if (userData["kyc_status"] != null) {
+      await prefs.setString("kyc_status", userData["kyc_status"].toString());
+    }
+
+    if (userData["government_id_documents"] != null) {
+      await prefs.setString(
+        "government_id_documents",
+        jsonEncode(userData["government_id_documents"]),
+      );
     }
 
     // Mark user as logged in
@@ -577,7 +625,7 @@ class _SignInScreenState extends State<SignInScreen> {
         validator: _phoneValidator,
         enabled: !otpSent,
         prefixIcon: const Icon(Icons.phone_android),
-        maxLength: 10,
+        maxLength: ApiService.IsBebugMode == true? 10: 9,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(10),

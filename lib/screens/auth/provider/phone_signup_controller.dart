@@ -1328,70 +1328,50 @@ class PhoneSignupController extends ChangeNotifier {
 
   // ------------------ FINAL SAVE ------------------
   Future<void> saveAndFinish(BuildContext context) async {
-    // Validate address
-    if (selectedAddress == null || selectedAddress!.isEmpty) {
-      Fluttertoast.showToast(msg: "Please select your address");
-      return;
-    }
-
     busy = true;
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("api_token");
 
-    // Parse address components
-    String? addressLine1 = selectedAddress ?? cityCtrl.text;
-    String? city = "";
-    String? state = "";
-    String? country = "";
-    String? postalCode = "";
-
-    if (addressLine1 != null && addressLine1.isNotEmpty) {
-      List<String> parts = addressLine1.split(',');
-
-      if (parts.length >= 4) {
-        city = parts[parts.length - 4].trim();
-        state = parts[parts.length - 3].trim();
-        country = parts[parts.length - 2].trim();
-        postalCode = parts[parts.length - 1].trim();
-      }
+    if (token == null || token.isEmpty) {
+      busy = false;
+      notifyListeners();
+      Fluttertoast.showToast(msg: "Session expired. Please login again.");
+      return;
     }
 
     final res = await ApiService.multipart(
       endpoint: "/vendor/complete-profile",
       token: token,
       fields: {
-        // Send empty for name fields, but send email
-        "name": "",  // Empty as requested
-        "email": emailCtrl.text.trim(),  // Email is sent
+        "name": "",
+        "email": emailCtrl.text.trim(),
         "mobile": phoneCtrl.text.trim(),
         "password": pwdCtrl.text.trim(),
         "password_confirmation": confirmCtrl.text.trim(),
 
-        "address_line1": selectedAddress!,
+        "address_line1": "",
         "address_line2": "",
-        "city": selectedAddress!,
-        "state": "City",
-        "country": "tajikistan",
-        "postal_code": "12232",
+        "city": "",
+        "state": "",
+        "country": "",
+        "postal_code": "",
 
-        "latitude": selectedLat?.toString() ?? "",
-        "longitude": selectedLng?.toString() ?? "",
+        "latitude": "",
+        "longitude": "",
 
         "gov_id_type": govtIdType ?? "",
-        "gov_id_number": "",  // Empty as requested
+        "gov_id_number": "",
 
-        "terms_accepted": acceptedTerms ? "1" : "0",
+        "terms_accepted": "1",
         "alt_mobile": phoneCtrl.text.trim(),
 
         "device_id": "123",
-        "device_type": "ios",
+        "device_type": "android",
         "fcm_token": "1234321",
       },
-      files: {
-        // No files uploaded
-      },
+      files: {},
     );
 
     busy = false;
@@ -1400,9 +1380,7 @@ class PhoneSignupController extends ChangeNotifier {
     if (res["success"] == true) {
       Fluttertoast.showToast(msg: "Profile completed 🎉");
 
-      if (token != null) {
-        await _fetchProfile(token);
-      }
+      await _fetchProfile(token);
 
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(
@@ -1417,6 +1395,7 @@ class PhoneSignupController extends ChangeNotifier {
       );
     }
   }
+
 
   // ------------------ FETCH PROFILE ------------------
   Future<void> _fetchProfile(String token) async {
@@ -1512,11 +1491,10 @@ class PhoneSignupController extends ChangeNotifier {
 class SignupStep {
   static const int phoneOtp = 0;
   static const int accountCreated = 1;
-  static const int emailPassword = 2;  // Combined email & password step
+  static const int emailPassword = 2;
   static const int govtId = 3;
-  static const int address = 4;
 
-  static const int total = 5;
+  static const int total = 4;
 }
 
 

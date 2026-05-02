@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../extensions/context_extension.dart';
 import '../../../services/api_service.dart';
 import 'edit_profile_screen.dart';
 
@@ -73,7 +74,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
 
   String _getValue(String key) {
     final val = _profileData?[key];
-    if (val == null || val.toString().isEmpty) return "-";
+    if (val == null || val.toString().isEmpty) return context.tr('txt_no_data');
     return val.toString();
   }
 
@@ -90,7 +91,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Business Details"),
+        title: Text(context.tr('txt_business_details')),
         backgroundColor: Colors.white,
         foregroundColor: scheme.onSurface,
         elevation: 0,
@@ -100,14 +101,14 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _SectionHeader(title: 'Basic Information', icon: Icons.person_outline),
+            _SectionHeader(title: context.tr('txt_basic_information'), icon: Icons.person_outline),
             const SizedBox(height: 12),
             _InfoCard(
               children: [
-                _InfoRow(label: 'Full Name', value: _getValue("name")),
-                _InfoRow(label: 'Email', value: _getValue("email")),
-                _InfoRow(label: 'Mobile', value: _getValue("mobile")),
-                _InfoRow(label: 'Alternate Contact', value: _getValue("alt_mobile")),
+                _InfoRow(label: context.tr('txt_full_name'), value: _getValue("name")),
+                _InfoRow(label: context.tr('txt_email'), value: _getValue("email")),
+                _InfoRow(label: context.tr('txt_mobile'), value: _getValue("mobile")),
+                _InfoRow(label: context.tr('txt_alternate_contact'), value: _getValue("alt_mobile")),
               ],
             ),
             // const SizedBox(height: 20),
@@ -123,12 +124,10 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
             // ),
             const SizedBox(height: 20),
 
-            _SectionHeader(title: 'Address', icon: Icons.location_on_outlined),
-            const SizedBox(height: 12),
+            _SectionHeader(title: context.tr('txt_address_title'), icon: Icons.location_on_outlined),            const SizedBox(height: 12),
             _InfoCard(
               children: [
-                _InfoRow(label: 'City', value: _getValue("city")),
-                // _InfoRow(label: 'Full address', value: _getValue("state")),
+                _InfoRow(label: context.tr('txt_city'), value: _getValue("city")),                // _InfoRow(label: 'Full address', value: _getValue("state")),
               ],
             ),
             const SizedBox(height: 20),
@@ -143,7 +142,7 @@ class _VendorProfileScreenState extends State<VendorProfileScreen> {
                   ).then((_) => _fetchProfile());
                 },
                 icon: const Icon(Icons.edit),
-                label: const Text('Edit Profile'),
+                label: Text(context.tr('txt_edit_profile_btn')),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),

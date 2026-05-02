@@ -70,6 +70,7 @@ dependencies:
   pdf: ^3.12.0
   printing: ^5.14.3
   flutter_html: ^3.0.0
+  email_otp: ^3.1.0
 
 dev_dependencies:
   flutter_test:
@@ -120,6 +121,12 @@ flutter:
     - family: Circe Rounded Regular # The family name you will use in your Dart code
       fonts:
         - asset: assets/fonts/CirceRounded-Regular.ttf # Path to your font file
+    - family: Nata Sans Regular # The family name you will use in your Dart code
+      fonts:
+        - asset: assets/fonts/NataSans-Regular.ttf # Path to your font file
+    - family: Fantasque Sans Mono Regular # The family name you will use in your Dart code
+      fonts:
+        - asset: assets/fonts/FantasqueSansMono-Regular.ttf # Path to your font file
 
 
   # fonts:

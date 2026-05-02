@@ -119,6 +119,7 @@
 
 import 'dart:convert';
 
+import 'package:didit_sdk/sdk_flutter.dart';
 import 'package:flutter/material.dart';
 // import 'package:didit_sdk/sdk_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';

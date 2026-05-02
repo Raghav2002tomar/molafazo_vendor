@@ -43,7 +43,7 @@ class ApiService {
     } else {
       return {
         "success": false,
-        "message": data["message"] ?? "Something went wrong",
+        "message": data["message"] ?? "txt_something_went_wrong",
         "status": response.statusCode,
       };
     }
@@ -53,8 +53,8 @@ class ApiService {
     return {
       "success": false,
       "message": error.toString().contains("Timeout")
-          ? "Request timeout"
-          : "No Internet / Server Error",
+          ? "txt_request_timeout"
+          : "txt_no_internet_server_error",
     };
   }
 
@@ -118,19 +118,18 @@ class ApiService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {
           "success": decoded['status'] ?? true,
-          "message": decoded['message'] ?? "Review submitted successfully",
-          "data": decoded['data'],
+          "message": decoded['message'] ?? "txt_review_submitted_successfully",          "data": decoded['data'],
         };
       } else {
         return {
           "success": false,
-          "message": decoded['message'] ?? "Failed to submit review",
+          "message": decoded['message'] ?? "txt_failed_to_submit_review",
         };
       }
     } catch (e) {
       return {
         "success": false,
-        "message": "Error: ${e.toString()}",
+        "message": "txt_error_prefix: ${e.toString()}",
       };
     }
   }

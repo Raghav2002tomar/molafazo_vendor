@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:molafzo_vendor/screens/stores/screens/add_store_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../extensions/context_extension.dart';
 import '../../../services/api_service.dart';
+import '../../../widgets/pending_approval_screen.dart';
 import '../../stores/screens/store_detail_screen.dart';
 class StoreListScreen extends StatefulWidget {
   const StoreListScreen({super.key});
@@ -16,13 +18,38 @@ class StoreListScreen extends StatefulWidget {
 class _StoreListScreenState extends State<StoreListScreen> {
   bool loading = true;
   List<StoreModel> stores = [];
+  bool get _isProfileIncomplete => email.isEmpty;
+  bool get _isVerified => profilestatus == '1' && email.isNotEmpty;
+  String username = 'User';
+  String profilestatus = '';
+  String email = '';
 
   @override
   void initState() {
     super.initState();
-    fetchStores();
+    fetchUserData().then((_) {
+      if (_isVerified) {
+        fetchStores();
+      } else {
+        setState(() => loading = false);
+      }
+    });
   }
 
+
+  Future<void> fetchUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString('user');
+
+    if (userJson != null) {
+      final userData = jsonDecode(userJson);
+      setState(() {
+        username = userData['name'] ?? 'User';
+        email = userData['email'] ?? '';
+        profilestatus = userData['status_id']?.toString() ?? '';
+      });
+    }
+  }
   Future<void> fetchStores() async {
     setState(() => loading = true);
 
@@ -57,10 +84,16 @@ class _StoreListScreenState extends State<StoreListScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Store Management"),
+        title: Text(context.tr('txt_store_management')),
         backgroundColor: Colors.white,
       ),
-      body: RefreshIndicator(
+      body: !_isVerified
+          ? PendingApprovalScreen(
+        userName: username,
+        status: profilestatus,
+        onRefresh: fetchUserData,
+      )
+          : RefreshIndicator(
         onRefresh: fetchStores,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -69,22 +102,29 @@ class _StoreListScreenState extends State<StoreListScreen> {
             children: [
               InkWell(
                 onTap: () async {
-                  final res = await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => AddStoreScreen()),
-                  );
-                  // final prefs = await SharedPreferences.getInstance();
-                  // final userJson = prefs.getString('user'); // Get the saved JSON string
-                  // if (userJson != null) {
-                  //   final userData = jsonDecode(userJson); // Convert JSON string to Map
-                  //   final userId = userData['status_id']; // or 'user_id' depending on what you saved
-                  //   print(userId);
-                  // } else {
-                  //   print('No user data found');
-                  // }
+                  if (_isVerified) {
+                    final res = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => AddStoreScreen()),
+                    );
 
+                    if (res == true) {
+                      fetchStores();
+                    }
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PendingApprovalScreen(
+                          userName: username,
+                          status: profilestatus,
+                          onRefresh: fetchUserData,
+                        ),
+                      ),
+                    );
+                  }
                 },
-                child: _addStoreBtn(scheme),
+                child: _addStoreBtn(context, scheme),
               ),
               const SizedBox(height: 20),
 
@@ -92,7 +132,7 @@ class _StoreListScreenState extends State<StoreListScreen> {
                 const Center(child: CircularProgressIndicator()),
 
               if (!loading && stores.isEmpty)
-                const Center(child: Text("No stores found")),
+                Center(child: Text(context.tr('txt_no_stores_found'))),
 
               if (!loading)
                 ...stores.map(
@@ -101,7 +141,8 @@ class _StoreListScreenState extends State<StoreListScreen> {
                     child: _StoreCard(store: store),
                   ),
                 ),
-              SizedBox(height: 50,)
+
+              const SizedBox(height: 50),
             ],
           ),
         ),
@@ -109,7 +150,7 @@ class _StoreListScreenState extends State<StoreListScreen> {
     );
   }
 
-  Widget _addStoreBtn(ColorScheme scheme) {
+  Widget _addStoreBtn(BuildContext context, ColorScheme scheme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -122,7 +163,7 @@ class _StoreListScreenState extends State<StoreListScreen> {
           Icon(Icons.add_business, color: scheme.primary),
           const SizedBox(width: 8),
           Text(
-            'Add New Store',
+            context.tr('txt_add_new_store'),
             style: TextStyle(
               color: scheme.primary,
               fontWeight: FontWeight.w600,
@@ -198,10 +239,8 @@ class _StoreCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          _statusChip(store.isActive),
-                          const SizedBox(width: 8),
-                          Text(store.typeText),
-                        ],
+                          _statusChip(context, store.isActive),                          const SizedBox(width: 8),
+                          Text(store.typeText(context)),                        ],
                       )
                     ],
                   ),
@@ -241,17 +280,31 @@ class _StoreCard extends StatelessWidget {
               ],
             ),
             const Divider(height: 20),
-            _InfoRow(label: 'Email', value: store.email.isNotEmpty ? store.email : 'Not provided'),
-            _InfoRow(label: 'Phone', value: store.mobile),
-            _InfoRow(label: 'Address', value: store.fullAddress),
-            _InfoRow(label: 'Hours', value: store.workingHours),
+            _InfoRow(
+              label: context.tr('txt_email_label'),
+              value: store.email.isNotEmpty
+                  ? store.email
+                  : context.tr('txt_not_provided'),
+            ),
+            _InfoRow(
+              label: context.tr('txt_phone_label'),
+              value: store.mobile,
+            ),
+            _InfoRow(
+              label: context.tr('txt_address_label'),
+              value: store.fullAddress,
+            ),
+            _InfoRow(
+              label: context.tr('txt_hours_label'),
+              value: store.workingHours,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _statusChip(bool active) {
+  Widget _statusChip(BuildContext context, bool active) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
@@ -259,7 +312,7 @@ class _StoreCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        active ? 'Active' : 'Pending',
+        active ? context.tr('txt_active') : context.tr('txt_pending'),
         style: TextStyle(
           fontSize: 11,
           color: active ? Colors.green : Colors.orange,
@@ -332,6 +385,7 @@ class StoreModel {
   final Map<String, dynamic>? returnPolicy;
   final String? deliveryDays;
   final String? landmark;
+  final List<dynamic>? deliveryConfig;
 
   StoreModel({
     required this.id,
@@ -355,6 +409,7 @@ class StoreModel {
     this.returnPolicy,
     this.deliveryDays,
     this.landmark,
+    this.deliveryConfig,
   });
 
   factory StoreModel.fromJson(Map<String, dynamic> json) {
@@ -392,6 +447,7 @@ class StoreModel {
       }
     }
 
+
     return StoreModel(
       id: json['id'],
       name: json['name'] ?? '',
@@ -420,30 +476,35 @@ class StoreModel {
           ? Map<String, dynamic>.from(json['return_policy'])
           : null,
       deliveryDays: json['delivery_days'],
+      deliveryConfig: json['delivery_config'] is List
+          ? json['delivery_config']
+          : [],
     );
+
   }
 
   bool get isActive => statusId == 1;
 
-  String get typeText {
-    if (types.isEmpty) return 'Other';
+  String typeText(BuildContext context) {
+    if (types.isEmpty) return context.tr('txt_other');
+
     List<String> typeNames = [];
     for (var type in types) {
       switch (type) {
         case 1:
-          typeNames.add('Retail');
+          typeNames.add(context.tr('txt_retail'));
           break;
         case 2:
-          typeNames.add('Online');
+          typeNames.add(context.tr('txt_online'));
           break;
         case 3:
-          typeNames.add('Wholesale');
+          typeNames.add(context.tr('txt_wholesale'));
           break;
         case 4:
-          typeNames.add('Offline');
+          typeNames.add(context.tr('txt_offline'));
           break;
         default:
-          typeNames.add('Other');
+          typeNames.add(context.tr('txt_other'));
       }
     }
     return typeNames.join(', ');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../extensions/context_extension.dart';
 import '../../../services/api_service.dart';
 import 'add_store_screen.dart';
 
@@ -18,11 +19,11 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
   Map<String, dynamic>? store;
 
   // Store type mapping
-  final List<Map<String, dynamic>> storeTypes = [
-    {'label': 'Retail', 'value': '1'},
-    {'label': 'Online', 'value': '2'},
-    {'label': 'Wholesale', 'value': '3'},
-    {'label': 'Offline', 'value': '4'},
+  late final List<Map<String, dynamic>> storeTypes = [
+    {'label': context.tr('txt_retail'), 'value': '1'},
+    {'label': context.tr('txt_online'), 'value': '2'},
+    {'label': context.tr('txt_wholesale'), 'value': '3'},
+    {'label': context.tr('txt_offline'), 'value': '4'},
   ];
 
   @override
@@ -114,7 +115,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Store Details'),
+        title: Text(context.tr('txt_store_details')),
         backgroundColor: Colors.white,
         actions: [
           // InkWell(
@@ -132,7 +133,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : store == null
-          ? const Center(child: Text("Store not found"))
+          ? Center(child: Text(context.tr('txt_store_not_found')))
           : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -168,10 +169,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             Chip(
               label: Text(
                 store?['status_id'].toString() == '1'
-                    ? 'Active'
+                    ? context.tr('txt_active')
                     : store?['status_id'].toString() == '2'
-                    ? 'Pending Approval'
-                    : 'Unknown',
+                    ? context.tr('txt_pending_approval')
+                    : context.tr('txt_unknown'),
                 style: const TextStyle(color: Colors.white),
               ),
               backgroundColor: store?['status_id'].toString() == '1'
@@ -185,10 +186,10 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
 
             // ================= BASIC INFO =================
             _card(children: [
-              _row('Mobile', _text('mobile')),
-              _row('Email', _text('email')),
+              _row(context.tr('txt_mobile_label'), _text('mobile')),
+              _row(context.tr('txt_email_label'), _text('email')),
               _row(
-                'Address',
+                context.tr('txt_address_label'),
                 [
                   store?['address'],
                   store?['city'],
@@ -206,7 +207,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
                     .where((e) => e != null && e.toString().isNotEmpty)
                     .join(', '),
               ),
-              _row('Working Hours', _text('working_hours')),
+              _row(context.tr('txt_working_hours'), _text('working_hours')),
             ]),
 
             const SizedBox(height: 16),
@@ -216,7 +217,7 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _sectionTitle('Store Logo'),
+                  _sectionTitle(context.tr('txt_store_logo')),
                   const SizedBox(height: 8),
                   _networkImage(store?['logo'], height: 180, type: "logo"),
                   const SizedBox(height: 16),
@@ -226,14 +227,14 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
             const SizedBox(height: 16),
 
             // ================= STORE BACKGROUND =================
-            _sectionTitle('Store Background'),
+            _sectionTitle(context.tr('txt_store_background')),
             const SizedBox(height: 8),
             _networkImage(store?['store_background_image'], height: 180, radius: 12, type: "background_image"),
 
             const SizedBox(height: 16),
 
             // ================= DESCRIPTION =================
-            _sectionTitle('Store Description'),
+            _sectionTitle(context.tr('txt_store_description')),
             _card(children: [
               Text(
                 _text('description'),

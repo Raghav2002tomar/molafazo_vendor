@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../../../extensions/context_extension.dart';
 import '../controller/vendor_api_service.dart';
 import '../model/payment_details_model.dart';
 import 'promotion_request_screen.dart';
@@ -63,7 +64,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment Details'),
+        title: Text(context.tr('txt_payment_details')),
         // backgroundColor: Colors.deepPurple,
         // foregroundColor: Colors.white,
       ),
@@ -115,8 +116,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Selected Package',
+        Text(context.tr('txt_selected_package'),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
@@ -161,27 +161,25 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+             Row(
               children: [
                 Icon(Icons.payment, color: Colors.black),
                 SizedBox(width: 8),
-                Text(
-                  'Admin Payment Details',
+          Text(context.tr('txt_admin_payment_details'),
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const Divider(height: 24),
-            _buildInfoRow('Account Name', _paymentDetails!.accountName),
-            _buildInfoRow('Account Number', _paymentDetails!.accountNumber),
-            _buildInfoRow('IFSC Code', _paymentDetails!.ifsc),
-            _buildInfoRow('UPI ID', _paymentDetails!.upiId),
+            _buildInfoRow(context.tr('txt_account_name'), _paymentDetails!.accountName),
+            _buildInfoRow(context.tr('txt_account_number'), _paymentDetails!.accountNumber),
+            _buildInfoRow(context.tr('txt_ifsc_code'), _paymentDetails!.ifsc),
+            _buildInfoRow(context.tr('txt_upi_id'), _paymentDetails!.upiId),
             const SizedBox(height: 16),
             if (_paymentDetails!.qrCode.isNotEmpty)
               Column(
                 children: [
-                  const Text(
-                    'Scan QR Code',
+              Text(context.tr('txt_scan_qr_code'),
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
@@ -244,21 +242,20 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+             Row(
               children: [
                 Icon(Icons.info_outline, color: Colors.amber),
                 SizedBox(width: 8),
-                Text(
-                  'Instructions',
+          Text(context.tr('txt_instructions'),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            const Text('1. Make payment to the above account details'),
-            const Text('2. Take a screenshot of the payment confirmation'),
-            const Text('3. Upload the screenshot in the next step'),
-            const Text('4. Wait for admin approval'),
+            Text(context.tr('txt_instruction_1')),
+            Text(context.tr('txt_instruction_2')),
+            Text(context.tr('txt_instruction_3')),
+            Text(context.tr('txt_instruction_4'))
           ],
         ),
       ),
@@ -271,7 +268,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       child: ElevatedButton.icon(
         onPressed: _proceedToUpload,
         icon: const Icon(Icons.upload_file),
-        label: const Text('Proceed to Upload Payment Screenshot'),
+        label: Text(context.tr('txt_proceed_upload_screenshot')),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
